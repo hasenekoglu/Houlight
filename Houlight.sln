@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD94D2D2-DC24-4A01-88C0-4C9229289523}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{F7E54E98-3F47-4271-8F83-7B1EC89E6D05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Houlight.Domain", "src\Core\Houlight.Domain\Houlight.Domain.csproj", "{B2445B1E-E387-47D9-80AD-ADCE8910978C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Houlight.Application", "src\Core\Houlight.Application\Houlight.Application.csproj", "{9337D4DE-3570-4288-B233-DA0818FD7299}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{3FC2B8C5-2F30-479E-A6C0-F46481E824DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Houlight.Persistence", "src\Infrastructure\Houlight.Persistance\Houlight.Persistence.csproj", "{D41D83CC-64AA-4273-9D5C-A03BA20F0140}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Houlight.Infrastructure", "src\Infrastructure\Houlight.Infrastructure\Houlight.Infrastructure.csproj", "{09255FC4-3EB3-4A3B-80F1-42B983F133B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{4D07317D-10B1-4031-8163-449EC7280C16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoulightAPI.API", "src\Presentation\HoulightAPI.API\HoulightAPI.API.csproj", "{0B817F14-BF39-404E-93EC-8C41BC2080FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2445B1E-E387-47D9-80AD-ADCE8910978C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2445B1E-E387-47D9-80AD-ADCE8910978C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2445B1E-E387-47D9-80AD-ADCE8910978C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2445B1E-E387-47D9-80AD-ADCE8910978C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9337D4DE-3570-4288-B233-DA0818FD7299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9337D4DE-3570-4288-B233-DA0818FD7299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9337D4DE-3570-4288-B233-DA0818FD7299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9337D4DE-3570-4288-B233-DA0818FD7299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D41D83CC-64AA-4273-9D5C-A03BA20F0140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D41D83CC-64AA-4273-9D5C-A03BA20F0140}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D41D83CC-64AA-4273-9D5C-A03BA20F0140}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D41D83CC-64AA-4273-9D5C-A03BA20F0140}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09255FC4-3EB3-4A3B-80F1-42B983F133B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09255FC4-3EB3-4A3B-80F1-42B983F133B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09255FC4-3EB3-4A3B-80F1-42B983F133B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09255FC4-3EB3-4A3B-80F1-42B983F133B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F7E54E98-3F47-4271-8F83-7B1EC89E6D05} = {BD94D2D2-DC24-4A01-88C0-4C9229289523}
+		{B2445B1E-E387-47D9-80AD-ADCE8910978C} = {F7E54E98-3F47-4271-8F83-7B1EC89E6D05}
+		{9337D4DE-3570-4288-B233-DA0818FD7299} = {F7E54E98-3F47-4271-8F83-7B1EC89E6D05}
+		{3FC2B8C5-2F30-479E-A6C0-F46481E824DC} = {BD94D2D2-DC24-4A01-88C0-4C9229289523}
+		{D41D83CC-64AA-4273-9D5C-A03BA20F0140} = {3FC2B8C5-2F30-479E-A6C0-F46481E824DC}
+		{09255FC4-3EB3-4A3B-80F1-42B983F133B6} = {3FC2B8C5-2F30-479E-A6C0-F46481E824DC}
+		{4D07317D-10B1-4031-8163-449EC7280C16} = {BD94D2D2-DC24-4A01-88C0-4C9229289523}
+		{0B817F14-BF39-404E-93EC-8C41BC2080FD} = {4D07317D-10B1-4031-8163-449EC7280C16}
+	EndGlobalSection
+EndGlobal
