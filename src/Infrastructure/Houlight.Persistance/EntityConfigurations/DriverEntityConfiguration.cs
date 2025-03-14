@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class DriverEntityConfiguration : BaseEntityTypeConfiguration<DriverEntity,Guid> 
+public class DriverEntityConfiguration : BaseEntityTypeConfiguration<DriverEntity> 
 {
     public override void Configure(EntityTypeBuilder<DriverEntity> builder)
     {
+
+        base.Configure(builder);
 
         builder.ToTable(name: "Drivers");
         builder.Property(e => e.Name)
@@ -34,7 +36,6 @@ public class DriverEntityConfiguration : BaseEntityTypeConfiguration<DriverEntit
             .HasConversion<string>();
 
         
-
-        base.Configure(builder);
+;
     }
 }

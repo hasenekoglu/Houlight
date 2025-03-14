@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Houlight.Domain.Entities;
 
-public class VehicleEntity : BaseEntity<Guid>
+public class VehicleEntity : BaseEntity
 {
     public string PlateNumber { get; set; }
     public int Capacity { get; set; }
@@ -19,7 +19,7 @@ public class VehicleEntity : BaseEntity<Guid>
     public Guid AssignedDriverId { get; set; }
 
     public virtual LogisticsCompanyEntity LogisticsCompanyEntity { get; set; } = null!; 
-    public virtual ICollection<VehicleType> VehicleTypes { get; set; } = new List<VehicleType>();
+    public virtual ICollection<VehicleTypeEntity> VehicleTypes { get; set; } = new List<VehicleTypeEntity>();
     public virtual DriverEntity? AssignedDriver { get; set; }
 }
 

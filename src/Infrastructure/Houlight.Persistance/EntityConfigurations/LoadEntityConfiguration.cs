@@ -9,10 +9,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class LoadEntityConfiguration : BaseEntityTypeConfiguration<LoadEntity, Guid>
+public class LoadEntityConfiguration : BaseEntityTypeConfiguration<LoadEntity>
 {
     public override void Configure(EntityTypeBuilder<LoadEntity> builder)
     {
+        base.Configure(builder);    
+
         builder.ToTable(name: "Loads");
 
         builder.Property(e => e.FromLocation)
@@ -61,12 +63,14 @@ public class LoadEntityConfiguration : BaseEntityTypeConfiguration<LoadEntity, G
         builder.HasOne(e => e.VehicleEntity)
             .WithMany() // Bir araç birden fazla yük taşıyabilir
             .HasForeignKey(e => e.AssignedVehicleId);
+            //.OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(e => e.DriverEntity)
             .WithMany()  // Bir şoför birden fazla yük taşıyabilir
             .HasForeignKey(e => e.AssignedDriverId);
+            //.OnDelete(DeleteBehavior.Restrict);
 
-        base.Configure(builder);
+
     }
 }
 

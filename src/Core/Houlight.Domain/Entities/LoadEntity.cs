@@ -7,7 +7,7 @@ using Houlight.Domain.Enums;
 
 namespace Houlight.Domain.Entities;
 
-public class LoadEntity : BaseEntity<Guid>
+public class LoadEntity : BaseEntity
 
 {
     public string FromLocation { get; set; }

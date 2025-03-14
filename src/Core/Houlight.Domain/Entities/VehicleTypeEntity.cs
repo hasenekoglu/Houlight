@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Houlight.Domain.Entities;
 
 
-public class VehicleType : BaseEntity<Guid>
+public class VehicleTypeEntity : BaseEntity
 {
     public string Type { get; set; }
     public string Description { get; set; }

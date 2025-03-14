@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Houlight.Domain.Entities;
 
-public class LogisticsCompanyEntity : BaseEntity<Guid>
+public class LogisticsCompanyEntity : BaseEntity
 {
     public string CompanyName { get; set; }
     public string CompanyAddress { get; set; }

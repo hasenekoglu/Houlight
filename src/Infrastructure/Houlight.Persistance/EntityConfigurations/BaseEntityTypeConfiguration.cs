@@ -9,23 +9,23 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-    public class BaseEntityTypeConfiguration<TEntity,TId> : 
-        IEntityTypeConfiguration<TEntity> where TEntity : BaseEntity<TId>
+public class BaseEntityTypeConfiguration<T> : IEntityTypeConfiguration<T> where T : BaseEntity
+{
+    public virtual void Configure(EntityTypeBuilder<T> builder)
     {
-        public virtual void Configure(EntityTypeBuilder<TEntity> builder)
-        {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id)
-                .ValueGeneratedOnAdd();
+            .ValueGeneratedOnAdd();
 
-        builder.Property(e => e.CreatedDate)
-                .HasColumnType("datetime2"); 
-            
-        builder.Property(e => e.UpdatedDate)
-                .HasColumnType("datetime2");
+        builder.Property(e => e.CreateDate)
+            .ValueGeneratedOnAdd()
+            .HasColumnType("datetime2");
 
-        builder.Property(e => e.DeletedDate)
-                .HasColumnType("datetime2");
-        }
+        builder.Property(e => e.UpdateDate)
+            .HasColumnType("datetime2");
+
+        builder.Property(e => e.DeleteDate)
+            .HasColumnType("datetime2");
     }
+}
 

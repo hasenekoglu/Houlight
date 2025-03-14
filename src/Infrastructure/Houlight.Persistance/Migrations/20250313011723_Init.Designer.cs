@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Houlight.Persistence.Migrations
 {
-    [DbContext(typeof(BaseDbContext))]
-    [Migration("20250113212354_init")]
-    partial class init
+    [DbContext(typeof(HoulightDbContext))]
+    [Migration("20250313011723_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,10 +31,11 @@ namespace Houlight.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -56,7 +57,7 @@ namespace Houlight.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -70,10 +71,11 @@ namespace Houlight.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DriverStatus")
@@ -89,9 +91,6 @@ namespace Houlight.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("LogisticsCompanyEntityId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("LogisticsCompanyId")
                         .HasColumnType("uniqueidentifier");
@@ -110,12 +109,10 @@ namespace Houlight.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LogisticsCompanyEntityId");
 
                     b.HasIndex("LogisticsCompanyId");
 
@@ -137,7 +134,8 @@ namespace Houlight.Persistence.Migrations
                     b.Property<decimal?>("CompanyOfferedPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("CustomerExpectedPrice")
@@ -146,7 +144,7 @@ namespace Houlight.Persistence.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeliveryDate")
@@ -176,7 +174,7 @@ namespace Houlight.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Volume")
@@ -224,13 +222,14 @@ namespace Houlight.Persistence.Migrations
                         .HasMaxLength(11)
                         .HasColumnType("nvarchar(11)");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -250,7 +249,8 @@ namespace Houlight.Persistence.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CurrentVolume")
@@ -259,14 +259,11 @@ namespace Houlight.Persistence.Migrations
                     b.Property<int>("CurrentWeight")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("LogisticsCompanyEntityId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("LogisticsCompanyId")
                         .HasColumnType("uniqueidentifier");
@@ -276,14 +273,12 @@ namespace Houlight.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedDriverId");
-
-                    b.HasIndex("LogisticsCompanyEntityId");
 
                     b.HasIndex("LogisticsCompanyId");
 
@@ -296,10 +291,11 @@ namespace Houlight.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedDate")
+                    b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -312,7 +308,7 @@ namespace Houlight.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -337,13 +333,8 @@ namespace Houlight.Persistence.Migrations
 
             modelBuilder.Entity("Houlight.Domain.Entities.DriverEntity", b =>
                 {
-                    b.HasOne("Houlight.Domain.Entities.LogisticsCompanyEntity", null)
-                        .WithMany("DriverEntities")
-                        .HasForeignKey("LogisticsCompanyEntityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Houlight.Domain.Entities.LogisticsCompanyEntity", "LogisticsCompanyEntity")
-                        .WithMany()
+                        .WithMany("DriverEntities")
                         .HasForeignKey("LogisticsCompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -391,13 +382,8 @@ namespace Houlight.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Houlight.Domain.Entities.LogisticsCompanyEntity", null)
-                        .WithMany("VehicleEntities")
-                        .HasForeignKey("LogisticsCompanyEntityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Houlight.Domain.Entities.LogisticsCompanyEntity", "LogisticsCompanyEntity")
-                        .WithMany()
+                        .WithMany("VehicleEntities")
                         .HasForeignKey("LogisticsCompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

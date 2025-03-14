@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class VehicleEntityConfiguration : BaseEntityTypeConfiguration<VehicleEntity, Guid>
+public class VehicleEntityConfiguration : BaseEntityTypeConfiguration<VehicleEntity>
 {
     public override void Configure(EntityTypeBuilder<VehicleEntity> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable(name: "Vehicles");
         builder.Property(e => e.PlateNumber)
             .IsRequired()
@@ -37,6 +39,6 @@ public class VehicleEntityConfiguration : BaseEntityTypeConfiguration<VehicleEnt
             .HasForeignKey(e => e.AssignedDriverId);
 
         
-        base.Configure(builder);
+  
     }
 }

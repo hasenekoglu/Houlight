@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class VehicleTypeEntityConfiguration : BaseEntityTypeConfiguration<VehicleType, Guid>
+public class VehicleTypeEntityConfiguration : BaseEntityTypeConfiguration<VehicleTypeEntity>
 {
-    public override void Configure(EntityTypeBuilder<VehicleType> builder)
+    public override void Configure(EntityTypeBuilder<VehicleTypeEntity> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("VehicleTypes");
 
         builder.Property(e => e.Type)
@@ -18,6 +20,6 @@ public class VehicleTypeEntityConfiguration : BaseEntityTypeConfiguration<Vehicl
             .IsRequired()
             .HasMaxLength(100);
 
-        base.Configure(builder);
+       
     }
 }

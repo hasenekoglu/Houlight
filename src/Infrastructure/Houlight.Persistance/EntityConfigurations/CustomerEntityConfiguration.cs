@@ -9,10 +9,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class CustomerEntityConfiguration : BaseEntityTypeConfiguration<CustomerEntity,Guid> 
+public class CustomerEntityConfiguration : BaseEntityTypeConfiguration<CustomerEntity> 
 {
     public override void Configure(EntityTypeBuilder<CustomerEntity> builder)
     {
+
+        base.Configure(builder);
+
         builder.ToTable(name: "Customers");
         builder.Property(e => e.Name)
             .IsRequired()
@@ -30,7 +33,7 @@ public class CustomerEntityConfiguration : BaseEntityTypeConfiguration<CustomerE
             .IsRequired()
             .HasMaxLength(11);
         
-        base.Configure(builder);
+ 
 
     }
 }

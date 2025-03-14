@@ -7,8 +7,9 @@ using Houlight.Domain.Enums;
 
 namespace Houlight.Domain.Entities;
 
-public class DriverEntity : BaseEntity<Guid>
+public class DriverEntity : BaseEntity
 {
+
     public string Name { get; set; }
     public string Surname { get; set; }
     public string LicenseNumber { get; set; }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Houlight.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,9 +20,9 @@ namespace Houlight.Persistence.Migrations
                     Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     PhoneNumber = table.Column<int>(type: "int", maxLength: 11, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,9 +38,9 @@ namespace Houlight.Persistence.Migrations
                     CompanyAddress = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     CompanyPhoneNumber = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
                     CompanyEmail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -54,9 +54,9 @@ namespace Houlight.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -75,20 +75,13 @@ namespace Houlight.Persistence.Migrations
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     DriverStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LogisticsCompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LogisticsCompanyEntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Drivers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Drivers_LogisticsCompanies_LogisticsCompanyEntityId",
-                        column: x => x.LogisticsCompanyEntityId,
-                        principalTable: "LogisticsCompanies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Drivers_LogisticsCompanies_LogisticsCompanyId",
                         column: x => x.LogisticsCompanyId,
@@ -109,10 +102,9 @@ namespace Houlight.Persistence.Migrations
                     CurrentVolume = table.Column<int>(type: "int", nullable: false),
                     LogisticsCompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AssignedDriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LogisticsCompanyEntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -121,12 +113,6 @@ namespace Houlight.Persistence.Migrations
                         name: "FK_Vehicles_Drivers_AssignedDriverId",
                         column: x => x.AssignedDriverId,
                         principalTable: "Drivers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Vehicles_LogisticsCompanies_LogisticsCompanyEntityId",
-                        column: x => x.LogisticsCompanyEntityId,
-                        principalTable: "LogisticsCompanies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -156,9 +142,9 @@ namespace Houlight.Persistence.Migrations
                     LogisticsCompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     AssignedVehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     AssignedDriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -214,11 +200,6 @@ namespace Houlight.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Drivers_LogisticsCompanyEntityId",
-                table: "Drivers",
-                column: "LogisticsCompanyEntityId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Drivers_LogisticsCompanyId",
                 table: "Drivers",
                 column: "LogisticsCompanyId");
@@ -252,11 +233,6 @@ namespace Houlight.Persistence.Migrations
                 name: "IX_Vehicles_AssignedDriverId",
                 table: "Vehicles",
                 column: "AssignedDriverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vehicles_LogisticsCompanyEntityId",
-                table: "Vehicles",
-                column: "LogisticsCompanyEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vehicles_LogisticsCompanyId",

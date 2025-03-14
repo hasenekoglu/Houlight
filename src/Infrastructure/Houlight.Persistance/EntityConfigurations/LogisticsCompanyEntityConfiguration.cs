@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Houlight.Persistence.EntityConfigurations;
 
-public class LogisticsCompanyEntityConfiguration : BaseEntityTypeConfiguration<LogisticsCompanyEntity, Guid>
+public class LogisticsCompanyEntityConfiguration : BaseEntityTypeConfiguration<LogisticsCompanyEntity>
 {
     public override void Configure(EntityTypeBuilder<LogisticsCompanyEntity> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable(name: "LogisticsCompanies");
         builder.Property(e => e.CompanyName)
             .IsRequired()
@@ -33,6 +35,6 @@ public class LogisticsCompanyEntityConfiguration : BaseEntityTypeConfiguration<L
                .WithOne(d=> d.LogisticsCompanyEntity)
             .HasForeignKey(e => e.LogisticsCompanyId);
 
-        base.Configure(builder);
+     
     }
 }

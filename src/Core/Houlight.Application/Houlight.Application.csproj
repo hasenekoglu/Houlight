@@ -9,8 +9,15 @@
   <ItemGroup>
     <Folder Include="Features\Commands\" />
     <Folder Include="Features\Queries\" />
-    <Folder Include="Interfaces\Repositories\" />
     <Folder Include="Mapping\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Houlight.Domain\Houlight.Domain.csproj" />
   </ItemGroup>
 
 </Project>
