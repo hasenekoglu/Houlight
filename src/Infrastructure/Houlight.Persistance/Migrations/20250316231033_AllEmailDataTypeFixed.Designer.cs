@@ -4,6 +4,7 @@ using Houlight.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Houlight.Persistence.Migrations
 {
     [DbContext(typeof(HoulightDbContext))]
-    partial class HoulightDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316231033_AllEmailDataTypeFixed")]
+    partial class AllEmailDataTypeFixed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +36,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -57,7 +59,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -76,7 +77,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DriverStatus")
@@ -112,7 +112,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -148,7 +147,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeliveryDate")
@@ -179,7 +177,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Volume")
@@ -232,11 +229,9 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -267,7 +262,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsAvailable")
@@ -282,7 +276,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -305,7 +298,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -319,7 +311,6 @@ namespace Houlight.Persistence.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

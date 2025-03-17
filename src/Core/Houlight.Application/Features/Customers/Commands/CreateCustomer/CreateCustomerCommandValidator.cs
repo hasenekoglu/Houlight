@@ -1,0 +1,27 @@
+using FluentValidation;
+
+namespace Houlight.Application.Features.Customers.Commands.CreateCustomer;
+
+public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCommand>
+{
+    public CreateCustomerCommandValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Ad alanı boş olamaz.")
+            .MaximumLength(50).WithMessage("Ad alanı 50 karakterden uzun olamaz.");
+
+        RuleFor(x => x.Surname)
+            .NotEmpty().WithMessage("Soyad alanı boş olamaz.")
+            .MaximumLength(50).WithMessage("Soyad alanı 50 karakterden uzun olamaz.");
+
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("E-posta alanı boş olamaz.")
+            .EmailAddress().WithMessage("Geçerli bir e-posta adresi giriniz.")
+            .MaximumLength(100).WithMessage("E-posta alanı 100 karakterden uzun olamaz.");
+
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Telefon numarası alanı boş olamaz.")
+            .Matches(@"^[0-9]+$").WithMessage("Telefon numarası sadece rakamlardan oluşmalıdır.")
+            .Length(10).WithMessage("Telefon numarası 10 haneli olmalıdır.");
+    }
+} 

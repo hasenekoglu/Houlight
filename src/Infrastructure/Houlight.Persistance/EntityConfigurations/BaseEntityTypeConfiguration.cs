@@ -22,9 +22,11 @@ public class BaseEntityTypeConfiguration<T> : IEntityTypeConfiguration<T> where 
             .HasColumnType("datetime2");
 
         builder.Property(e => e.UpdateDate)
+            .ValueGeneratedOnAdd()
             .HasColumnType("datetime2");
 
         builder.Property(e => e.DeleteDate)
+            .ValueGeneratedOnAdd()
             .HasColumnType("datetime2");
     }
 }

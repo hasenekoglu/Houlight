@@ -13,7 +13,7 @@ public class DriverEntity : BaseEntity
     public string Name { get; set; }
     public string Surname { get; set; }
     public string LicenseNumber { get; set; }
-    public int PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; }
     public string Email { get; set; }
     public DriverStatus DriverStatus { get; set; } = DriverStatus.OffDuty;
 

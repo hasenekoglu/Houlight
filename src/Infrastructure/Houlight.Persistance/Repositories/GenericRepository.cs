@@ -13,13 +13,13 @@ namespace Houlight.Persistence.Repositories;
 
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
     {
-        private readonly HoulightDbContext DbContext;
+        private readonly DbContext DbContext;
 
         protected DbSet<TEntity> entity => DbContext.Set<TEntity>();
 
-        public GenericRepository(HoulightDbContext HoulightDbContext)
+        public GenericRepository(DbContext DbContext)
         {
-            this.DbContext = HoulightDbContext ?? throw new ArgumentNullException(nameof(HoulightDbContext));
+            this.DbContext = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
         }
 
         #region Insert Methods
