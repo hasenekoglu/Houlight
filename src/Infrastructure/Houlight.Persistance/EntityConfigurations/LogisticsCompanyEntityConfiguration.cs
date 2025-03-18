@@ -29,11 +29,13 @@ public class LogisticsCompanyEntityConfiguration : BaseEntityTypeConfiguration<L
 
         builder.HasMany(e => e.DriverEntities)
             .WithOne(d=> d.LogisticsCompanyEntity)
-           .HasForeignKey(e => e.LogisticsCompanyId);
+           .HasForeignKey(e => e.LogisticsCompanyId)
+           .OnDelete(DeleteBehavior.Restrict);
 
            builder.HasMany(e => e.VehicleEntities)
                .WithOne(d=> d.LogisticsCompanyEntity)
-            .HasForeignKey(e => e.LogisticsCompanyId);
+            .HasForeignKey(e => e.LogisticsCompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
 
      
     }
