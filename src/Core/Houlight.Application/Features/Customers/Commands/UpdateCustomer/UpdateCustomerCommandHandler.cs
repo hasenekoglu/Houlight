@@ -29,6 +29,7 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.Surname = request.Surname;
         customer.Email = request.Email;
         customer.PhoneNumber = request.PhoneNumber;
+        customer.UpdateDate = DateTime.Now;
 
         await _customerRepository.UpdateAsync(customer);
 

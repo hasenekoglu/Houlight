@@ -11,8 +11,8 @@ public class UpdateVehicleCommand : IRequest<UpdateVehicleResponse>
     public int CurrentWeight { get; set; }
     public int CurrentVolume { get; set; }
     public Guid LogisticsCompanyId { get; set; }
-    public Guid AssignedDriverId { get; set; }
-    public List<Guid> VehicleTypeIds { get; set; }
+    public Guid? AssignedDriverId { get; set; }
+    public Guid VehicleTypeId { get; set; }
 }
 
 public class UpdateVehicleResponse
@@ -24,6 +24,10 @@ public class UpdateVehicleResponse
     public int CurrentWeight { get; set; }
     public int CurrentVolume { get; set; }
     public Guid LogisticsCompanyId { get; set; }
+     public string LogisticsCompanyName { get; set; }
     public Guid AssignedDriverId { get; set; }
+    public string AssignedDriverName { get; set; }
+    public Guid VehicleTypeId { get; set; }
+    public string VehicleTypeType { get; set; }
     public DateTime UpdateDate { get; set; }
 } 

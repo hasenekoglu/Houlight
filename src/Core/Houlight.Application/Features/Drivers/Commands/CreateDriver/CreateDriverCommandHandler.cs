@@ -8,16 +8,23 @@ namespace Houlight.Application.Features.Drivers.Commands.CreateDriver;
 public class CreateDriverCommandHandler : IRequestHandler<CreateDriverCommand, CreateDriverResponse>
 {
     private readonly IDriverRepository _driverRepository;
+    private readonly ILogisticsCompanyRepository _logisticsCompanyRepository;
     private readonly IMapper _mapper;
 
-    public CreateDriverCommandHandler(IDriverRepository driverRepository, IMapper mapper)
+    public CreateDriverCommandHandler(IDriverRepository driverRepository, IMapper mapper, ILogisticsCompanyRepository logisticsCompanyRepository)
     {
         _driverRepository = driverRepository;
+        _logisticsCompanyRepository=logisticsCompanyRepository;
         _mapper = mapper;
     }
 
     public async Task<CreateDriverResponse> Handle(CreateDriverCommand request, CancellationToken cancellationToken)
     {
+        var logisticsCompany = await _logisticsCompanyRepository.GetByIdAsync(request.LogisticsCompanyId);
+        if (logisticsCompany == null)
+            throw new Exception("Lojistik þirket bulunamadý.");
+
+
         var driver = new DriverEntity
         {
             LogisticsCompanyId = request.LogisticsCompanyId,
@@ -32,6 +39,10 @@ public class CreateDriverCommandHandler : IRequestHandler<CreateDriverCommand, C
         };
 
         await _driverRepository.AddAsync(driver);
-        return _mapper.Map<CreateDriverResponse>(driver);
+        var response = _mapper.Map<CreateDriverResponse>(driver);
+        response.LogisticsCompanyName =logisticsCompany.CompanyName;
+        response.DriverStatus = request.DriverStatus;
+        return response;
+
     }
 } 

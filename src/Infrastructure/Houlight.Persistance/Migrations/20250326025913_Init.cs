@@ -19,7 +19,7 @@ namespace Houlight.Persistence.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", maxLength: 11, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -71,7 +71,7 @@ namespace Houlight.Persistence.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", maxLength: 11, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     DriverStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LogisticsCompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -101,7 +101,8 @@ namespace Houlight.Persistence.Migrations
                     CurrentWeight = table.Column<int>(type: "int", nullable: false),
                     CurrentVolume = table.Column<int>(type: "int", nullable: false),
                     LogisticsCompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedDriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssignedDriverId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    VehicleTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -119,6 +120,12 @@ namespace Houlight.Persistence.Migrations
                         name: "FK_Vehicles_LogisticsCompanies_LogisticsCompanyId",
                         column: x => x.LogisticsCompanyId,
                         principalTable: "LogisticsCompanies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Vehicles_VehicleTypes_VehicleTypeId",
+                        column: x => x.VehicleTypeId,
+                        principalTable: "VehicleTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -175,30 +182,6 @@ namespace Houlight.Persistence.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "VehicleEntityVehicleType",
-                columns: table => new
-                {
-                    VehicleEntitiesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VehicleTypesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VehicleEntityVehicleType", x => new { x.VehicleEntitiesId, x.VehicleTypesId });
-                    table.ForeignKey(
-                        name: "FK_VehicleEntityVehicleType_VehicleTypes_VehicleTypesId",
-                        column: x => x.VehicleTypesId,
-                        principalTable: "VehicleTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_VehicleEntityVehicleType_Vehicles_VehicleEntitiesId",
-                        column: x => x.VehicleEntitiesId,
-                        principalTable: "Vehicles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Drivers_LogisticsCompanyId",
                 table: "Drivers",
@@ -225,11 +208,6 @@ namespace Houlight.Persistence.Migrations
                 column: "LogisticsCompanyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_VehicleEntityVehicleType_VehicleTypesId",
-                table: "VehicleEntityVehicleType",
-                column: "VehicleTypesId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Vehicles_AssignedDriverId",
                 table: "Vehicles",
                 column: "AssignedDriverId");
@@ -238,6 +216,11 @@ namespace Houlight.Persistence.Migrations
                 name: "IX_Vehicles_LogisticsCompanyId",
                 table: "Vehicles",
                 column: "LogisticsCompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vehicles_VehicleTypeId",
+                table: "Vehicles",
+                column: "VehicleTypeId");
         }
 
         /// <inheritdoc />
@@ -247,19 +230,16 @@ namespace Houlight.Persistence.Migrations
                 name: "Loads");
 
             migrationBuilder.DropTable(
-                name: "VehicleEntityVehicleType");
-
-            migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropTable(
-                name: "VehicleTypes");
 
             migrationBuilder.DropTable(
                 name: "Vehicles");
 
             migrationBuilder.DropTable(
                 name: "Drivers");
+
+            migrationBuilder.DropTable(
+                name: "VehicleTypes");
 
             migrationBuilder.DropTable(
                 name: "LogisticsCompanies");

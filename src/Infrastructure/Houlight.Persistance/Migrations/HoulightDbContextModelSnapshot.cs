@@ -250,7 +250,7 @@ namespace Houlight.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AssignedDriverId")
+                    b.Property<Guid?>("AssignedDriverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Capacity")
@@ -285,11 +285,16 @@ namespace Houlight.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("VehicleTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedDriverId");
 
                     b.HasIndex("LogisticsCompanyId");
+
+                    b.HasIndex("VehicleTypeId");
 
                     b.ToTable("Vehicles", (string)null);
                 });
@@ -325,21 +330,6 @@ namespace Houlight.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("VehicleTypes", (string)null);
-                });
-
-            modelBuilder.Entity("VehicleEntityVehicleTypeEntity", b =>
-                {
-                    b.Property<Guid>("VehicleEntitiesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("VehicleTypesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("VehicleEntitiesId", "VehicleTypesId");
-
-                    b.HasIndex("VehicleTypesId");
-
-                    b.ToTable("VehicleEntityVehicleType", (string)null);
                 });
 
             modelBuilder.Entity("Houlight.Domain.Entities.DriverEntity", b =>
@@ -390,8 +380,7 @@ namespace Houlight.Persistence.Migrations
                     b.HasOne("Houlight.Domain.Entities.DriverEntity", "AssignedDriver")
                         .WithMany()
                         .HasForeignKey("AssignedDriverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Houlight.Domain.Entities.LogisticsCompanyEntity", "LogisticsCompanyEntity")
                         .WithMany("VehicleEntities")
@@ -399,24 +388,17 @@ namespace Houlight.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Houlight.Domain.Entities.VehicleTypeEntity", "VehicleTypeEntity")
+                        .WithMany("VehicleEntities")
+                        .HasForeignKey("VehicleTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("AssignedDriver");
 
                     b.Navigation("LogisticsCompanyEntity");
-                });
 
-            modelBuilder.Entity("VehicleEntityVehicleTypeEntity", b =>
-                {
-                    b.HasOne("Houlight.Domain.Entities.VehicleEntity", null)
-                        .WithMany()
-                        .HasForeignKey("VehicleEntitiesId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Houlight.Domain.Entities.VehicleTypeEntity", null)
-                        .WithMany()
-                        .HasForeignKey("VehicleTypesId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("VehicleTypeEntity");
                 });
 
             modelBuilder.Entity("Houlight.Domain.Entities.CustomerEntity", b =>
@@ -428,6 +410,11 @@ namespace Houlight.Persistence.Migrations
                 {
                     b.Navigation("DriverEntities");
 
+                    b.Navigation("VehicleEntities");
+                });
+
+            modelBuilder.Entity("Houlight.Domain.Entities.VehicleTypeEntity", b =>
+                {
                     b.Navigation("VehicleEntities");
                 });
 #pragma warning restore 612, 618

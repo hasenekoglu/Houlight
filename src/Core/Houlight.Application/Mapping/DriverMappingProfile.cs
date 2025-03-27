@@ -12,7 +12,8 @@ public class DriverMappingProfile : Profile
 {
     public DriverMappingProfile()
     {
-        CreateMap<DriverEntity, CreateDriverResponse>();
+        CreateMap<DriverEntity, CreateDriverResponse>()
+            .ForMember(dest => dest.LogisticsCompanyName, opt => opt.MapFrom(src => src.LogisticsCompanyEntity.CompanyName));
         CreateMap<DriverEntity, UpdateDriverResponse>();
         CreateMap<DriverEntity, GetAllDriversResponse>()
             .ForMember(dest => dest.LogisticsCompanyName, opt => opt.MapFrom(src => src.LogisticsCompanyEntity.CompanyName));

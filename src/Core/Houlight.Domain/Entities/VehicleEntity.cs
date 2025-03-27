@@ -16,10 +16,12 @@ public class VehicleEntity : BaseEntity
     public int CurrentVolume { get; set; } = 0;
 
     public Guid LogisticsCompanyId { get; set; }
-    public Guid AssignedDriverId { get; set; }
+    public Guid? AssignedDriverId { get; set; }
+    public Guid VehicleTypeId { get; set; } 
 
     public virtual LogisticsCompanyEntity LogisticsCompanyEntity { get; set; } = null!; 
-    public virtual ICollection<VehicleTypeEntity> VehicleTypes { get; set; } = new List<VehicleTypeEntity>();
+    public virtual VehicleTypeEntity VehicleTypeEntity { get; set; }
     public virtual DriverEntity? AssignedDriver { get; set; }
+
 }
 

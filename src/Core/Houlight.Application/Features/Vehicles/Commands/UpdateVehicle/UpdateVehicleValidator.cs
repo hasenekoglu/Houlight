@@ -18,7 +18,7 @@ public class UpdateVehicleValidator : AbstractValidator<UpdateVehicleCommand>
             .NotEmpty().WithMessage("Kapasite boş olamaz.")
             .GreaterThan(0).WithMessage("Kapasite 0'dan büyük olmalıdır.");
 
-        RuleFor(x => x.VehicleTypeIds)
+        RuleFor(x => x.VehicleTypeId)
             .NotEmpty().WithMessage("Araç tipi ID boş olamaz.");
 
         RuleFor(x => x.LogisticsCompanyId)

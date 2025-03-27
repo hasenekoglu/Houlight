@@ -61,6 +61,7 @@ public class GetVehiclesByFilterQueryHandler : IRequestHandler<GetVehiclesByFilt
         var vehicles = await query
             .Include(x => x.LogisticsCompanyEntity)
             .Include(x => x.AssignedDriver)
+            .Include(x => x.VehicleTypeEntity)
             .ToListAsync(cancellationToken);
 
         return _mapper.Map<List<GetVehiclesByFilterResponse>>(vehicles);

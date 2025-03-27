@@ -26,6 +26,7 @@ public class UpdateLogisticsCompanyCommandHandler : IRequestHandler<UpdateLogist
         company.CompanyAddress = request.CompanyAddress;
         company.CompanyEmail = request.CompanyEmail;
         company.CompanyPhoneNumber = request.CompanyPhoneNumber;
+        company.UpdateDate = DateTime.Now;
 
         await _logisticsCompanyRepository.UpdateAsync(company);
 

@@ -1,5 +1,6 @@
 using AutoMapper;
 using Houlight.Application.Interfaces.Repositories;
+using Houlight.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +19,14 @@ public class GetAllVehiclesQueryHandler : IRequestHandler<GetAllVehiclesQuery, L
 
     public async Task<List<GetAllVehiclesResponse>> Handle(GetAllVehiclesQuery request, CancellationToken cancellationToken)
     {
-        var vehicles = await _vehicleRepository.GetAll();
+        var vehicles = await _vehicleRepository.GetList(
+            predicate: null,
+            noTracking: true,
+            orderBy: null,
+            v => v.LogisticsCompanyEntity,
+            v => v.AssignedDriver,
+            v => v.VehicleTypeEntity
+        );
         return _mapper.Map<List<GetAllVehiclesResponse>>(vehicles);
     }
 } 

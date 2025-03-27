@@ -19,6 +19,11 @@ public class GetVehicleByIdQueryHandler : IRequestHandler<GetVehicleByIdQuery, G
     public async Task<GetVehicleByIdResponse> Handle(GetVehicleByIdQuery request, CancellationToken cancellationToken)
     {
         var vehicle = await _vehicleRepository.GetByIdAsync(request.Id);
+        vehicle = await _vehicleRepository.AsQueryable()
+            .Include(x => x.LogisticsCompanyEntity)
+            .Include(x => x.AssignedDriver)
+            .Include(x => x.VehicleTypeEntity)
+            .FirstOrDefaultAsync(x => x.Id == request.Id);
         if (vehicle == null)
             return null;
 

@@ -12,5 +12,5 @@ public class VehicleTypeEntity : BaseEntity
     public string Type { get; set; }
     public string Description { get; set; }
 
-    public virtual ICollection<VehicleEntity> VehicleEntities { get; set; } = new List<VehicleEntity>();
+    public virtual ICollection<VehicleEntity> VehicleEntities { get; set; } 
 }

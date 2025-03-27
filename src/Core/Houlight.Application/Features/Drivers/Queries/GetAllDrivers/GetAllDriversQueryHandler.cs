@@ -17,7 +17,11 @@ public class GetAllDriversQueryHandler : IRequestHandler<GetAllDriversQuery, Lis
 
     public async Task<List<GetAllDriversResponse>> Handle(GetAllDriversQuery request, CancellationToken cancellationToken)
     {
-        var drivers = await _driverRepository.GetAll();
+        var drivers = await _driverRepository.GetList(
+            predicate: null,
+            noTracking: true,
+            orderBy: null,
+            v=>v.LogisticsCompanyEntity);
         return _mapper.Map<List<GetAllDriversResponse>>(drivers);
     }
 } 

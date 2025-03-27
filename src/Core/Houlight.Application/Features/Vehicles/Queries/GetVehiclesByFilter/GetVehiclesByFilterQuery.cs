@@ -25,6 +25,8 @@ public class GetVehiclesByFilterResponse
     public string LogisticsCompanyName { get; set; }
     public Guid AssignedDriverId { get; set; }
     public string AssignedDriverName { get; set; }
+    public Guid VehicleTypeId { get; set; }
+    public string VehicleTypeType { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
 } 

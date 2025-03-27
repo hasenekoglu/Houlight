@@ -1,3 +1,5 @@
+using Houlight.Application.Features.Vehicles.Queries.GetVehicleById;
+using Houlight.Domain.Entities;
 using MediatR;
 
 namespace Houlight.Application.Features.Vehicles.Queries.GetAllVehicles;
@@ -18,6 +20,10 @@ public class GetAllVehiclesResponse
     public string LogisticsCompanyName { get; set; }
     public Guid AssignedDriverId { get; set; }
     public string AssignedDriverName { get; set; }
+
+    public Guid VehicleTypeId { get; set; }
+    public string VehicleTypeType { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
+
 } 

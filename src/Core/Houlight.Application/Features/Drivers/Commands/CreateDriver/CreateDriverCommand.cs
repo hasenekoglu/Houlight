@@ -24,5 +24,6 @@ public class CreateDriverResponse
     public string Email { get; set; }
     public DriverStatus DriverStatus { get; set; }
     public Guid LogisticsCompanyId { get; set; }
+    public string LogisticsCompanyName { get; set; }
     public DateTime CreateDate { get; set; }
 } 

@@ -29,9 +29,9 @@ public class VehicleEntityConfiguration : BaseEntityTypeConfiguration<VehicleEnt
             .IsRequired();
 
         // VehicleEntity ile VehicleType arasında çoktan-çok ilişki
-        builder.HasMany(e => e.VehicleTypes)
+        builder.HasOne(e => e.VehicleTypeEntity)
             .WithMany(vt => vt.VehicleEntities)
-            .UsingEntity(j => j.ToTable("VehicleEntityVehicleType")); // Bağlantı tablosu
+            .HasForeignKey(e => e.VehicleTypeId);
 
 
         builder.HasOne(e => e.AssignedDriver)
