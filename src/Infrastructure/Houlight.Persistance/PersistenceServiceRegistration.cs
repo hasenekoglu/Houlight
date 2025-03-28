@@ -20,12 +20,13 @@ public static class PersistenceServiceRegistration
             options.UseSqlServer(
                 configuration.GetConnectionString("SqlServer")));
 
-        services.AddScoped<ICustomerRepository,CustomerRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDriverRepository, DriverRepository>();
         services.AddScoped<ILoadRepository, LoadRepository>();
         services.AddScoped<ILogisticsCompanyRepository, LogisticsCompanyRepository>();
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped<IVehicleTypeRepository, VehicleTypeRepository>();
+        services.AddScoped<ILoadOfferRepository, LoadOfferRepository>();
 
         return services;
     }

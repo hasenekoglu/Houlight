@@ -21,6 +21,7 @@ public class HoulightDbContext : DbContext
     public DbSet<VehicleEntity> Vehicles { get; set; }
     public DbSet<VehicleTypeEntity> VehicleTypes { get; set; }
     public DbSet<LoadEntity> Loads { get; set; }
+    public DbSet<LoadOfferEntity> LoadOffers { get; set; }
 
     public HoulightDbContext(DbContextOptions dbContextOptions, IConfiguration configuration): base(dbContextOptions)
     {

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Houlight.Domain.Enums;
 
 namespace Houlight.Domain.Entities;
 
-public class LoadEntity : BaseEntity
-
+public class LoadOfferEntity : BaseEntity
 {
     public string FromLocation { get; set; }
     public string ToLocation { get; set; }
@@ -17,21 +11,18 @@ public class LoadEntity : BaseEntity
     public int Volume { get; set; }
     public string? Description { get; set; }
     public DateTime? DeliveryDate { get; set; }
-    public LoadStatus Status { get; set; } = LoadStatus.Pending;
     public decimal? CustomerExpectedPrice { get; set; }
-    public decimal? CompanyOfferedPrice { get; set; }
+    public decimal CompanyOfferedPrice { get; set; }
 
-
+    public Guid LoadId { get; set; }
     public Guid CustomerId { get; set; }
-    public Guid? LogisticsCompanyId { get; set; }
+    public Guid LogisticsCompanyId { get; set; }
     public Guid? AssignedVehicleId { get; set; }
     public Guid? AssignedDriverId { get; set; }
 
-
+    public virtual LoadEntity LoadEntity { get; set; } = null!;
     public virtual CustomerEntity CustomerEntity { get; set; } = null!;
-    public virtual LogisticsCompanyEntity? LogisticsCompanyEntity { get; set; }
+    public virtual LogisticsCompanyEntity LogisticsCompanyEntity { get; set; } = null!;
     public virtual VehicleEntity? VehicleEntity { get; set; }
     public virtual DriverEntity? DriverEntity { get; set; }
-    public virtual ICollection<LoadOfferEntity> LoadOffers { get; set; } = new List<LoadOfferEntity>();
-}
-
+} 
