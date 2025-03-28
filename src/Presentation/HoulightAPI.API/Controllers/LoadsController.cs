@@ -1,7 +1,6 @@
 using Houlight.Application.Features.Loads.Commands.CreateLoad;
 using Houlight.Application.Features.Loads.Commands.CustomerLoadUpdate;
 using Houlight.Application.Features.Loads.Commands.DeleteLoad;
-using Houlight.Application.Features.Loads.Commands.LogisticsCompanyLoadUpdate;
 using Houlight.Application.Features.Loads.Queries.GetAllLoads;
 using Houlight.Application.Features.Loads.Queries.GetLoadById;
 using Houlight.Application.Features.Loads.Queries.GetLoadsByFilter;
@@ -53,16 +52,6 @@ public class LoadsController : ControllerBase
 
     [HttpPut("customer/{id}")]
     public async Task<IActionResult> UpdateLoadByCustomer(Guid id, [FromBody] CustomerLoadUpdateCommand command)
-    {
-        if (id != command.Id)
-            return BadRequest();
-
-        var result = await _mediator.Send(command);
-        return Ok(result);
-    }
-
-    [HttpPut("logistics-company/{id}")]
-    public async Task<IActionResult> UpdateLoadByLogisticsCompany(Guid id, [FromBody] LogisticsCompanyLoadUpdateCommand command)
     {
         if (id != command.Id)
             return BadRequest();

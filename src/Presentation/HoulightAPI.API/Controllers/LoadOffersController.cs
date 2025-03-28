@@ -1,5 +1,7 @@
 using Houlight.Application.Features.LoadOffers.Commands.AcceptLoadOffer;
 using Houlight.Application.Features.LoadOffers.Commands.CreateLoadOffer;
+using Houlight.Application.Features.LoadOffers.Commands.UpdateLoadOffer;
+using Houlight.Application.Features.LoadOffers.Commands.DeleteLoadOffer;
 using Houlight.Application.Features.LoadOffers.Queries.GetLoadOfferList;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,10 +33,28 @@ public class LoadOffersController : ControllerBase
         return CreatedAtAction(nameof(GetLoadOffers), new { id = result.Id }, result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateLoadOffer(Guid id, [FromBody] UpdateLoadOfferCommand command)
+    {
+        if (id != command.Id)
+            return BadRequest();
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
     [HttpPost("{id}/accept")]
     public async Task<IActionResult> AcceptLoadOffer(Guid id)
     {
         var command = new AcceptLoadOfferCommand { LoadOfferId = id };
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteLoadOffer(Guid id)
+    {
+        var command = new DeleteLoadOfferCommand { Id = id };
         var result = await _mediator.Send(command);
         return Ok(result);
     }
