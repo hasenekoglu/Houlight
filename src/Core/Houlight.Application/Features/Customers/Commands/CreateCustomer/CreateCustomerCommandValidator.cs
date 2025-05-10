@@ -23,5 +23,10 @@ public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCo
             .NotEmpty().WithMessage("Telefon numarası alanı boş olamaz.")
             .Matches(@"^[0-9]+$").WithMessage("Telefon numarası sadece rakamlardan oluşmalıdır.")
             .Length(10).WithMessage("Telefon numarası 10 haneli olmalıdır.");
+
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Şifre alanı boş olamaz.")
+            .MinimumLength(6).WithMessage("Şifre en az 6 karakter olmalıdır.")
+            .MaximumLength(50).WithMessage("Şifre 50 karakterden uzun olamaz.");
     }
 } 

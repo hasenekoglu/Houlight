@@ -14,6 +14,8 @@ public class CustomerEntity : BaseEntity
     public string Surname { get; set; }
     public string Email { get; set; }
     public string PhoneNumber { get; set; }
+    public string PasswordHash { get; set; }
+    public string PasswordSalt { get; set; }
 
 
     public virtual ICollection<LoadEntity>? LoadEntities { get; set; } 

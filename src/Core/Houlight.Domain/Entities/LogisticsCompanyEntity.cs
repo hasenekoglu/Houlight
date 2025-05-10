@@ -12,6 +12,8 @@ public class LogisticsCompanyEntity : BaseEntity
     public string CompanyAddress { get; set; }
     public string CompanyPhoneNumber { get; set; }
     public string CompanyEmail { get; set; }
+    public string PasswordHash { get; set; }
+    public string PasswordSalt { get; set; }
 
     public virtual ICollection<DriverEntity>? DriverEntities { get; set; } 
     public virtual ICollection<VehicleEntity>? VehicleEntities { get; set; }

@@ -1,0 +1,112 @@
+@using Microsoft.AspNetCore.Components.Routing
+@using System.IdentityModel.Tokens.Jwt
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Houlight</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Ana Sayfa
+            </NavLink>
+        </div>
+
+        @if (!isAuthenticated)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="customer/login">
+                    <span class="oi oi-account-login" aria-hidden="true"></span> Müşteri Girişi
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="customer/register">
+                    <span class="oi oi-person" aria-hidden="true"></span> Müşteri Kayıt
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="company/login">
+                    <span class="oi oi-account-login" aria-hidden="true"></span> Şirket Girişi
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="company/register">
+                    <span class="oi oi-person" aria-hidden="true"></span> Şirket Kayıt
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            @if (userType == "customer")
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="customer/dashboard">
+                        <span class="oi oi-dashboard" aria-hidden="true"></span> Panel
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="customer/profile">
+                        <span class="oi oi-person" aria-hidden="true"></span> Profil
+                    </NavLink>
+                </div>
+            }
+            else if (userType == "company")
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="company/dashboard">
+                        <span class="oi oi-dashboard" aria-hidden="true"></span> Panel
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="company/profile">
+                        <span class="oi oi-person" aria-hidden="true"></span> Profil
+                    </NavLink>
+                </div>
+            }
+
+            <div class="nav-item px-3">
+                <button class="nav-link btn btn-link" @onclick="HandleLogout">
+                    <span class="oi oi-account-logout" aria-hidden="true"></span> Çıkış Yap
+                </button>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool isAuthenticated;
+    private string userType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "token");
+        var storedUserType = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "userType");
+        
+        isAuthenticated = !string.IsNullOrEmpty(token);
+        userType = storedUserType;
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task HandleLogout()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "token");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "userType");
+        isAuthenticated = false;
+        userType = null;
+        NavigationManager.NavigateTo("/");
+    }
+} 

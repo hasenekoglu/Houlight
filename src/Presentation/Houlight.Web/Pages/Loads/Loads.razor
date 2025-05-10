@@ -1,0 +1,54 @@
+@page "/loads"
+@using Houlight.Domain.Entities
+@using Houlight.Application.Features.Loads.Queries.GetAllLoads
+@using Houlight.Web.Services
+@inject ILoadService LoadService
+
+<PageTitle>Yükler</PageTitle>
+
+<h1>Yükler</h1>
+
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="/loads/create" class="btn btn-primary">Yeni Yük Ekle</a>
+    </div>
+</div>
+
+<div class="row">
+    @if (loads == null)
+    {
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!loads.Any())
+    {
+        <div class="col-12">
+            <div class="alert alert-info">
+                Henüz hiç yük bulunmuyor.
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var load in loads)
+        {
+            <div class="col-md-4 mb-4">
+                <LoadCard Load="@load" />
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<GetAllLoadsResponse>? loads;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loads = await LoadService.GetAllLoadsAsync();
+    }
+} 

@@ -1,0 +1,182 @@
+@page "/customer/dashboard"
+@using Houlight.Domain.Entities
+@using Houlight.Domain.Enums
+
+<PageTitle>Müşteri Paneli - Houlight</PageTitle>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-person-circle display-4" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">@customer.Name @customer.Surname</h5>
+                            <p class="text-muted mb-0">@customer.Email</p>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/customer/profile" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person me-2"></i> Profil Bilgileri
+                        </a>
+                        <a href="/customer/loads" class="list-group-item list-group-item-action">
+                            <i class="bi bi-truck me-2"></i> Yüklerim
+                        </a>
+                        <a href="/customer/offers" class="list-group-item list-group-item-action">
+                            <i class="bi bi-cart me-2"></i> Tekliflerim
+                        </a>
+                        <button class="list-group-item list-group-item-action text-danger" @onclick="HandleLogout">
+                            <i class="bi bi-box-arrow-right me-2"></i> Çıkış Yap
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Aktif Yükler</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-truck display-4" style="color: var(--primary-color);"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h2 class="mb-0">@activeLoads</h2>
+                                    <p class="text-muted mb-0">Aktif Yük</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Bekleyen Teklifler</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-cart display-4" style="color: var(--primary-color);"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h2 class="mb-0">@pendingOffers</h2>
+                                    <p class="text-muted mb-0">Bekleyen Teklif</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Son Yüklerim</h5>
+                        <a href="/customer/loads" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+                    </div>
+                    
+                    @if (recentLoads.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Yük No</th>
+                                        <th>Nereden</th>
+                                        <th>Nereye</th>
+                                        <th>Durum</th>
+                                        <th>Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var load in recentLoads)
+                                    {
+                                        <tr>
+                                            <td>@load.Id.ToString().Substring(0, 8)</td>
+                                            <td>@load.FromLocation</td>
+                                            <td>@load.ToLocation</td>
+                                            <td>
+                                                <span class="badge bg-@GetStatusColor(load.Status)">
+                                                    @load.Status
+                                                </span>
+                                            </td>
+                                            <td>@load.DeliveryDate?.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-truck display-4 text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Henüz yük bulunmuyor.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CustomerEntity customer = new()
+    {
+        Name = "Ahmet",
+        Surname = "Yılmaz",
+        Email = "ahmet@example.com",
+        PhoneNumber = "0555 123 45 67"
+    };
+
+    private int activeLoads = 3;
+    private int pendingOffers = 2;
+    private List<LoadEntity> recentLoads = new();
+
+    protected override void OnInitialized()
+    {
+        // Temsili veri
+        recentLoads = new List<LoadEntity>
+        {
+            new LoadEntity
+            {
+                Id = Guid.NewGuid(),
+                FromLocation = "İstanbul",
+                ToLocation = "Ankara",
+                Status = LoadStatus.InTransit,
+                DeliveryDate = DateTime.Now.AddDays(2)
+            },
+            new LoadEntity
+            {
+                Id = Guid.NewGuid(),
+                FromLocation = "İzmir",
+                ToLocation = "Bursa",
+                Status = LoadStatus.Pending,
+                DeliveryDate = DateTime.Now.AddDays(5)
+            }
+        };
+    }
+
+    private string GetStatusColor(LoadStatus status) => status switch
+    {
+        LoadStatus.Pending => "warning",
+        LoadStatus.InTransit => "primary",
+        LoadStatus.Delivered => "success",
+  
+        _ => "secondary"
+    };
+
+    private void HandleLogout()
+    {
+        // TODO: Backend entegrasyonu yapılacak
+        NavigationManager.NavigateTo("/");
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+} 

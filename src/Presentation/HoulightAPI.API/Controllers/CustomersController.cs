@@ -1,6 +1,7 @@
 ﻿using Houlight.Application.Features.Customers.Commands.CreateCustomer;
 using Houlight.Application.Features.Customers.Commands.DeleteCustomer;
 using Houlight.Application.Features.Customers.Commands.UpdateCustomer;
+using Houlight.Application.Features.Customers.Commands.Login;
 using Houlight.Application.Features.Customers.Queries.GetAllCustomers;
 using Houlight.Application.Features.Customers.Queries.GetCustomerById;
 using Houlight.Application.Features.Customers.Queries.GetCustomersByFilter;
@@ -75,5 +76,15 @@ public class CustomersController : ControllerBase
     {
         var response = await _mediator.Send(query);
         return Ok(response);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginCustomerCommand command)
+    {
+        if (command == null || string.IsNullOrEmpty(command.Email) || string.IsNullOrEmpty(command.Password))
+            return BadRequest("Email ve şifre alanları zorunludur.");
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 }

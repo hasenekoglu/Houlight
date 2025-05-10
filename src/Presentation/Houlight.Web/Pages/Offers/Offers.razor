@@ -1,0 +1,53 @@
+@page "/offers"
+@using Houlight.Domain.Entities
+@using Houlight.Web.Services
+@inject ILoadOfferService LoadOfferService
+
+<PageTitle>Teklifler</PageTitle>
+
+<h1>Teklifler</h1>
+
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="/offers/create" class="btn btn-primary">Yeni Teklif Ekle</a>
+    </div>
+</div>
+
+<div class="row">
+    @if (offers == null)
+    {
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!offers.Any())
+    {
+        <div class="col-12">
+            <div class="alert alert-info">
+                Henüz hiç teklif bulunmuyor.
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var offer in offers)
+        {
+            <div class="col-md-4 mb-4">
+                <OfferCard Offer="@offer" />
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<LoadOfferEntity>? offers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        offers = await LoadOfferService.GetAllOffersAsync();
+    }
+} 

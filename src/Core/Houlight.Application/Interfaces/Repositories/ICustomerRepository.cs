@@ -9,4 +9,5 @@ namespace Houlight.Application.Interfaces.Repositories;
 
 public interface ICustomerRepository : IGenericRepository<CustomerEntity>
 {
+    Task<CustomerEntity?> GetByEmailAsync(string email);
 }

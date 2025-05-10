@@ -1,0 +1,132 @@
+@page "/"
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Yükünüzü Geleceğe Taşıyoruz</h1>
+            <p>Houlight ile lojistikte dijital dönüşüm başlıyor. Yükünüzü güvenle, hızla ve akıllıca taşıyın.</p>
+            <div class="hero-actions">
+                <a href="/register" class="hero-btn hero-btn-primary">Üye Ol</a>
+                <a href="/login" class="hero-btn hero-btn-secondary">Giriş Yap</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="images/ResimWeb/YukunuzuGelecegeTasiyoruz.jpg" alt="Yükünüzü Geleceğe Taşıyoruz" />
+        </div>
+    </div>
+</section>
+
+<!-- Houlight Tanıtım Bölümleri -->
+<section class="houlight-intro">
+    <div class="intro-row">
+        <div class="intro-text">
+            <h3>Akıllı Lojistik</h3>
+            <p>Yapay zeka destekli sistemimizle yükünüzü en uygun ve hızlı şekilde taşıyoruz.</p>
+        </div>
+        <div class="intro-img">
+            <img src="images/ResimWeb/AkilliLojistik.png" alt="Akıllı Lojistik" />
+        </div>
+    </div>
+    <div class="intro-row reverse">
+        <div class="intro-text">
+            <h3>Şeffaf Takip</h3>
+            <p>Yükünüzün her adımını dijital olarak takip edin, süreci anlık izleyin.</p>
+        </div>
+        <div class="intro-img">
+            <img src="images/ResimWeb/SeffafTakip.jpg" alt="Şeffaf Takip" />
+        </div>
+    </div>
+    <div class="intro-row">
+        <div class="intro-text">
+            <h3>Güçlü Ağ</h3>
+            <p>Türkiye'nin dört bir yanında geniş lojistik ağı ile hizmet.</p>
+        </div>
+        <div class="intro-img">
+            <img src="images/ResimWeb/GucluAg.jpg" alt="Güçlü Ağ" />
+        </div>
+    </div>
+    <div class="intro-row reverse">
+        <div class="intro-text">
+            <h3>7/24 Destek</h3>
+            <p>Her zaman yanınızdayız. Canlı destek ve hızlı çözüm.</p>
+        </div>
+        <div class="intro-img">
+            <img src="images/ResimWeb/Destek.jpg" alt="7/24 Destek" />
+        </div>
+    </div>
+</section>
+
+<!-- Neden Houlight 4'lü Modern Kutular -->
+<section class="houlight-why-modern">
+    <div class="why-container">
+        <div class="why-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Güvenli" />
+            <h3>Güvenli</h3>
+            <p>Tüm işlemleriniz güvenli ve şeffaf şekilde gerçekleşir.</p>
+        </div>
+        <div class="why-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/189/189792.png" alt="Hızlı" />
+            <h3>Hızlı</h3>
+            <p>Anında teklif alın, yükünüzü hızla taşıtın.</p>
+        </div>
+        <div class="why-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png" alt="Dijital" />
+            <h3>Dijital</h3>
+            <p>Tüm süreçler dijital, kolay ve erişilebilir.</p>
+        </div>
+        <div class="why-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Uygun Fiyat" />
+            <h3>Uygun Fiyat</h3>
+            <p>Rekabetçi fiyatlarla avantajlı lojistik.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Nasıl Çalışır Bölümü -->
+<section class="how-section-modern">
+    <div class="how-modern-content">
+        <div class="how-modern-steps">
+            <h2>Nasıl Çalışır?</h2>
+            <ul>
+                <li><span class="step-icon">📝</span> <b>Kayıt Olun:</b> Hızlıca üye olun, profilinizi oluşturun.</li>
+                <li><span class="step-icon">📦</span> <b>Yükünüzü Ekleyin:</b> Taşınacak yükünüzü sisteme girin.</li>
+                <li><span class="step-icon">💬</span> <b>Teklif Alın:</b> Lojistik firmalarından anında teklif alın.</li>
+                <li><span class="step-icon">📲</span> <b>Yükünüzü Takip Edin:</b> Tüm süreci dijital olarak izleyin.</li>
+            </ul>
+        </div>
+        <div class="how-modern-image">
+            <img src="images/ResimWeb/NasilCalisir.jpg" alt="Kargo Kutusu" />
+        </div>
+    </div>
+</section>
+
+@code {
+    [Inject] NavigationManager NavigationManager { get; set; }
+}
+
+<style>
+    .hero-section {
+        background-color: #212529;
+    }
+
+    .features-section {
+        background-color: #f8f9fa;
+    }
+
+    .cta-section {
+        background-color: #212529;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+
+    .btn-warning:hover {
+        background-color: #ffca2c;
+        border-color: #ffc720;
+        color: #000;
+    }
+</style>

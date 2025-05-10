@@ -4,6 +4,7 @@ using Houlight.Application.Features.LogisticsCompanies.Commands.UpdateLogisticsC
 using Houlight.Application.Features.LogisticsCompanies.Queries.GetAllLogisticsCompanies;
 using Houlight.Application.Features.LogisticsCompanies.Queries.GetLogisticsCompanyById;
 using Houlight.Application.Features.LogisticsCompanies.Queries.GetLogisticsCompaniesByFilter;
+using Houlight.Application.Features.LogisticsCompanies.Commands.Login;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -74,5 +75,15 @@ public class LogisticsCompaniesController : ControllerBase
         var query = new GetAllLogisticsCompaniesQuery();
         var response = await _mediator.Send(query);
         return Ok(response);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginCompanyCommand command)
+    {
+        if (command == null || string.IsNullOrEmpty(command.Email) || string.IsNullOrEmpty(command.Password))
+            return BadRequest("Email ve şifre alanları zorunludur.");
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 } 

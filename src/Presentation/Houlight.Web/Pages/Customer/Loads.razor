@@ -1,0 +1,312 @@
+@page "/customer/loads"
+@using Houlight.Domain.Entities
+@using Houlight.Domain.Enums
+
+<PageTitle>Yüklerim - Houlight</PageTitle>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Yüklerim</h4>
+        <button class="btn btn-primary" @onclick="() => ShowNewLoadModal = true">
+            <i class="bi bi-plus-lg me-2"></i>Yeni Yük Ekle
+        </button>
+    </div>
+    
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Yük No</th>
+                            <th>Nereden</th>
+                            <th>Nereye</th>
+                            <th>Yük Tipi</th>
+                            <th>Ağırlık</th>
+                            <th>Hacim</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var load in loads)
+                        {
+                            <tr>
+                                <td>@load.Id.ToString().Substring(0, 8)</td>
+                                <td>@load.FromLocation</td>
+                                <td>@load.ToLocation</td>
+                                <td>@GetLoadTypeName(load.LoadType)</td>
+                                <td>@load.Weight kg</td>
+                                <td>@load.Volume m³</td>
+                                <td>
+                                    <span class="badge bg-@GetStatusColor(load.Status)">
+                                        @GetStatusName(load.Status)
+                                    </span>
+                                </td>
+                                <td>@load.CreateDate.ToShortDateString()</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ShowLoadDetails(load)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    @if (load.Status == LoadStatus.Pending)
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelLoad(load)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowNewLoadModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Yük Ekle</h5>
+                    <button type="button" class="btn-close" @onclick="() => ShowNewLoadModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@newLoad" OnValidSubmit="HandleNewLoadSubmit">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nereden</label>
+                            <InputText @bind-Value="newLoad.FromLocation" class="form-control" />
+                            <ValidationMessage For="@(() => newLoad.FromLocation)" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nereye</label>
+                            <InputText @bind-Value="newLoad.ToLocation" class="form-control" />
+                            <ValidationMessage For="@(() => newLoad.ToLocation)" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Yük Tipi</label>
+                            <InputSelect @bind-Value="newLoad.LoadType" class="form-select">
+                                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                                {
+                                    <option value="@type">@GetLoadTypeName(type)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ağırlık (kg)</label>
+                                <InputNumber @bind-Value="newLoad.Weight" class="form-control" />
+                                <ValidationMessage For="@(() => newLoad.Weight)" />
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Hacim (m³)</label>
+                                <InputNumber @bind-Value="newLoad.Volume" class="form-control" />
+                                <ValidationMessage For="@(() => newLoad.Volume)" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Beklenen Fiyat</label>
+                            <InputNumber @bind-Value="newLoad.CustomerExpectedPrice" class="form-control" />
+                            <ValidationMessage For="@(() => newLoad.CustomerExpectedPrice)" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Teslimat Tarihi</label>
+                            <InputDate @bind-Value="newLoad.DeliveryDate" class="form-control" />
+                            <ValidationMessage For="@(() => newLoad.DeliveryDate)" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <InputTextArea @bind-Value="newLoad.Description" class="form-control" rows="3" />
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" @onclick="() => ShowNewLoadModal = false">
+                                İptal
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Kaydet
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (selectedLoad != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yük Detayları</h5>
+                    <button type="button" class="btn-close" @onclick="() => selectedLoad = null"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Yük No</dt>
+                        <dd class="col-sm-8">@selectedLoad.Id.ToString().Substring(0, 8)</dd>
+                        
+                        <dt class="col-sm-4">Nereden</dt>
+                        <dd class="col-sm-8">@selectedLoad.FromLocation</dd>
+                        
+                        <dt class="col-sm-4">Nereye</dt>
+                        <dd class="col-sm-8">@selectedLoad.ToLocation</dd>
+                        
+                        <dt class="col-sm-4">Yük Tipi</dt>
+                        <dd class="col-sm-8">@GetLoadTypeName(selectedLoad.LoadType)</dd>
+                        
+                        <dt class="col-sm-4">Ağırlık</dt>
+                        <dd class="col-sm-8">@selectedLoad.Weight kg</dd>
+                        
+                        <dt class="col-sm-4">Hacim</dt>
+                        <dd class="col-sm-8">@selectedLoad.Volume m³</dd>
+                        
+                        <dt class="col-sm-4">Beklenen Fiyat</dt>
+                        <dd class="col-sm-8">@selectedLoad.CustomerExpectedPrice?.ToString("C")</dd>
+                        
+                        <dt class="col-sm-4">Şirket Teklifi</dt>
+                        <dd class="col-sm-8">@selectedLoad.CompanyOfferedPrice?.ToString("C")</dd>
+                        
+                        <dt class="col-sm-4">Durum</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@GetStatusColor(selectedLoad.Status)">
+                                @GetStatusName(selectedLoad.Status)
+                            </span>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Oluşturma Tarihi</dt>
+                        <dd class="col-sm-8">@selectedLoad.CreateDate.ToShortDateString()</dd>
+                        
+                        <dt class="col-sm-4">Teslimat Tarihi</dt>
+                        <dd class="col-sm-8">@selectedLoad.DeliveryDate?.ToShortDateString()</dd>
+                        
+                        <dt class="col-sm-4">Açıklama</dt>
+                        <dd class="col-sm-8">@selectedLoad.Description</dd>
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => selectedLoad = null">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<LoadEntity> loads = new();
+    private LoadEntity? selectedLoad;
+    private bool ShowNewLoadModal;
+    private LoadEntity newLoad = new();
+
+    protected override void OnInitialized()
+    {
+        // Temsili veri
+        loads = new List<LoadEntity>
+        {
+            new LoadEntity
+            {
+                Id = Guid.NewGuid(),
+                FromLocation = "İstanbul",
+                ToLocation = "Ankara",
+                LoadType = LoadType.GeneralCargo,
+                Weight = 1000,
+                Volume = 5,
+                Status = LoadStatus.InTransit,
+                DeliveryDate = DateTime.Now.AddDays(2),
+                Description = "Genel kargo taşımacılığı",
+                CustomerExpectedPrice = 1500,
+                CompanyOfferedPrice = 1800,
+                CreateDate = DateTime.Now.AddDays(-1)
+            },
+            new LoadEntity
+            {
+                Id = Guid.NewGuid(),
+                FromLocation = "İzmir",
+                ToLocation = "Bursa",
+                LoadType = LoadType.TemperatureSensitive,
+                Weight = 500,
+                Volume = 3,
+                Status = LoadStatus.Pending,
+                DeliveryDate = DateTime.Now.AddDays(5),
+                Description = "Soğuk zincir taşımacılığı",
+                CustomerExpectedPrice = 2000,
+                CompanyOfferedPrice = null,
+                CreateDate = DateTime.Now.AddDays(-2)
+            }
+        };
+    }
+
+    private string GetLoadTypeName(LoadType type) => type switch
+    {
+        LoadType.GeneralCargo => "Genel Kargo",
+        LoadType.PerishableGoods => "Bozulabilir Ürünler",
+        LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+        LoadType.FragileItems => "Kırılabilir Eşyalar",
+        LoadType.BulkCargo => "Dökme Kargo",
+        LoadType.Liquid => "Sıvı Kargo",
+        LoadType.HighValue => "Yüksek Değerli Ürünler",
+        LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+        LoadType.DangerousGoods => "Tehlikeli Mallar",
+        _ => type.ToString()
+    };
+
+    private string GetStatusName(LoadStatus status) => status switch
+    {
+        LoadStatus.Pending => "Beklemede",
+        LoadStatus.Assigned => "Atandı",
+        LoadStatus.InTransit => "Yolda",
+        LoadStatus.Delivered => "Teslim Edildi",
+        LoadStatus.Accepted => "Kabul Edildi",
+        _ => status.ToString()
+    };
+
+    private string GetStatusColor(LoadStatus status) => status switch
+    {
+        LoadStatus.Pending => "warning",
+        LoadStatus.Assigned => "info",
+        LoadStatus.InTransit => "primary",
+        LoadStatus.Delivered => "success",
+        LoadStatus.Accepted => "success",
+        _ => "secondary"
+    };
+
+    private void ShowLoadDetails(LoadEntity load)
+    {
+        selectedLoad = load;
+    }
+
+    private async Task HandleNewLoadSubmit()
+    {
+        // TODO: Backend entegrasyonu yapılacak
+        newLoad.Id = Guid.NewGuid();
+        newLoad.Status = LoadStatus.Pending;
+        newLoad.CreateDate = DateTime.Now;
+        loads.Add(newLoad);
+        newLoad = new LoadEntity();
+        ShowNewLoadModal = false;
+    }
+
+    private async Task CancelLoad(LoadEntity load)
+    {
+        // TODO: Backend entegrasyonu yapılacak
+        load.Status = LoadStatus.Pending;
+    }
+} 

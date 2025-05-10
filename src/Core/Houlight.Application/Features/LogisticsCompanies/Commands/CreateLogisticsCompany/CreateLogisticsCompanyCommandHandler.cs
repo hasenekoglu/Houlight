@@ -1,5 +1,7 @@
 using AutoMapper;
+using FluentValidation;
 using Houlight.Application.Interfaces.Repositories;
+using Houlight.Application.Services.Auth;
 using Houlight.Domain.Entities;
 using MediatR;
 
@@ -9,11 +11,19 @@ public class CreateLogisticsCompanyCommandHandler : IRequestHandler<CreateLogist
 {
     private readonly ILogisticsCompanyRepository _logisticsCompanyRepository;
     private readonly IMapper _mapper;
+    private readonly CreateLogisticsCompanyCommandValidator _validator;
+    private readonly IAuthService _authService;
 
-    public CreateLogisticsCompanyCommandHandler(ILogisticsCompanyRepository logisticsCompanyRepository, IMapper mapper)
+    public CreateLogisticsCompanyCommandHandler(
+        ILogisticsCompanyRepository logisticsCompanyRepository,
+        IMapper mapper,
+        CreateLogisticsCompanyCommandValidator validator,
+        IAuthService authService)
     {
         _logisticsCompanyRepository = logisticsCompanyRepository;
         _mapper = mapper;
+        _validator = validator;
+        _authService = authService;
     }
 
     public async Task<CreateLogisticsCompanyResponse> Handle(CreateLogisticsCompanyCommand request, CancellationToken cancellationToken)
@@ -22,9 +32,14 @@ public class CreateLogisticsCompanyCommandHandler : IRequestHandler<CreateLogist
         {
             CompanyName = request.CompanyName,
             CompanyAddress = request.CompanyAddress,
-            CompanyEmail = request.CompanyEmail,
-            CompanyPhoneNumber = request.CompanyPhoneNumber
+            CompanyPhoneNumber = request.CompanyPhoneNumber,
+            CompanyEmail = request.CompanyEmail
         };
+
+        // Şifre hash'leme işlemi
+        var (passwordHash, passwordSalt) = _authService.CreatePasswordHash(request.Password);
+        company.PasswordHash = passwordHash;
+        company.PasswordSalt = passwordSalt;
 
         await _logisticsCompanyRepository.AddAsync(company);
 

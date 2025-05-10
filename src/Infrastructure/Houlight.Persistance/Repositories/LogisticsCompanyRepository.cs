@@ -10,4 +10,9 @@ public class LogisticsCompanyRepository : GenericRepository<LogisticsCompanyEnti
     public LogisticsCompanyRepository(HoulightDbContext dbContext) : base(dbContext)
     {
     }
+
+    public async Task<LogisticsCompanyEntity?> GetByEmailAsync(string email)
+    {
+        return await FirstOrDefaultAsync(x => x.CompanyEmail == email);
+    }
 }

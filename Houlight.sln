@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoulightAPI.API", "src\Presentation\HoulightAPI.API\HoulightAPI.API.csproj", "{0B817F14-BF39-404E-93EC-8C41BC2080FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Houlight.Web", "src\Presentation\Houlight.Web\Houlight.Web.csproj", "{487F504B-ADBD-4D72-B35F-525FEA789FD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B817F14-BF39-404E-93EC-8C41BC2080FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{487F504B-ADBD-4D72-B35F-525FEA789FD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{487F504B-ADBD-4D72-B35F-525FEA789FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{487F504B-ADBD-4D72-B35F-525FEA789FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{487F504B-ADBD-4D72-B35F-525FEA789FD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,5 +66,6 @@ Global
 		{09255FC4-3EB3-4A3B-80F1-42B983F133B6} = {3FC2B8C5-2F30-479E-A6C0-F46481E824DC}
 		{4D07317D-10B1-4031-8163-449EC7280C16} = {BD94D2D2-DC24-4A01-88C0-4C9229289523}
 		{0B817F14-BF39-404E-93EC-8C41BC2080FD} = {4D07317D-10B1-4031-8163-449EC7280C16}
+		{487F504B-ADBD-4D72-B35F-525FEA789FD2} = {4D07317D-10B1-4031-8163-449EC7280C16}
 	EndGlobalSection
 EndGlobal

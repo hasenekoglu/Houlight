@@ -1,0 +1,21 @@
+@using Houlight.Domain.Entities
+@using Houlight.Application.Features.Loads.Queries.GetAllLoads
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Load.FromLocation → @Load.ToLocation</h5>
+        <p class="card-text">@Load.Description</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary">@Load.Status</span>
+            <div>
+                <span class="me-2">@Load.CustomerExpectedPrice ₺</span>
+                <a href="/loads/@Load.Id" class="btn btn-outline-primary">Detaylar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public GetAllLoadsResponse Load { get; set; }
+} 

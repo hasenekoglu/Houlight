@@ -15,4 +15,9 @@ public class CustomerRepository : GenericRepository<CustomerEntity>, ICustomerRe
     public CustomerRepository(HoulightDbContext dbContext) : base(dbContext)
     {
     }
+
+    public async Task<CustomerEntity?> GetByEmailAsync(string email)
+    {
+        return await FirstOrDefaultAsync(x => x.Email == email);
+    }
 }
