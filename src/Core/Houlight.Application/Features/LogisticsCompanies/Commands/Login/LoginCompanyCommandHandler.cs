@@ -15,7 +15,7 @@ public class LoginCompanyCommandHandler : IRequestHandler<LoginCompanyCommand, L
 
     public async Task<LoginCompanyResponse> Handle(LoginCompanyCommand request, CancellationToken cancellationToken)
     {
-        var (success, token) = await _authService.LoginCompanyAsync(request.Email, request.Password);
+       var (success, token, companyId) = await _authService.LoginCompanyAsync(request.Email, request.Password);
 
         return new LoginCompanyResponse
         {

@@ -15,15 +15,27 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
     {
         _customerRepository = customerRepository;
         _mapper = mapper;
-        _validator=validator;
+        _validator = validator;
     }
 
     public async Task<UpdateCustomerCommandResponse> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
     {
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
+
         var customer = await _customerRepository.GetByIdAsync(request.Id);
         
         if (customer == null)
             throw new Exception("Müşteri bulunamadı.");
+
+        // E-posta değişmişse kontrol et
+        if (customer.Email != request.Email)
+        {
+            var existingCustomer = await _customerRepository.FirstOrDefaultAsync(x => 
+                x.Email == request.Email && x.Id != request.Id);
+            
+            if (existingCustomer != null)
+                throw new Exception("Bu e-posta adresi başka bir müşteri tarafından kullanılıyor.");
+        }
 
         customer.Name = request.Name;
         customer.Surname = request.Surname;
@@ -32,7 +44,6 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.UpdateDate = DateTime.Now;
 
         await _customerRepository.UpdateAsync(customer);
-
 
         return _mapper.Map<UpdateCustomerCommandResponse>(customer);
     }

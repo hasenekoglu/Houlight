@@ -2,12 +2,14 @@
 using Houlight.Application.Features.Customers.Commands.DeleteCustomer;
 using Houlight.Application.Features.Customers.Commands.UpdateCustomer;
 using Houlight.Application.Features.Customers.Commands.Login;
+using Houlight.Application.Features.Customers.Commands.ChangePassword;
 using Houlight.Application.Features.Customers.Queries.GetAllCustomers;
 using Houlight.Application.Features.Customers.Queries.GetCustomerById;
 using Houlight.Application.Features.Customers.Queries.GetCustomersByFilter;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HoulightAPI.API.Controllers;
 
@@ -63,6 +65,26 @@ public class CustomersController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(x =>
+    x.Type == "sub" ||
+    x.Type == "nameidentifier" ||
+    x.Type == "nameid" ||
+    x.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        var query = new GetCustomerByIdQuery { Id = Guid.Parse(userIdClaim.Value) };
+        var response = await _mediator.Send(query);
+
+        if (response == null)
+            return NotFound();
+
+        return Ok(response);
+    }
+
     [HttpGet]
     public async Task<ActionResult<List<GetAllCustomersResponse>>> GetAll()
     {
@@ -86,5 +108,22 @@ public class CustomersController : ControllerBase
 
         var result = await _mediator.Send(command);
         return Ok(result);
+    }
+
+    [HttpPut("change-password")]
+    public async Task<ActionResult<ChangePasswordCommandResponse>> ChangePassword([FromBody] ChangePasswordCommand command)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(x =>
+            x.Type == "sub" ||
+            x.Type == "nameidentifier" ||
+            x.Type == "nameid" ||
+            x.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        command.Id = Guid.Parse(userIdClaim.Value);
+        var response = await _mediator.Send(command);
+        return Ok(response);
     }
 }

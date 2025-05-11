@@ -15,13 +15,15 @@ public class LoginCustomerCommandHandler : IRequestHandler<LoginCustomerCommand,
 
     public async Task<LoginCustomerResponse> Handle(LoginCustomerCommand request, CancellationToken cancellationToken)
     {
-        var (success, token) = await _authService.LoginCustomerAsync(request.Email, request.Password);
+        // GÜNCELLE: LoginCustomerAsync artık müşteri ID'sini de döndürmeli!
+        var (success, token, customerId) = await _authService.LoginCustomerAsync(request.Email, request.Password);
 
         return new LoginCustomerResponse
         {
             Success = success,
             Token = token,
-            Message = success ? "Giriş başarılı" : "E-posta veya şifre hatalı"
+            Message = success ? "Giriş başarılı" : "E-posta veya şifre hatalı",
+            UserId = customerId // <-- Burası önemli!
         };
     }
 } 

@@ -1,128 +1,505 @@
 @page "/customer/profile"
+@using Houlight.Application.Features.Customers.Commands.ChangePassword
+@using Houlight.Application.Features.Customers.Commands.UpdateCustomer
 @using Houlight.Domain.Entities
-@using Houlight.Application.Interfaces.Repositories
-@using System.Linq.Expressions
-@inject ICustomerRepository CustomerRepository
+@using Houlight.Web.Extensions
+@using Houlight.Web.Services
+@using Blazored.LocalStorage
+@using System.ComponentModel.DataAnnotations
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
 
-<PageTitle>Profil Bilgileri - Houlight</PageTitle>
+<PageTitle>Profilim - Houlight</PageTitle>
 
 <div class="container py-4">
-    @if (isLoading)
+    @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
         </div>
     }
-    else
+
+    @if (!string.IsNullOrEmpty(successMessage))
     {
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">Profil Bilgileri</h4>
-                        
-                        <EditForm Model="@customer" OnValidSubmit="HandleSubmit">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @successMessage
+            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Profil Bilgilerim</h4>
+        <a href="/customer/dashboard" class="dashboard-back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Dashboard'a Dön
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4 profile-card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle text-houlight-accent fs-4 me-2"></i>
+                        <h5 class="card-title mb-0">Profil Bilgilerim</h5>
+                    </div>
+                    @if (!isEditing)
+                    {
+                        <button class="btn btn-houlight-accent btn-sm" @onclick="StartEditing">
+                            <i class="bi bi-pencil me-1"></i>
+                            Düzenle
+                        </button>
+                    }
+                </div>
+                <div class="card-body p-4">
+                    @if (!isEditing)
+                    {
+                        <div class="profile-info">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium text-muted">Ad</label>
+                                    <div class="profile-value">@profileModel.Name</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium text-muted">Soyad</label>
+                                    <div class="profile-value">@profileModel.Surname</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium text-muted">E-posta</label>
+                                    <div class="profile-value">@profileModel.Email</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium text-muted">Telefon</label>
+                                    <div class="profile-value">+90 @profileModel.PhoneNumber</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@profileModel" OnValidSubmit="HandleProfileUpdate">
                             <DataAnnotationsValidator />
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Ad</label>
-                                    <InputText @bind-Value="customer.Name" class="form-control" />
-                                    <ValidationMessage For="@(() => customer.Name)" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium">Ad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-person text-muted"></i>
+                                        </span>
+                                        <InputText @bind-Value="profileModel.Name" class="form-control border-start-0" placeholder="Adınız" />
+                                    </div>
+                                    <ValidationMessage For="@(() => profileModel.Name)" class="text-danger small mt-1" />
                                 </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Soyad</label>
-                                    <InputText @bind-Value="customer.Surname" class="form-control" />
-                                    <ValidationMessage For="@(() => customer.Surname)" />
+                                <div class="col-md-6">
+                                    <label class="form-label fw-medium">Soyad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-person text-muted"></i>
+                                        </span>
+                                        <InputText @bind-Value="profileModel.Surname" class="form-control border-start-0" placeholder="Soyadınız" />
+                                    </div>
+                                    <ValidationMessage For="@(() => profileModel.Surname)" class="text-danger small mt-1" />
                                 </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">E-posta</label>
-                                <InputText @bind-Value="customer.Email" class="form-control" />
-                                <ValidationMessage For="@(() => customer.Email)" />
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Telefon</label>
-                                <InputText @bind-Value="customer.PhoneNumber" class="form-control" />
-                                <ValidationMessage For="@(() => customer.PhoneNumber)" />
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save me-2"></i>Değişiklikleri Kaydet
-                                </button>
-                                
-                                <a href="/customer/dashboard" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-2"></i>Geri Dön
-                                </a>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">E-posta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-envelope text-muted"></i>
+                                        </span>
+                                        <InputText type="email" @bind-Value="profileModel.Email" class="form-control border-start-0" placeholder="ornek@email.com" />
+                                    </div>
+                                    <ValidationMessage For="@(() => profileModel.Email)" class="text-danger small mt-1" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Telefon</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-telephone text-muted"></i>
+                                        </span>
+                                        <span class="input-group-text bg-light border-end-0 border-start-0">+90</span>
+                                        <InputText @bind-Value="profileModel.PhoneNumber" class="form-control border-start-0" placeholder="5XX XXX XX XX" maxlength="10" />
+                                    </div>
+                                    <ValidationMessage For="@(() => profileModel.PhoneNumber)" class="text-danger small mt-1" />
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Telefon numaranızı başında 0 olmadan giriniz (Örnek: 5XX XXX XX XX)
+                                    </small>
+                                </div>
+                                <div class="col-12 mt-4 d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelEditing" disabled="@(isLoading)">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        <span>İptal</span>
+                                    </button>
+                                    <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            <span>Güncelleniyor...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check-circle me-2"></i>
+                                            <span>Kaydet</span>
+                                        }
+                                    </button>
+                                </div>
                             </div>
                         </EditForm>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 profile-card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-lock text-houlight-accent fs-4 me-2"></i>
+                        <h5 class="card-title mb-0">Şifre Değiştir</h5>
                     </div>
+                    @if (!isChangingPassword)
+                    {
+                        <button class="btn btn-houlight-accent btn-sm" @onclick="StartPasswordChange">
+                            <i class="bi bi-pencil me-1"></i>
+                            Değiştir
+                        </button>
+                    }
+                </div>
+                <div class="card-body p-4">
+                    @if (!isChangingPassword)
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-shield-lock fs-1 mb-3"></i>
+                            <p class="mb-0">Şifrenizi güvenli tutmak için düzenli olarak değiştirmenizi öneririz.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@passwordModel" OnValidSubmit="HandlePasswordChange">
+                            <DataAnnotationsValidator />
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Mevcut Şifre</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-key text-muted"></i>
+                                        </span>
+                                        <InputText type="password" @bind-Value="passwordModel.CurrentPassword" class="form-control border-start-0" placeholder="Mevcut şifrenizi giriniz" />
+                                    </div>
+                                    <ValidationMessage For="@(() => passwordModel.CurrentPassword)" class="text-danger small mt-1" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Yeni Şifre</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-lock text-muted"></i>
+                                        </span>
+                                        <InputText type="password" @bind-Value="passwordModel.NewPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi giriniz" />
+                                    </div>
+                                    <ValidationMessage For="@(() => passwordModel.NewPassword)" class="text-danger small mt-1" />
+                                    <div class="password-requirements mt-2 p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1 fw-medium">Şifre Gereksinimleri:</small>
+                                        <ul class="list-unstyled mb-0 small">
+                                            <li class="mb-1">
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                En az 6 karakter uzunluğunda
+                                            </li>
+                                            <li class="mb-1">
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                En az bir büyük harf
+                                            </li>
+                                            <li class="mb-1">
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                En az bir küçük harf
+                                            </li>
+                                            <li class="mb-1">
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                En az bir rakam
+                                            </li>
+                                            <li>
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                En az bir özel karakter
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Yeni Şifre Tekrar</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-lock-fill text-muted"></i>
+                                        </span>
+                                        <InputText type="password" @bind-Value="passwordModel.ConfirmPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi tekrar giriniz" />
+                                    </div>
+                                    <ValidationMessage For="@(() => passwordModel.ConfirmPassword)" class="text-danger small mt-1" />
+                                </div>
+                                <div class="col-12 mt-4 d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelPasswordChange" disabled="@(isLoading)">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        <span>İptal</span>
+                                    </button>
+                                    <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            <span>Güncelleniyor...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-shield-check me-2"></i>
+                                            <span>Şifreyi Değiştir</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    }
                 </div>
             </div>
         </div>
-    }
+    </div>
 </div>
 
 @code {
-    private CustomerEntity customer = new();
-    private bool isLoading = true;
+    private ProfileModel profileModel = new();
+    private PasswordModel passwordModel = new();
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isLoading = false;
+    private bool isEditing = false;
+    private bool isChangingPassword = false;
+    private ProfileModel originalProfileModel = new();
+
+    private class ProfileModel
+    {
+        public Guid Id { get; set; }
+        [Required(ErrorMessage = "Ad alanı boş olamaz.")]
+        [StringLength(50, ErrorMessage = "Ad alanı 50 karakterden uzun olamaz.")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "Soyad alanı boş olamaz.")]
+        [StringLength(50, ErrorMessage = "Soyad alanı 50 karakterden uzun olamaz.")]
+        public string Surname { get; set; } = "";
+
+        [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
+        [StringLength(100, ErrorMessage = "E-posta alanı 100 karakterden uzun olamaz.")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Telefon numarası alanı boş olamaz.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası 10 haneli olmalıdır.")]
+        public string PhoneNumber { get; set; } = "";
+    }
+
+    private class PasswordModel
+    {
+        [Required(ErrorMessage = "Mevcut şifre alanı boş olamaz.")]
+        public string CurrentPassword { get; set; } = "";
+
+        [Required(ErrorMessage = "Yeni şifre alanı boş olamaz.")]
+        [StringLength(50, MinimumLength = 6, ErrorMessage = "Şifre 6-50 karakter arasında olmalıdır.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).*$", 
+            ErrorMessage = "Şifre en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir.")]
+        public string NewPassword { get; set; } = "";
+
+        [Required(ErrorMessage = "Şifre tekrar alanı boş olamaz.")]
+        [Compare("NewPassword", ErrorMessage = "Şifreler uyuşmuyor.")]
+        public string ConfirmPassword { get; set; } = "";
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        Console.WriteLine("[Profile] OnInitializedAsync başladı");
+        await LoadCustomerProfile();
+        if (!string.IsNullOrEmpty(profileModel.PhoneNumber))
         {
-            // TODO: Gerçek müşteri ID'si kullanılacak
-            var customerId = Guid.Parse("00000000-0000-0000-0000-000000000000");
-            
-            customer = await CustomerRepository.GetByIdAsync(customerId);
-            if (customer == null)
-            {
-                // Müşteri bulunamadıysa yeni oluştur
-                customer = new CustomerEntity
-                {
-                    Id = customerId,
-                    CreateDate = DateTime.Now
-                };
-            }
+            profileModel.PhoneNumber = profileModel.PhoneNumber.TrimStart('0');
         }
-        catch (Exception ex)
-        {
-            // TODO: Hata yönetimi
-            Console.WriteLine($"Hata: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        Console.WriteLine("[Profile] OnInitializedAsync bitti");
     }
 
-    private async Task HandleSubmit()
+    private async Task LoadCustomerProfile()
     {
         try
         {
-            if (customer.Id == Guid.Empty)
+            Console.WriteLine("[Profile] API çağrısı başlıyor");
+            var response = await Http.GetAsync<ProfileModel>("api/customers/profile");
+            Console.WriteLine("[Profile] API çağrısı bitti");
+            if (response != null)
             {
-                await CustomerRepository.AddAsync(customer);
+                profileModel = response;
+                if (!string.IsNullOrEmpty(profileModel.PhoneNumber))
+                {
+                    profileModel.PhoneNumber = profileModel.PhoneNumber.TrimStart('0');
+                }
+                Console.WriteLine("[Profile] Profil modeli güncellendi");
+            }
+        }
+        catch(Exception ex)
+        {
+            errorMessage = "Profil bilgileri yüklenirken bir hata oluştu.";
+            Console.WriteLine($"[Profile] Hata: {ex}");
+        }
+    }
+
+    private void StartEditing()
+    {
+        originalProfileModel = new ProfileModel
+        {
+            Id = profileModel.Id,
+            Name = profileModel.Name,
+            Surname = profileModel.Surname,
+            Email = profileModel.Email,
+            PhoneNumber = profileModel.PhoneNumber
+        };
+        isEditing = true;
+    }
+
+    private void CancelEditing()
+    {
+        profileModel = originalProfileModel;
+        isEditing = false;
+    }
+
+    private void StartPasswordChange()
+    {
+        passwordModel = new PasswordModel();
+        isChangingPassword = true;
+    }
+
+    private void CancelPasswordChange()
+    {
+        passwordModel = new PasswordModel();
+        isChangingPassword = false;
+    }
+
+    private async Task HandleProfileUpdate()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            var command = new UpdateCustomerCommand
+            {
+                Id = profileModel.Id,
+                Name = profileModel.Name.Trim(),
+                Surname = profileModel.Surname.Trim(),
+                Email = profileModel.Email.Trim().ToLower(),
+                PhoneNumber = profileModel.PhoneNumber.Trim()
+            };
+
+            var response = await Http.PutAsync<UpdateCustomerCommandResponse>($"api/customers/{profileModel.Id}", command);
+            
+            if (response != null)
+            {
+                successMessage = "Profil bilgileriniz başarıyla güncellendi.";
+                profileModel = new ProfileModel
+                {
+                    Id = response.Id,
+                    Name = response.Name,
+                    Surname = response.Surname,
+                    Email = response.Email,
+                    PhoneNumber = response.PhoneNumber
+                };
+                await localStorage.SetItemAsync("userName", $"{response.Name} {response.Surname}");
+                isEditing = false;
             }
             else
             {
-                await CustomerRepository.UpdateAsync(customer);
+                errorMessage = "Profil güncellenirken beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
             }
-      
-            
-            NavigationManager.NavigateTo("/customer/dashboard");
         }
         catch (Exception ex)
         {
-            // TODO: Hata yönetimi
-            Console.WriteLine($"Hata: {ex.Message}");
+            HandleError(ex);
         }
+
+        isLoading = false;
+    }
+
+    private async Task HandlePasswordChange()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            var command = new ChangePasswordCommand
+            {
+                Id = profileModel.Id,
+                CurrentPassword = passwordModel.CurrentPassword,
+                NewPassword = passwordModel.NewPassword
+            };
+
+            var response = await Http.PutAsync<ChangePasswordCommandResponse>("api/customers/change-password", command);
+            
+            if (response?.Success == true)
+            {
+                successMessage = response.Message;
+                passwordModel = new PasswordModel();
+                isChangingPassword = false;
+            }
+            else
+            {
+                errorMessage = response?.Message ?? "Şifre değiştirilirken bir hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+
+        isLoading = false;
+    }
+
+    private async Task HandleError(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx)
+        {
+            var responseContent = await httpEx.GetResponseContentAsync();
+            if (!string.IsNullOrEmpty(responseContent))
+            {
+                try
+                {
+                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(responseContent);
+                    if (errorResponse?.errors != null)
+                    {
+                        var errorMessages = errorResponse.errors.SelectMany(e => e.Value.Select(m => $"{e.Key}: {m}"));
+                        errorMessage = string.Join(", ", errorMessages);
+                    }
+                    else if (!string.IsNullOrEmpty(errorResponse?.message))
+                    {
+                        errorMessage = errorResponse.message;
+                    }
+                    else
+                    {
+                        errorMessage = responseContent;
+                    }
+                }
+                catch
+                {
+                    errorMessage = responseContent;
+                }
+            }
+            else
+            {
+                errorMessage = httpEx.Message;
+            }
+        }
+        else
+        {
+            errorMessage = "İşlem sırasında beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+        }
+    }
+
+    private class ErrorResponse
+    {
+        public string message { get; set; }
+        public Dictionary<string, string[]> errors { get; set; }
     }
 } 

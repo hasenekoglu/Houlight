@@ -1,5 +1,10 @@
 @page "/login"
-@using Houlight.Domain.Entities
+@using Blazored.LocalStorage
+@using Houlight.Web.Services
+@using System.ComponentModel.DataAnnotations
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject AuthHttpClient Http
+@inject NavigationManager NavigationManager
 
 <PageTitle>Giriş Yap - Houlight</PageTitle>
 
@@ -9,21 +14,28 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4" style="color: var(--primary-color);">Giriş Yap</h2>
-                    
-                    <div class="mb-3">
-                        <label for="email" class="form-label">E-posta</label>
-                        <input type="email" class="form-control" id="email" @bind="email" placeholder="ornek@email.com" />
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="password" class="form-label">Şifre</label>
-                        <input type="password" class="form-control" id="password" @bind="password" />
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button class="btn btn-primary btn-lg" @onclick="HandleLogin">Giriş Yap</button>
-                    </div>
-                    
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <InputText type="email" id="email" class="form-control" @bind-Value="loginModel.Email" placeholder="ornek@email.com" />
+                            <ValidationMessage For="@(() => loginModel.Email)" class="text-danger" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Şifre</label>
+                            <InputText type="password" id="password" class="form-control" @bind-Value="loginModel.Password" />
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
+                                @(isLoading ? "Giriş Yapılıyor..." : "Giriş Yap")
+                            </button>
+                        </div>
+                    </EditForm>
                     <div class="text-center mt-4">
                         <p class="mb-0">Hesabınız yok mu? <a href="/register" class="text-decoration-none" style="color: var(--primary-color);">Kayıt Ol</a></p>
                     </div>
@@ -34,16 +46,57 @@
 </div>
 
 @code {
-    private string email = "";
-    private string password = "";
+    private LoginModel loginModel = new();
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private class LoginModel
+    {
+        [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Şifre alanı boş olamaz.")]
+        public string Password { get; set; } = "";
+    }
 
     private async Task HandleLogin()
     {
-        // TODO: Backend entegrasyonu yapılacak
-        // Şimdilik temsili olarak yönlendirme yapıyoruz
-        NavigationManager.NavigateTo("/customer/dashboard");
+        errorMessage = string.Empty;
+        isLoading = true;
+        try
+        {
+            var response = await Http.PostAsync<LoginCustomerResponse>("api/customers/login", new { 
+                Email = loginModel.Email, 
+                Password = loginModel.Password 
+            });
+            
+            if (response != null && response.Success && !string.IsNullOrEmpty(response.Token))
+            {
+                await localStorage.SetItemAsync("authToken", response.Token);
+                await localStorage.SetItemAsync("userType", "customer");
+                await localStorage.SetItemAsync("userName", response.Name);
+                await localStorage.SetItemAsync("userId", response.UserId.ToString());
+                NavigationManager.NavigateTo("/customer/dashboard", true);
+            }
+            else
+            {
+                errorMessage = response?.Message ?? "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
+        }
+        isLoading = false;
     }
 
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
+    public class LoginCustomerResponse
+    {
+        public bool Success { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
+    }
 } 

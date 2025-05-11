@@ -21,11 +21,12 @@ public class GetLoadOfferListQueryHandler : IRequestHandler<GetLoadOfferListQuer
     public async Task<List<LoadOfferListDto>> Handle(GetLoadOfferListQuery request, CancellationToken cancellationToken)
     {
         var query = _loadOfferRepository.AsQueryable()
+            .Include(x => x.LoadEntity)
             .Include(x => x.CustomerEntity)
             .Include(x => x.LogisticsCompanyEntity)
             .Include(x => x.VehicleEntity)
             .Include(x => x.DriverEntity)
-            .AsQueryable(); // Ensure the query is of type IQueryable<LoadOfferEntity>
+            .AsQueryable();
 
         if (request.LoadId.HasValue)
             query = query.Where(x => x.LoadId == request.LoadId);

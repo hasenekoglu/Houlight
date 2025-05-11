@@ -1,5 +1,9 @@
 @page "/register"
-@using Houlight.Domain.Entities
+@using Blazored.LocalStorage
+@using Houlight.Web.Services
+@using System.ComponentModel.DataAnnotations
+@inject AuthHttpClient Http
+@inject NavigationManager NavigationManager
 
 <PageTitle>Kayıt Ol - Houlight</PageTitle>
 
@@ -9,42 +13,55 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4" style="color: var(--primary-color);">Kayıt Ol</h2>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="name" class="form-label">Ad</label>
-                            <input type="text" class="form-control" id="name" @bind="name" />
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+                    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Ad</label>
+                                <InputText id="name" class="form-control" @bind-Value="registerModel.Name" />
+                                <ValidationMessage For="@(() => registerModel.Name)" class="text-danger" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="surname" class="form-label">Soyad</label>
+                                <InputText id="surname" class="form-control" @bind-Value="registerModel.Surname" />
+                                <ValidationMessage For="@(() => registerModel.Surname)" class="text-danger" />
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="surname" class="form-label">Soyad</label>
-                            <input type="text" class="form-control" id="surname" @bind="surname" />
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <InputText id="email" class="form-control" @bind-Value="registerModel.Email" placeholder="ornek@email.com" />
+                            <ValidationMessage For="@(() => registerModel.Email)" class="text-danger" />
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="email" class="form-label">E-posta</label>
-                        <input type="email" class="form-control" id="email" @bind="email" placeholder="ornek@email.com" />
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Telefon</label>
-                        <input type="tel" class="form-control" id="phone" @bind="phone" placeholder="05XX XXX XX XX" />
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Şifre</label>
-                        <input type="password" class="form-control" id="password" @bind="password" />
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
-                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button class="btn btn-primary btn-lg" @onclick="HandleRegister">Kayıt Ol</button>
-                    </div>
-                    
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Telefon</label>
+                            <InputText id="phone" class="form-control" @bind-Value="registerModel.Phone" placeholder="5XXXXXXXXX" />
+                            <ValidationMessage For="@(() => registerModel.Phone)" class="text-danger" />
+                            <small class="text-muted">Örnek: 5XXXXXXXXX (10 haneli)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre</label>
+                            <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" />
+                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
+                            <small class="text-muted">En az 6 karakter</small>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
+                            <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" />
+                            @if (!string.IsNullOrEmpty(passwordError))
+                            {
+                                <div class="text-danger">@passwordError</div>
+                            }
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
+                                @(isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol")
+                            </button>
+                        </div>
+                    </EditForm>
                     <div class="text-center mt-4">
                         <p class="mb-0">Zaten hesabınız var mı? <a href="/login" class="text-decoration-none" style="color: var(--primary-color);">Giriş Yap</a></p>
                     </div>
@@ -55,20 +72,71 @@
 </div>
 
 @code {
-    private string name = "";
-    private string surname = "";
-    private string email = "";
-    private string phone = "";
-    private string password = "";
+    private RegisterModel registerModel = new();
     private string confirmPassword = "";
+    private string passwordError = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private class RegisterModel
+    {
+        [Required(ErrorMessage = "Ad alanı boş olamaz.")]
+        [StringLength(50, ErrorMessage = "Ad alanı 50 karakterden uzun olamaz.")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "Soyad alanı boş olamaz.")]
+        [StringLength(50, ErrorMessage = "Soyad alanı 50 karakterden uzun olamaz.")]
+        public string Surname { get; set; } = "";
+
+        [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
+        [StringLength(100, ErrorMessage = "E-posta alanı 100 karakterden uzun olamaz.")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Telefon numarası alanı boş olamaz.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası 10 haneli olmalıdır.")]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "Şifre alanı boş olamaz.")]
+        [StringLength(50, MinimumLength = 6, ErrorMessage = "Şifre 6-50 karakter arasında olmalıdır.")]
+        public string Password { get; set; } = "";
+    }
 
     private async Task HandleRegister()
     {
-        // TODO: Backend entegrasyonu yapılacak
-        // Şimdilik temsili olarak yönlendirme yapıyoruz
-        NavigationManager.NavigateTo("/login");
-    }
+        errorMessage = string.Empty;
+        passwordError = string.Empty;
 
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
+        if (registerModel.Password != confirmPassword)
+        {
+            passwordError = "Şifreler uyuşmuyor.";
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            var response = await Http.PostAsync<object>("api/customers", new {
+                Name = registerModel.Name,
+                Surname = registerModel.Surname,
+                Email = registerModel.Email,
+                PhoneNumber = registerModel.Phone,
+                Password = registerModel.Password
+            });
+            
+            if (response != null)
+            {
+                NavigationManager.NavigateTo("/login", true);
+            }
+            else
+            {
+                errorMessage = "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
+        }
+        isLoading = false;
+    }
 } 

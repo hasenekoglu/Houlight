@@ -1,4 +1,7 @@
+@using Blazored.LocalStorage
 @inherits LayoutComponentBase
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
 
 <header class="houlight-navbar black-navbar">
     <div class="navbar-content">
@@ -11,13 +14,51 @@
             <a href="/contact">İletişim</a>
         </nav>
         <div class="navbar-actions">
-            <div class="dropdown" @onclick="ToggleDropdown">
-                <button class="navbar-btn navbar-btn-primary">Giriş / Üye Ol</button>
-                <div class="dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
-                    <a href="/login" class="dropdown-item">Müşteri Girişi</a>
-                    <a href="/company/login" class="dropdown-item">Şirket Girişi</a>
+            @if (!isAuthenticated)
+            {
+                <div class="dropdown" @onclick="ToggleDropdown">
+                    <button class="navbar-btn navbar-btn-primary">Giriş / Üye Ol</button>
+                    <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
+                        <a href="/login" class="houlight-dropdown-item">
+                            <i class="bi bi-person"></i> Müşteri Girişi
+                        </a>
+                        <a href="/company/login" class="houlight-dropdown-item">
+                            <i class="bi bi-building"></i> Şirket Girişi
+                        </a>
+                    </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="dropdown" @onclick="ToggleDropdown">
+                    <button class="navbar-btn navbar-btn-primary">
+                        <i class="bi bi-person-circle me-2"></i>@userName
+                    </button>
+                    <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
+                        @if (userType == "customer")
+                        {
+                            <a href="/customer/dashboard" class="houlight-dropdown-item">
+                                <i class="bi bi-speedometer2"></i> Panel
+                            </a>
+                            <a href="/customer/profile" class="houlight-dropdown-item">
+                                <i class="bi bi-person"></i> Profil
+                            </a>
+                        }
+                        else if (userType == "company")
+                        {
+                            <a href="/company/dashboard" class="houlight-dropdown-item">
+                                <i class="bi bi-speedometer2"></i> Panel
+                            </a>
+                            <a href="/company/profile" class="houlight-dropdown-item">
+                                <i class="bi bi-person"></i> Profil
+                            </a>
+                        }
+                        <button class="houlight-dropdown-item text-danger" @onclick="HandleLogout" type="button">
+                            <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
         <button class="navbar-toggle" @onclick="ToggleMenu">☰</button>
     </div>
@@ -25,11 +66,47 @@
         <a href="/">Ana Sayfa</a>
         <a href="/about">Hakkımızda</a>
         <a href="/contact">İletişim</a>
-        <button class="navbar-btn navbar-btn-primary" @onclick="ToggleDropdown">Giriş / Üye Ol</button>
-        <div class="dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
-            <a href="/login" class="dropdown-item">Müşteri Girişi</a>
-            <a href="/company/login" class="dropdown-item">Şirket Girişi</a>
-        </div>
+        @if (!isAuthenticated)
+        {
+            <button class="navbar-btn navbar-btn-primary" @onclick="ToggleDropdown">Giriş / Üye Ol</button>
+            <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
+                <a href="/login" class="houlight-dropdown-item">
+                    <i class="bi bi-person"></i> Müşteri Girişi
+                </a>
+                <a href="/company/login" class="houlight-dropdown-item">
+                    <i class="bi bi-building"></i> Şirket Girişi
+                </a>
+            </div>
+        }
+        else
+        {
+            <button class="navbar-btn navbar-btn-primary" @onclick="ToggleDropdown">
+                <i class="bi bi-person-circle me-2"></i>@userName
+            </button>
+            <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
+                @if (userType == "customer")
+                {
+                    <a href="/customer/dashboard" class="houlight-dropdown-item">
+                        <i class="bi bi-speedometer2"></i> Panel
+                    </a>
+                    <a href="/customer/profile" class="houlight-dropdown-item">
+                        <i class="bi bi-person"></i> Profil
+                    </a>
+                }
+                else if (userType == "company")
+                {
+                    <a href="/company/dashboard" class="houlight-dropdown-item">
+                        <i class="bi bi-speedometer2"></i> Panel
+                    </a>
+                    <a href="/company/profile" class="houlight-dropdown-item">
+                        <i class="bi bi-person"></i> Profil
+                    </a>
+                }
+                <button class="houlight-dropdown-item text-danger" @onclick="HandleLogout" type="button">
+                    <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                </button>
+            </div>
+        }
     </div>
 </header>
 
@@ -42,6 +119,33 @@
 @code {
     private bool isMenuOpen = false;
     private bool isDropdownOpen = false;
+    private bool isAuthenticated;
+    private string userType;
+    private string userName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await localStorage.GetItemAsync<string>("authToken");
+        var storedUserType = await localStorage.GetItemAsync<string>("userType");
+        var storedUserName = await localStorage.GetItemAsync<string>("userName");
+        
+        isAuthenticated = !string.IsNullOrEmpty(token);
+        userType = storedUserType;
+        userName = storedUserName;
+    }
+
     void ToggleMenu() => isMenuOpen = !isMenuOpen;
     void ToggleDropdown() => isDropdownOpen = !isDropdownOpen;
+
+    private async Task HandleLogout()
+    {
+        await localStorage.RemoveItemAsync("authToken");
+        await localStorage.RemoveItemAsync("userType");
+        await localStorage.RemoveItemAsync("userName");
+        await localStorage.RemoveItemAsync("userId");
+        isAuthenticated = false;
+        userType = null;
+        userName = null;
+        NavigationManager.NavigateTo("/");
+    }
 } 

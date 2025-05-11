@@ -20,8 +20,19 @@ public class LoadOffersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetLoadOffers([FromQuery] GetLoadOfferListQuery query)
+    public async Task<IActionResult> GetLoadOffers()
     {
+        var userId = User.Claims.FirstOrDefault(x =>
+            x.Type == "sub" ||
+            x.Type == "nameidentifier" ||
+            x.Type == "nameid" ||
+            x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        Guid? customerId = null;
+        if (Guid.TryParse(userId, out var parsedId))
+            customerId = parsedId;
+
+        var query = new GetLoadOfferListQuery { CustomerId = customerId };
         var result = await _mediator.Send(query);
         return Ok(result);
     }
@@ -47,6 +58,14 @@ public class LoadOffersController : ControllerBase
     public async Task<IActionResult> AcceptLoadOffer(Guid id)
     {
         var command = new AcceptLoadOfferCommand { LoadOfferId = id };
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/reject")]
+    public async Task<IActionResult> RejectLoadOffer(Guid id)
+    {
+        var command = new DeleteLoadOfferCommand { Id = id };
         var result = await _mediator.Send(command);
         return Ok(result);
     }

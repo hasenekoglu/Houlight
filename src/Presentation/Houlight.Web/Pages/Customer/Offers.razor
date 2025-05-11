@@ -1,164 +1,123 @@
 @page "/customer/offers"
+@using Houlight.Application.Features.LoadOffers.Commands.AcceptLoadOffer
+@using Houlight.Application.Features.LoadOffers.Commands.DeleteLoadOffer
 @using Houlight.Domain.Entities
 @using Houlight.Domain.Enums
-@using Houlight.Application.Interfaces.Repositories
-@using System.Linq.Expressions
-@inject ILoadOfferRepository LoadOfferRepository
-@inject ILoadRepository LoadRepository
+@using Houlight.Web.Services
+@using Blazored.LocalStorage
+@using Houlight.Application.Features.LoadOffers.Queries.GetLoadOfferList
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
 
 <PageTitle>Tekliflerim - Houlight</PageTitle>
 
 <div class="container py-4">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Tekliflerim</h4>
-        <button class="btn btn-primary" @onclick="() => ShowNewOfferModal = true">
-            <i class="bi bi-plus-lg me-2"></i>Yeni Teklif Oluştur
-        </button>
+        <a href="/customer/dashboard" class="dashboard-back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Dashboard'a Dön
+        </a>
     </div>
     
     @if (isLoading)
     {
-        <div class="text-center">
+        <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
         </div>
     }
+    else if (offers.Count == 0)
+    {
+        <div class="alert alert-info">Henüz teklifiniz bulunmamaktadır.</div>
+    }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Teklif No</th>
-                                <th>Yük No</th>
-                                <th>Nereden</th>
-                                <th>Nereye</th>
-                                <th>Yük Tipi</th>
-                                <th>Ağırlık</th>
-                                <th>Hacim</th>
-                                <th>Beklenen Fiyat</th>
-                                <th>Şirket Teklifi</th>
-                                <th>Durum</th>
-                                <th>Tarih</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var offer in offers)
-                            {
-                                <tr>
-                                    <td>@offer.Id.ToString().Substring(0, 8)</td>
-                                    <td>@offer.LoadId.ToString().Substring(0, 8)</td>
-                                    <td>@offer.FromLocation</td>
-                                    <td>@offer.ToLocation</td>
-                                    <td>@GetLoadTypeName(offer.LoadType)</td>
-                                    <td>@offer.Weight kg</td>
-                                    <td>@offer.Volume m³</td>
-                                    <td>@offer.CustomerExpectedPrice?.ToString("C")</td>
-                                    <td>@offer.CompanyOfferedPrice.ToString("C")</td>
-                                    <td>
-                                        <span class="badge bg-@GetStatusColor(offer.LoadEntity.Status)">
-                                            @GetStatusName(offer.LoadEntity.Status)
-                                        </span>
-                                    </td>
-                                    <td>@offer.CreateDate.ToShortDateString()</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ShowOfferDetails(offer)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        @if (offer.LoadEntity.Status == LoadStatus.Pending)
+        @foreach (var loadGroup in GroupedOffers)
+        {
+            var firstOffer = loadGroup.First();
+            <div class="mb-4">
+                <div class="card shadow-sm border-0 mb-2 bg-light">
+                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+                        <div>
+                            <strong>Yük No:</strong> @firstOffer.LoadId.ToString().Substring(0, 8)
+                            <span class="mx-2">|</span>
+                            <strong>Rota:</strong> @firstOffer.FromLocation → @firstOffer.ToLocation
+                            <span class="mx-2">|</span>
+                            <strong>Tip:</strong> @GetLoadTypeName(firstOffer.LoadType)
+                            <span class="mx-2">|</span>
+                            <strong>Ağırlık:</strong> @firstOffer.Weight kg
+                            <span class="mx-2">|</span>
+                            <strong>Hacim:</strong> @firstOffer.Volume m³
+                        </div>
+                        <div>
+                            <strong>Teslimat:</strong> @firstOffer.DeliveryDate?.ToShortDateString()
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    @foreach (var offer in loadGroup)
+                    {
+                        var cardClass = offer.IsAccepted ? "border-success" : "border-danger";
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 @cardClass shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold">@offer.LogisticsCompanyName</span>
+                                        @if (offer.IsAccepted)
                                         {
-                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelOffer(offer)">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
+                                            <span class="badge bg-success">Kabul Edildi</span>
                                         }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Reddedildi</span>
+                                        }
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Fiyat:</strong> @offer.CompanyOfferedPrice.ToString("C")
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Araç:</strong> @offer.VehiclePlate
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Şoför:</strong> @offer.DriverName
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Açıklama:</strong> @offer.Description
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 d-flex justify-content-end">
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ShowOfferDetails(offer)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    @if (!offer.IsAccepted)
+                                    {
+                                        <button class="btn btn-sm btn-outline-success me-2" @onclick="() => AcceptOffer(offer)">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RejectOffer(offer)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
-        </div>
+        }
     }
 </div>
-
-@if (ShowNewOfferModal)
-{
-    <div class="modal fade show" style="display: block;" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Yeni Teklif Oluştur</h5>
-                    <button type="button" class="btn-close" @onclick="() => ShowNewOfferModal = false"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="@newOffer" OnValidSubmit="HandleNewOfferSubmit">
-                        <DataAnnotationsValidator />
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Yük Seçin</label>
-                            <InputSelect @bind-Value="newOffer.LoadId" class="form-select">
-                                <option value="">Yük Seçin</option>
-                                @foreach (var load in availableLoads)
-                                {
-                                    <option value="@load.Id">@load.FromLocation - @load.ToLocation</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="@(() => newOffer.LoadId)" />
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Ağırlık (kg)</label>
-                                <InputNumber @bind-Value="newOffer.Weight" class="form-control" />
-                                <ValidationMessage For="@(() => newOffer.Weight)" />
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Hacim (m³)</label>
-                                <InputNumber @bind-Value="newOffer.Volume" class="form-control" />
-                                <ValidationMessage For="@(() => newOffer.Volume)" />
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Beklenen Fiyat</label>
-                            <InputNumber @bind-Value="newOffer.CustomerExpectedPrice" class="form-control" />
-                            <ValidationMessage For="@(() => newOffer.CustomerExpectedPrice)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Teslimat Tarihi</label>
-                            <InputDate @bind-Value="newOffer.DeliveryDate" class="form-control" />
-                            <ValidationMessage For="@(() => newOffer.DeliveryDate)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Açıklama</label>
-                            <InputTextArea @bind-Value="newOffer.Description" class="form-control" rows="3" />
-                            <ValidationMessage For="@(() => newOffer.Description)" />
-                        </div>
-                        
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" @onclick="() => ShowNewOfferModal = false">
-                                İptal
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                Kaydet
-                            </button>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal-backdrop fade show"></div>
-}
 
 @if (selectedOffer != null)
 {
@@ -177,36 +136,37 @@
                         <dt class="col-sm-4">Yük No</dt>
                         <dd class="col-sm-8">@selectedOffer.LoadId.ToString().Substring(0, 8)</dd>
                         
-                        <dt class="col-sm-4">Nereden</dt>
-                        <dd class="col-sm-8">@selectedOffer.FromLocation</dd>
-                        
-                        <dt class="col-sm-4">Nereye</dt>
-                        <dd class="col-sm-8">@selectedOffer.ToLocation</dd>
-                        
-                        <dt class="col-sm-4">Yük Tipi</dt>
-                        <dd class="col-sm-8">@GetLoadTypeName(selectedOffer.LoadType)</dd>
-                        
-                        <dt class="col-sm-4">Ağırlık</dt>
-                        <dd class="col-sm-8">@selectedOffer.Weight kg</dd>
-                        
-                        <dt class="col-sm-4">Hacim</dt>
-                        <dd class="col-sm-8">@selectedOffer.Volume m³</dd>
-                        
-                        <dt class="col-sm-4">Beklenen Fiyat</dt>
-                        <dd class="col-sm-8">@selectedOffer.CustomerExpectedPrice?.ToString("C")</dd>
-                        
-                        <dt class="col-sm-4">Şirket Teklifi</dt>
-                        <dd class="col-sm-8">@selectedOffer.CompanyOfferedPrice.ToString("C")</dd>
-                        
                         <dt class="col-sm-4">Durum</dt>
                         <dd class="col-sm-8">
-                            <span class="badge bg-@GetStatusColor(selectedOffer.LoadEntity.Status)">
-                                @GetStatusName(selectedOffer.LoadEntity.Status)
-                            </span>
+                            @if (selectedOffer.IsAccepted)
+                            {
+                                <span class="badge bg-success">Kabul Edildi</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Reddedildi</span>
+                            }
                         </dd>
                         
-                        <dt class="col-sm-4">Oluşturma Tarihi</dt>
-                        <dd class="col-sm-8">@selectedOffer.CreateDate.ToShortDateString()</dd>
+                        <dt class="col-sm-4">Yük Bilgileri</dt>
+                        <dd class="col-sm-8">
+                            <div>@selectedOffer.FromLocation → @selectedOffer.ToLocation</div>
+                            <div>Yük Tipi: @GetLoadTypeName(selectedOffer.LoadType)</div>
+                            <div>Ağırlık: @selectedOffer.Weight kg</div>
+                            <div>Hacim: @selectedOffer.Volume m³</div>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Şirket</dt>
+                        <dd class="col-sm-8">@selectedOffer.LogisticsCompanyName</dd>
+                        
+                        <dt class="col-sm-4">Fiyat</dt>
+                        <dd class="col-sm-8">@selectedOffer.CompanyOfferedPrice.ToString("C")</dd>
+                        
+                        <dt class="col-sm-4">Araç</dt>
+                        <dd class="col-sm-8">@selectedOffer.VehiclePlate</dd>
+                        
+                        <dt class="col-sm-4">Şoför</dt>
+                        <dd class="col-sm-8">@selectedOffer.DriverName</dd>
                         
                         <dt class="col-sm-4">Teslimat Tarihi</dt>
                         <dd class="col-sm-8">@selectedOffer.DeliveryDate?.ToShortDateString()</dd>
@@ -216,6 +176,15 @@
                     </dl>
                 </div>
                 <div class="modal-footer">
+                    @if (!selectedOffer.IsAccepted)
+                    {
+                        <button type="button" class="btn btn-success me-2" @onclick="() => AcceptOffer(selectedOffer)">
+                            <i class="bi bi-check-lg me-1"></i> Kabul Et
+                        </button>
+                        <button type="button" class="btn btn-danger me-2" @onclick="() => RejectOffer(selectedOffer)">
+                            <i class="bi bi-x-lg me-1"></i> Reddet
+                        </button>
+                    }
                     <button type="button" class="btn btn-secondary" @onclick="() => selectedOffer = null">
                         Kapat
                     </button>
@@ -227,33 +196,50 @@
 }
 
 @code {
-    private List<LoadOfferEntity> offers = new();
-    private List<LoadEntity> availableLoads = new();
-    private LoadOfferEntity? selectedOffer;
-    private bool ShowNewOfferModal;
-    private LoadOfferEntity newOffer = new();
-    private bool isLoading = true;
+    private List<LoadOfferListDto> offers = new();
+    private LoadOfferListDto? selectedOffer;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    // Yükleri LoadId'ye göre gruplama
+    private IEnumerable<IGrouping<Guid, LoadOfferListDto>> GroupedOffers => offers.GroupBy(x => x.LoadId);
+
+    private string GetLoadTypeName(LoadType type)
+    {
+        return type switch
+        {
+            LoadType.GeneralCargo => "Genel Kargo",
+            LoadType.PerishableGoods => "Bozulabilir Ürünler",
+            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+            LoadType.FragileItems => "Kırılabilir Eşyalar",
+            LoadType.BulkCargo => "Dökme Kargo",
+            LoadType.Liquid => "Sıvı Kargo",
+            LoadType.HighValue => "Yüksek Değerli Ürünler",
+            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+            LoadType.DangerousGoods => "Tehlikeli Mallar",
+            _ => "Bilinmiyor"
+        };
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCustomerOffers();
+    }
+
+    private async Task LoadCustomerOffers()
+    {
         try
         {
-            // Tüm teklifleri ve ilişkili yükleri getir
-            offers = await LoadOfferRepository.GetList(
-                predicate: x => true, // Tüm teklifleri getir
-                includes: new Expression<Func<LoadOfferEntity, object>>[] { x => x.LoadEntity }
-            );
-
-            // Bekleyen yükleri getir
-            availableLoads = await LoadRepository.GetList(
-                x => x.Status == LoadStatus.Pending,
-                includes: new Expression<Func<LoadEntity, object>>[] { x => x.CustomerEntity }
-            );
+            isLoading = true;
+            var response = await Http.GetAsync<List<LoadOfferListDto>>("api/LoadOffers");
+            if (response != null)
+            {
+                offers = response;
+            }
         }
-        catch (Exception ex)
+        catch
         {
-            // TODO: Hata yönetimi
-            Console.WriteLine($"Hata: {ex.Message}");
+            errorMessage = "Teklifler yüklenirken bir hata oluştu.";
         }
         finally
         {
@@ -261,85 +247,62 @@
         }
     }
 
-    private string GetLoadTypeName(LoadType type) => type switch
-    {
-        LoadType.GeneralCargo => "Genel Kargo",
-        LoadType.PerishableGoods => "Bozulabilir Ürünler",
-        LoadType.HazardousMaterials => "Tehlikeli Maddeler",
-        LoadType.FragileItems => "Kırılabilir Eşyalar",
-        LoadType.BulkCargo => "Dökme Kargo",
-        LoadType.Liquid => "Sıvı Kargo",
-        LoadType.HighValue => "Yüksek Değerli Ürünler",
-        LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
-        LoadType.DangerousGoods => "Tehlikeli Mallar",
-        _ => type.ToString()
-    };
-
-    private string GetStatusName(LoadStatus status) => status switch
-    {
-        LoadStatus.Pending => "Beklemede",
-        LoadStatus.Assigned => "Atandı",
-        LoadStatus.InTransit => "Yolda",
-        LoadStatus.Delivered => "Teslim Edildi",
-        LoadStatus.Accepted => "Kabul Edildi",
-        _ => status.ToString()
-    };
-
-    private string GetStatusColor(LoadStatus status) => status switch
-    {
-        LoadStatus.Pending => "warning",
-        LoadStatus.Assigned => "info",
-        LoadStatus.InTransit => "primary",
-        LoadStatus.Delivered => "success",
-        LoadStatus.Accepted => "success",
-        _ => "secondary"
-    };
-
-    private void ShowOfferDetails(LoadOfferEntity offer)
-    {
-        selectedOffer = offer;
-    }
-
-    private async Task HandleNewOfferSubmit()
+    private async Task AcceptOffer(LoadOfferListDto offer)
     {
         try
         {
-            var selectedLoad = availableLoads.FirstOrDefault(l => l.Id == newOffer.LoadId);
-            if (selectedLoad != null)
+            isLoading = true;
+            var response = await Http.PostAsync<AcceptLoadOfferResponse>($"api/loadoffers/{offer.Id}/accept", null);
+            if (response != null && response.Success)
             {
-                newOffer.Id = Guid.NewGuid();
-                newOffer.FromLocation = selectedLoad.FromLocation;
-                newOffer.ToLocation = selectedLoad.ToLocation;
-                newOffer.LoadType = selectedLoad.LoadType;
-                newOffer.CreateDate = DateTime.Now;
-                newOffer.CustomerId = selectedLoad.CustomerId;
-
-                await LoadOfferRepository.AddAsync(newOffer);
-              
-                offers.Add(newOffer);
-                newOffer = new LoadOfferEntity();
-                ShowNewOfferModal = false;
+                await LoadCustomerOffers();
+                selectedOffer = null; // Modal'ı kapat
+            }
+            else
+            {
+                errorMessage = "Teklif kabul edilirken bir hata oluştu.";
             }
         }
-        catch (Exception ex)
+        catch
         {
-            // TODO: Hata yönetimi
-            Console.WriteLine($"Hata: {ex.Message}");
+            errorMessage = "Teklif kabul edilirken bir hata oluştu.";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
-    private async Task CancelOffer(LoadOfferEntity offer)
+    private async Task RejectOffer(LoadOfferListDto offer)
     {
         try
         {
-            offer.LoadEntity.Status = LoadStatus.Pending;
-            await LoadRepository.UpdateAsync(offer.LoadEntity);
-           
+            isLoading = true;
+            var response = await Http.PostAsync<DeleteLoadOfferResponse>($"api/loadoffers/{offer.Id}/reject", null);
+            if (response != null && response.Success)
+            {
+                // Reddedilen teklifi listeden kaldır
+                offers = offers.Where(x => x.Id != offer.Id).ToList();
+                selectedOffer = null; // Modal'ı kapat
+            }
+            else
+            {
+                errorMessage = "Teklif reddedilirken bir hata oluştu.";
+            }
         }
-        catch (Exception ex)
+        catch
         {
-            // TODO: Hata yönetimi
-            Console.WriteLine($"Hata: {ex.Message}");
+            errorMessage = "Teklif reddedilirken bir hata oluştu.";
         }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ShowOfferDetails(LoadOfferListDto offer)
+    {
+        selectedOffer = offer;
+        errorMessage = string.Empty; // Modal açıldığında hata mesajını temizle
     }
 } 

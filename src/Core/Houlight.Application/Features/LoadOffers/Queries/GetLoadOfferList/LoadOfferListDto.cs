@@ -5,6 +5,9 @@ namespace Houlight.Application.Features.LoadOffers.Queries.GetLoadOfferList;
 public class LoadOfferListDto
 {
     public Guid Id { get; set; }
+    public Guid LoadId { get; set; }
+    public LoadStatus LoadStatus { get; set; }
+    public bool IsAccepted { get; set; }
     public string FromLocation { get; set; }
     public string ToLocation { get; set; }
     public LoadType LoadType { get; set; }

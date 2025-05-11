@@ -1,4 +1,5 @@
 using FluentValidation;
+using Houlight.Application.Interfaces.Repositories;
 
 namespace Houlight.Application.Features.Customers.Commands.UpdateCustomer;
 
@@ -24,7 +25,7 @@ public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCo
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Telefon numarası alanı boş olamaz.")
-            .Matches(@"^[0-9]+$").WithMessage("Telefon numarası sadece rakamlardan oluşmalıdır.")
-            .Length(10).WithMessage("Telefon numarası 10 haneli olmalıdır.");
+            .Matches(@"^[0-9]{10}$").WithMessage("Telefon numarası 10 haneli olmalıdır (Örnek: 5XX XXX XX XX)")
+            .Must(phone => !phone.StartsWith("0")).WithMessage("Telefon numarası 0 ile başlamamalıdır.");
     }
 } 

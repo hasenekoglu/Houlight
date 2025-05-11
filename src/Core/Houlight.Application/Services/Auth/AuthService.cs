@@ -27,28 +27,28 @@ public class AuthService : IAuthService
         _logisticsCompanyRepository = logisticsCompanyRepository;
     }
 
-    public async Task<(bool success, string token)> LoginCustomerAsync(string email, string password)
+    public async Task<(bool success, string token, Guid customerId)> LoginCustomerAsync(string email, string password)
     {
         var customer = await _customerRepository.GetByEmailAsync(email);
-        if (customer == null) return (false, null);
+        if (customer == null) return (false, null, Guid.Empty);
 
         if (!VerifyPasswordHash(password, customer.PasswordHash, customer.PasswordSalt))
-            return (false, null);
+            return (false, null, Guid.Empty);
 
         var token = GenerateToken(customer.Id.ToString(), "customer");
-        return (true, token);
+        return (true, token, customer.Id);
     }
 
-    public async Task<(bool success, string token)> LoginCompanyAsync(string email, string password)
+    public async Task<(bool success, string token, Guid companyId)> LoginCompanyAsync(string email, string password)
     {
         var company = await _logisticsCompanyRepository.GetByEmailAsync(email);
-        if (company == null) return (false, null);
+        if (company == null) return (false, null, Guid.Empty);
 
         if (!VerifyPasswordHash(password, company.PasswordHash, company.PasswordSalt))
-            return (false, null);
+            return (false, null, Guid.Empty);
 
         var token = GenerateToken(company.Id.ToString(), "company");
-        return (true, token);
+        return (true, token, company.Id);
     }
 
     public async Task<bool> RegisterCustomerAsync(CustomerEntity customer, string password)
@@ -134,13 +134,16 @@ public class AuthService : IAuthService
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+        var claims = new[]
+{
+    new Claim(JwtRegisteredClaimNames.Sub, userId), // "sub"
+    new Claim("nameid", userId),                    // "nameid" (kısa hali)
+    new Claim(ClaimTypes.NameIdentifier, userId),   // "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+    new Claim(ClaimTypes.Role, userType)
+};
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Role, userType)
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(7),
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],

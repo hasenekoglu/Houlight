@@ -1,74 +1,102 @@
 @page "/customer/loads"
+@using Houlight.Application.Features.Loads.Commands.CreateLoad
 @using Houlight.Domain.Entities
 @using Houlight.Domain.Enums
+@using Houlight.Web.Services
+@using Houlight.Web.Extensions
+@using Blazored.LocalStorage
+@using Houlight.Application.Features.Loads.Queries.GetLoadsByFilter
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
 
 <PageTitle>Yüklerim - Houlight</PageTitle>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Yüklerim</h4>
-        <button class="btn btn-primary" @onclick="() => ShowNewLoadModal = true">
-            <i class="bi bi-plus-lg me-2"></i>Yeni Yük Ekle
-        </button>
-    </div>
-    
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Yük No</th>
-                            <th>Nereden</th>
-                            <th>Nereye</th>
-                            <th>Yük Tipi</th>
-                            <th>Ağırlık</th>
-                            <th>Hacim</th>
-                            <th>Durum</th>
-                            <th>Tarih</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var load in loads)
-                        {
-                            <tr>
-                                <td>@load.Id.ToString().Substring(0, 8)</td>
-                                <td>@load.FromLocation</td>
-                                <td>@load.ToLocation</td>
-                                <td>@GetLoadTypeName(load.LoadType)</td>
-                                <td>@load.Weight kg</td>
-                                <td>@load.Volume m³</td>
-                                <td>
-                                    <span class="badge bg-@GetStatusColor(load.Status)">
-                                        @GetStatusName(load.Status)
-                                    </span>
-                                </td>
-                                <td>@load.CreateDate.ToShortDateString()</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ShowLoadDetails(load)">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    @if (load.Status == LoadStatus.Pending)
-                                    {
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelLoad(load)">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <div>
+            <a href="/customer/dashboard" class="dashboard-back-btn me-2">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+            <button class="btn btn-houlight-accent" @onclick="() => ShowNewLoadModal = true">
+                <i class="bi bi-plus-circle me-1"></i>
+                Yeni Yük Ekle
+            </button>
         </div>
     </div>
+    
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+    
+    @if (isLoading)
+    {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else if (loads == null || loads.Count == 0)
+    {
+        <div class="alert alert-info">Henüz yükünüz bulunmamaktadır.</div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var load in loads)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">@load.FromLocation → @load.ToLocation</span>
+                                <span class="badge bg-@GetStatusColor(load.Status)">@GetStatusName(load.Status)</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Yük Tipi:</strong> @GetLoadTypeName(load.LoadType)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Ağırlık:</strong> @load.Weight kg
+                            </div>
+                            <div class="mb-2">
+                                <strong>Hacim:</strong> @load.Volume m³
+                            </div>
+                            <div class="mb-2">
+                                <strong>Beklenen Fiyat:</strong> @load.CustomerExpectedPrice?.ToString("C")
+                            </div>
+                            <div class="mb-2">
+                                <strong>Teslimat Tarihi:</strong> @load.DeliveryDate?.ToShortDateString()
+                            </div>
+                            <div class="mb-2">
+                                <strong>Açıklama:</strong> @load.Description
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowLoadDetails(load)">
+                                <i class="bi bi-eye"></i> Detay
+                            </button>
+                            @if (load.Status == LoadStatus.Pending)
+                            {
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelLoad(load)">
+                                    <i class="bi bi-x-lg"></i> İptal
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @if (ShowNewLoadModal)
 {
-    <div class="modal fade show" style="display: block;" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal fade show houlight-modal" style="display: block;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Yeni Yük Ekle</h5>
@@ -77,66 +105,76 @@
                 <div class="modal-body">
                     <EditForm Model="@newLoad" OnValidSubmit="HandleNewLoadSubmit">
                         <DataAnnotationsValidator />
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Nereden</label>
-                            <InputText @bind-Value="newLoad.FromLocation" class="form-control" />
-                            <ValidationMessage For="@(() => newLoad.FromLocation)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Nereye</label>
-                            <InputText @bind-Value="newLoad.ToLocation" class="form-control" />
-                            <ValidationMessage For="@(() => newLoad.ToLocation)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Yük Tipi</label>
-                            <InputSelect @bind-Value="newLoad.LoadType" class="form-select">
-                                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
-                                {
-                                    <option value="@type">@GetLoadTypeName(type)</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        
+                        <ValidationSummary class="houlight-validation-summary" />
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Ağırlık (kg)</label>
-                                <InputNumber @bind-Value="newLoad.Weight" class="form-control" />
-                                <ValidationMessage For="@(() => newLoad.Weight)" />
+                            <div class="col-md-6">
+                                <div class="form-column">
+                                    <div class="mb-3">
+                                        <label class="form-label required">Nereden</label>
+                                        <InputText @bind-Value="newLoad.FromLocation" class="form-control houlight-input" placeholder="Örn: İstanbul" />
+                                        <ValidationMessage For="@(() => newLoad.FromLocation)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label required">Nereye</label>
+                                        <InputText @bind-Value="newLoad.ToLocation" class="form-control houlight-input" placeholder="Örn: Ankara" />
+                                        <ValidationMessage For="@(() => newLoad.ToLocation)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label required">Yük Tipi</label>
+                                        <InputSelect @bind-Value="newLoad.LoadType" class="form-select houlight-select">
+                                            @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                                            {
+                                                <option value="@type">@GetLoadTypeName(type)</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => newLoad.LoadType)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label required">Ağırlık (kg)</label>
+                                        <InputNumber @bind-Value="newLoad.Weight" class="form-control houlight-input" min="1" max="100000" />
+                                        <ValidationMessage For="@(() => newLoad.Weight)" class="text-danger" />
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Hacim (m³)</label>
-                                <InputNumber @bind-Value="newLoad.Volume" class="form-control" />
-                                <ValidationMessage For="@(() => newLoad.Volume)" />
+                            <div class="col-md-6">
+                                <div class="form-column">
+                                    <div class="mb-3">
+                                        <label class="form-label required">Hacim (m³)</label>
+                                        <InputNumber @bind-Value="newLoad.Volume" class="form-control houlight-input" min="1" max="1000" />
+                                        <ValidationMessage For="@(() => newLoad.Volume)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Beklenen Fiyat (₺)</label>
+                                        <InputNumber @bind-Value="newLoad.CustomerExpectedPrice" class="form-control houlight-input" min="0" />
+                                        <ValidationMessage For="@(() => newLoad.CustomerExpectedPrice)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Teslimat Tarihi</label>
+                                        <InputDate @bind-Value="newLoad.DeliveryDate" class="form-control houlight-input" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
+                                        <ValidationMessage For="@(() => newLoad.DeliveryDate)" class="text-danger" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Açıklama</label>
+                                        <InputTextArea @bind-Value="newLoad.Description" class="form-control houlight-input" rows="3" placeholder="Yük hakkında detaylı bilgi..." />
+                                        <ValidationMessage For="@(() => newLoad.Description)" class="text-danger" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Beklenen Fiyat</label>
-                            <InputNumber @bind-Value="newLoad.CustomerExpectedPrice" class="form-control" />
-                            <ValidationMessage For="@(() => newLoad.CustomerExpectedPrice)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Teslimat Tarihi</label>
-                            <InputDate @bind-Value="newLoad.DeliveryDate" class="form-control" />
-                            <ValidationMessage For="@(() => newLoad.DeliveryDate)" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Açıklama</label>
-                            <InputTextArea @bind-Value="newLoad.Description" class="form-control" rows="3" />
-                        </div>
-                        
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" @onclick="() => ShowNewLoadModal = false">
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn houlight-cancel-btn" @onclick="() => ShowNewLoadModal = false" disabled="@isLoading">
                                 İptal
                             </button>
-                            <button type="submit" class="btn btn-primary">
-                                Kaydet
+                            <button type="submit" class="btn houlight-submit-btn" disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Kaydediliyor...</span>
+                                }
+                                else
+                                {
+                                    <span>Kaydet</span>
+                                }
                             </button>
                         </div>
                     </EditForm>
@@ -161,26 +199,38 @@
                         <dt class="col-sm-4">Yük No</dt>
                         <dd class="col-sm-8">@selectedLoad.Id.ToString().Substring(0, 8)</dd>
                         
+                        <dt class="col-sm-4">Ad</dt>
+                        <dd class="col-sm-8">@selectedLoad?.CustomerName</dd>
+                        
+                        <dt class="col-sm-4">Şirket</dt>
+                        <dd class="col-sm-8">@selectedLoad?.LogisticsCompanyName</dd>
+                        
+                        <dt class="col-sm-4">Araç</dt>
+                        <dd class="col-sm-8">@selectedLoad?.AssignedVehiclePlate</dd>
+                        
+                        <dt class="col-sm-4">Şoför</dt>
+                        <dd class="col-sm-8">@selectedLoad?.AssignedDriverName</dd>
+                        
                         <dt class="col-sm-4">Nereden</dt>
-                        <dd class="col-sm-8">@selectedLoad.FromLocation</dd>
+                        <dd class="col-sm-8">@selectedLoad?.FromLocation</dd>
                         
                         <dt class="col-sm-4">Nereye</dt>
-                        <dd class="col-sm-8">@selectedLoad.ToLocation</dd>
+                        <dd class="col-sm-8">@selectedLoad?.ToLocation</dd>
                         
                         <dt class="col-sm-4">Yük Tipi</dt>
                         <dd class="col-sm-8">@GetLoadTypeName(selectedLoad.LoadType)</dd>
                         
                         <dt class="col-sm-4">Ağırlık</dt>
-                        <dd class="col-sm-8">@selectedLoad.Weight kg</dd>
+                        <dd class="col-sm-8">@selectedLoad?.Weight kg</dd>
                         
                         <dt class="col-sm-4">Hacim</dt>
-                        <dd class="col-sm-8">@selectedLoad.Volume m³</dd>
+                        <dd class="col-sm-8">@selectedLoad?.Volume m³</dd>
                         
                         <dt class="col-sm-4">Beklenen Fiyat</dt>
-                        <dd class="col-sm-8">@selectedLoad.CustomerExpectedPrice?.ToString("C")</dd>
+                        <dd class="col-sm-8">@selectedLoad?.CustomerExpectedPrice?.ToString("C")</dd>
                         
                         <dt class="col-sm-4">Şirket Teklifi</dt>
-                        <dd class="col-sm-8">@selectedLoad.CompanyOfferedPrice?.ToString("C")</dd>
+                        <dd class="col-sm-8">@selectedLoad?.CompanyOfferedPrice?.ToString("C")</dd>
                         
                         <dt class="col-sm-4">Durum</dt>
                         <dd class="col-sm-8">
@@ -189,14 +239,11 @@
                             </span>
                         </dd>
                         
-                        <dt class="col-sm-4">Oluşturma Tarihi</dt>
-                        <dd class="col-sm-8">@selectedLoad.CreateDate.ToShortDateString()</dd>
-                        
                         <dt class="col-sm-4">Teslimat Tarihi</dt>
-                        <dd class="col-sm-8">@selectedLoad.DeliveryDate?.ToShortDateString()</dd>
+                        <dd class="col-sm-8">@selectedLoad?.DeliveryDate?.ToShortDateString()</dd>
                         
                         <dt class="col-sm-4">Açıklama</dt>
-                        <dd class="col-sm-8">@selectedLoad.Description</dd>
+                        <dd class="col-sm-8">@selectedLoad?.Description</dd>
                     </dl>
                 </div>
                 <div class="modal-footer">
@@ -211,102 +258,257 @@
 }
 
 @code {
-    private List<LoadEntity> loads = new();
-    private LoadEntity? selectedLoad;
+    private List<GetLoadsByFilterResponse> loads = new();
+    private GetLoadsByFilterResponse? selectedLoad;
     private bool ShowNewLoadModal;
-    private LoadEntity newLoad = new();
+    private CreateLoadCommand newLoad = new CreateLoadCommand { LoadType = LoadType.GeneralCargo };
+    private string errorMessage = "";
+    private bool isLoading = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Temsili veri
-        loads = new List<LoadEntity>
+        var token = await localStorage.GetItemAsync<string>("authToken");
+        var userType = await localStorage.GetItemAsync<string>("userType");
+        
+        if (string.IsNullOrEmpty(token) || userType != "customer")
         {
-            new LoadEntity
-            {
-                Id = Guid.NewGuid(),
-                FromLocation = "İstanbul",
-                ToLocation = "Ankara",
-                LoadType = LoadType.GeneralCargo,
-                Weight = 1000,
-                Volume = 5,
-                Status = LoadStatus.InTransit,
-                DeliveryDate = DateTime.Now.AddDays(2),
-                Description = "Genel kargo taşımacılığı",
-                CustomerExpectedPrice = 1500,
-                CompanyOfferedPrice = 1800,
-                CreateDate = DateTime.Now.AddDays(-1)
-            },
-            new LoadEntity
-            {
-                Id = Guid.NewGuid(),
-                FromLocation = "İzmir",
-                ToLocation = "Bursa",
-                LoadType = LoadType.TemperatureSensitive,
-                Weight = 500,
-                Volume = 3,
-                Status = LoadStatus.Pending,
-                DeliveryDate = DateTime.Now.AddDays(5),
-                Description = "Soğuk zincir taşımacılığı",
-                CustomerExpectedPrice = 2000,
-                CompanyOfferedPrice = null,
-                CreateDate = DateTime.Now.AddDays(-2)
-            }
-        };
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        await LoadCustomerLoads();
     }
 
-    private string GetLoadTypeName(LoadType type) => type switch
+    private async Task LoadCustomerLoads()
     {
-        LoadType.GeneralCargo => "Genel Kargo",
-        LoadType.PerishableGoods => "Bozulabilir Ürünler",
-        LoadType.HazardousMaterials => "Tehlikeli Maddeler",
-        LoadType.FragileItems => "Kırılabilir Eşyalar",
-        LoadType.BulkCargo => "Dökme Kargo",
-        LoadType.Liquid => "Sıvı Kargo",
-        LoadType.HighValue => "Yüksek Değerli Ürünler",
-        LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
-        LoadType.DangerousGoods => "Tehlikeli Mallar",
-        _ => type.ToString()
-    };
+        try
+        {
+            var token = await localStorage.GetItemAsync<string>("authToken");
+            if (string.IsNullOrEmpty(token))
+            {
+                errorMessage = "Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.";
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
 
-    private string GetStatusName(LoadStatus status) => status switch
-    {
-        LoadStatus.Pending => "Beklemede",
-        LoadStatus.Assigned => "Atandı",
-        LoadStatus.InTransit => "Yolda",
-        LoadStatus.Delivered => "Teslim Edildi",
-        LoadStatus.Accepted => "Kabul Edildi",
-        _ => status.ToString()
-    };
-
-    private string GetStatusColor(LoadStatus status) => status switch
-    {
-        LoadStatus.Pending => "warning",
-        LoadStatus.Assigned => "info",
-        LoadStatus.InTransit => "primary",
-        LoadStatus.Delivered => "success",
-        LoadStatus.Accepted => "success",
-        _ => "secondary"
-    };
-
-    private void ShowLoadDetails(LoadEntity load)
-    {
-        selectedLoad = load;
+            var response = await Http.GetAsync<List<GetLoadsByFilterResponse>>("api/loads/filter");
+            if (response != null)
+            {
+                loads = response;
+            }
+            else
+            {
+                errorMessage = "Yükler yüklenemedi. Lütfen daha sonra tekrar deneyin.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Yükler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"Yük yükleme hatası: {ex}");
+        }
     }
 
     private async Task HandleNewLoadSubmit()
     {
-        // TODO: Backend entegrasyonu yapılacak
-        newLoad.Id = Guid.NewGuid();
-        newLoad.Status = LoadStatus.Pending;
-        newLoad.CreateDate = DateTime.Now;
-        loads.Add(newLoad);
-        newLoad = new LoadEntity();
-        ShowNewLoadModal = false;
+        errorMessage = string.Empty;
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var token = await localStorage.GetItemAsync<string>("authToken");
+            var userId = await localStorage.GetItemAsync<string>("userId");
+            
+            Console.WriteLine($"Loads.razor - Token durumu: {(string.IsNullOrEmpty(token) ? "Boş" : "Var")}");
+            Console.WriteLine($"Loads.razor - UserId durumu: {(string.IsNullOrEmpty(userId) ? "Boş" : userId)}");
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                errorMessage = "Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.";
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("Loads.razor - UserId bulunamadı, yükleri yeniden yüklemeyi deniyorum...");
+                await LoadCustomerLoads();
+                userId = await localStorage.GetItemAsync<string>("userId");
+                Console.WriteLine($"Loads.razor - Yükler yüklendikten sonra userId durumu: {(string.IsNullOrEmpty(userId) ? "Boş" : userId)}");
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    errorMessage = "Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.";
+                    NavigationManager.NavigateTo("/login");
+                    return;
+                }
+            }
+
+            if (!Guid.TryParse(userId, out var customerId))
+            {
+                Console.WriteLine($"Loads.razor - Geçersiz userId formatı: {userId}");
+                errorMessage = "Geçersiz kullanıcı bilgisi. Lütfen tekrar giriş yapın.";
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            newLoad.CustomerId = customerId;
+
+            Console.WriteLine("Loads.razor - Yük ekleme isteği gönderiliyor...");
+            Console.WriteLine($"Loads.razor - Yük bilgileri: FromLocation={newLoad.FromLocation}, ToLocation={newLoad.ToLocation}, Weight={newLoad.Weight}, Volume={newLoad.Volume}, CustomerId={newLoad.CustomerId}");
+            
+            try
+            {
+                var response = await Http.PostAsync<CreateLoadResponse>("api/loads", newLoad);
+                Console.WriteLine($"Loads.razor - Yük ekleme yanıtı: {response != null}");
+
+                if (response != null)
+                {
+                    ShowNewLoadModal = false;
+                    newLoad = new CreateLoadCommand { LoadType = LoadType.GeneralCargo };
+                    await LoadCustomerLoads();
+                    StateHasChanged();
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Loads.razor - Yük ekleme HTTP hatası: {ex.Message}");
+                if (ex.Data.Contains("DetailedError"))
+                {
+                    errorMessage = ex.Data["DetailedError"]?.ToString() ?? ex.Message;
+                }
+                else if (ex.Data.Contains("ResponseContent"))
+                {
+                    var errorContent = ex.Data["ResponseContent"]?.ToString();
+                    Console.WriteLine($"Loads.razor - Backend'den gelen ham hata içeriği: {errorContent}");
+                    
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(errorContent);
+                        if (errorResponse?.errors != null && errorResponse.errors.Any())
+                        {
+                            if (errorResponse.errors.ContainsKey("CustomerId"))
+                            {
+                                Console.WriteLine("Loads.razor - CustomerId hatası tespit edildi, yükleri yeniden yüklemeyi deniyorum...");
+                                await LoadCustomerLoads();
+                                errorMessage = "Oturum bilgisi yenilendi. Lütfen tekrar deneyin.";
+                            }
+                            else
+                            {
+                                var errorMessages = errorResponse.errors.SelectMany(e => e.Value.Select(m => $"{e.Key}: {m}"));
+                                errorMessage = string.Join("\n", errorMessages);
+                                Console.WriteLine($"Loads.razor - Backend'den gelen hata mesajları: {string.Join(", ", errorMessages)}");
+                            }
+                        }
+                        else
+                        {
+                            errorMessage = errorResponse?.message ?? ex.Message;
+                            Console.WriteLine($"Loads.razor - Genel hata mesajı: {errorMessage}");
+                        }
+                    }
+                    catch (Exception parseEx)
+                    {
+                        Console.WriteLine($"Loads.razor - Hata mesajı parse edilemedi: {parseEx.Message}");
+                        errorMessage = ex.Message;
+                    }
+                }
+                else
+                {
+                    errorMessage = ex.Message;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Loads.razor - Yük ekleme beklenmeyen hata: {ex}");
+            errorMessage = "Yük eklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
-    private async Task CancelLoad(LoadEntity load)
+    private async Task CancelLoad(GetLoadsByFilterResponse load)
     {
-        // TODO: Backend entegrasyonu yapılacak
-        load.Status = LoadStatus.Pending;
+        try
+        {
+            var response = await Http.DeleteAsync($"api/loads/{load.Id}");
+            if (response)
+            {
+                await LoadCustomerLoads();
+            }
+            else
+            {
+                errorMessage = "Yük iptal edilemedi. Lütfen daha sonra tekrar deneyin.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Yük iptal edilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"Yük iptal hatası: {ex}");
+        }
     }
-} 
+
+    private string GetLoadTypeName(LoadType type)
+    {
+        return type switch
+        {
+            LoadType.GeneralCargo => "Genel Kargo",
+            LoadType.PerishableGoods => "Bozulabilir Ürünler",
+            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+            LoadType.FragileItems => "Kırılabilir Eşyalar",
+            LoadType.BulkCargo => "Dökme Kargo",
+            LoadType.Liquid => "Sıvı Kargo",
+            LoadType.HighValue => "Yüksek Değerli Ürünler",
+            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+            LoadType.DangerousGoods => "Tehlikeli Mallar",
+            _ => "Bilinmiyor"
+        };
+    }
+
+    private string GetStatusName(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "Beklemede",
+            LoadStatus.InTransit => "Yolda",
+            LoadStatus.Delivered => "Teslim Edildi",
+            LoadStatus.Assigned => "Atandı",
+            LoadStatus.Accepted => "Kabul Edildi",
+            _ => "Bilinmiyor"
+        };
+    }
+
+    private string GetStatusColor(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "warning",
+            LoadStatus.InTransit => "primary",
+            LoadStatus.Delivered => "success",
+            LoadStatus.Assigned => "info",
+            LoadStatus.Accepted => "success",
+            _ => "secondary"
+        };
+    }
+
+    private void ShowLoadDetails(GetLoadsByFilterResponse load)
+    {
+        selectedLoad = load;
+    }
+
+    private class ErrorResponse
+    {
+        public string message { get; set; }
+        public Dictionary<string, string[]> errors { get; set; }
+    }
+}
+
+<style>
+    .required:after {
+        content: " *";
+        color: #ff6600;
+    }
+</style> 

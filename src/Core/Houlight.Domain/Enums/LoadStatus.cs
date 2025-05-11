@@ -12,6 +12,7 @@ public enum LoadStatus
     Assigned = 1,
     InTransit = 2,
     Delivered = 3,
-    Accepted = 4
+    Accepted = 4,
+    Rejected = 5,
 }
 
