@@ -1,27 +1,48 @@
+@using System
+
 <footer class="houlight-footer">
     <div class="footer-content">
-        <div>
+        <div class="footer-brand">
             <div class="footer-logo">
                 <img src="images/Logo.png" alt="Houlight Logo" />
             </div>
             <div class="footer-desc">
                 Houlight, lojistikte dijital dönüşümün adresi. Yükünüzü güvenle ve hızla taşıyın.
             </div>
-        </div>
-        <div class="footer-links">
-            <a href="/">Ana Sayfa</a>
-            <a href="/about">Hakkımızda</a>
-            <a href="/contact">İletişim</a>
-            <a href="/privacy">Gizlilik Politikası</a>
-        </div>
-        <div>
             <div class="footer-social">
-                <a href="#" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
-                <a href="#" title="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" title="LinkedIn" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                <a href="#" title="Instagram" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" title="Twitter" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+        <div class="footer-links-container">
+            <div class="footer-links-group">
+                <h3 class="footer-section-title">Hızlı Erişim</h3>
+                <div class="footer-links">
+                    <a href="/">Ana Sayfa</a>
+                    <a href="/about">Hakkımızda</a>
+                    <a href="/contact">İletişim</a>
+                    <a href="/privacy">Gizlilik Politikası</a>
+                </div>
+            </div>
+            <div class="footer-links-group">
+                <h3 class="footer-section-title">İletişim</h3>
+                <div class="footer-contact">
+                    <p><i class="bi bi-geo-alt"></i> İstanbul, Türkiye</p>
+                    <p><i class="bi bi-telephone"></i> +90 (212) XXX XX XX</p>
+                    <p><i class="bi bi-envelope"></i> info@houlight.com</p>
+                </div>
             </div>
         </div>
     </div>
     <div class="footer-copy">
-        © @DateTime.Now.Year Houlight. Tüm hakları saklıdır.
+        <div class="footer-copy-content">
+            <span>© @DateTime.Now.Year Houlight. Tüm hakları saklıdır.</span>
+            <div class="footer-copy-links">
+                <a href="/terms">Kullanım Koşulları</a>
+                <a href="/privacy">Gizlilik Politikası</a>
+                <a href="/cookies">Çerez Politikası</a>
+            </div>
+        </div>
     </div>
 </footer> 

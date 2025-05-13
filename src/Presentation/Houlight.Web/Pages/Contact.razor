@@ -1,0 +1,142 @@
+@page "/contact"
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Houlight - İletişim</PageTitle>
+
+<div class="contact-section">
+    <div class="contact-background">
+        <div class="contact-circle contact-circle-1"></div>
+        <div class="contact-circle contact-circle-2"></div>
+        <div class="contact-circle contact-circle-3"></div>
+    </div>
+
+    <div class="contact-container">
+        <div class="contact-header">
+            <h1 class="contact-title">İletişim</h1>
+            <p class="contact-subtitle">Bizimle iletişime geçin</p>
+        </div>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <div class="contact-info-card">
+                    <div class="contact-info-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <h3>Adres</h3>
+                    <p>Merkez Mahallesi, Teknoloji Caddesi No:123<br />34000 İstanbul, Türkiye</p>
+                </div>
+
+                <div class="contact-info-card">
+                    <div class="contact-info-icon">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+                    <h3>Telefon</h3>
+                    <p>+90 (541) 711 74 05</p>
+                    <p>+90 (541) 711 74 05</p>
+                </div>
+
+                <div class="contact-info-card">
+                    <div class="contact-info-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <h3>E-posta</h3>
+                    <p>info@houlight.com</p>
+                    <p>destek@houlight.com</p>
+                </div>
+
+                <div class="contact-info-card">
+                    <div class="contact-info-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <h3>Çalışma Saatleri</h3>
+                    <p>Pazartesi - Cuma: 09:00 - 18:00</p>
+                    <p>Cumartesi: 10:00 - 14:00</p>
+                </div>
+            </div>
+
+            <div class="contact-form-container">
+                <div class="contact-form-card">
+                    <h2>Bize Ulaşın</h2>
+                    <EditForm Model="@contactModel" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="contact-validation-summary" />
+
+                        <div class="form-group">
+                            <label for="name">Adınız Soyadınız</label>
+                            <InputText id="name" @bind-Value="contactModel.Name" class="form-control" />
+                            <ValidationMessage For="@(() => contactModel.Name)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-posta Adresiniz</label>
+                            <InputText id="email" @bind-Value="contactModel.Email" class="form-control" />
+                            <ValidationMessage For="@(() => contactModel.Email)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subject">Konu</label>
+                            <InputSelect id="subject" @bind-Value="contactModel.Subject" class="form-control">
+                                <option value="">Seçiniz</option>
+                                <option value="Genel Bilgi">Genel Bilgi</option>
+                                <option value="Teknik Destek">Teknik Destek</option>
+                                <option value="İş Birliği">İş Birliği</option>
+                                <option value="Diğer">Diğer</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => contactModel.Subject)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Mesajınız</label>
+                            <InputTextArea id="message" @bind-Value="contactModel.Message" class="form-control" rows="5" />
+                            <ValidationMessage For="@(() => contactModel.Message)" />
+                        </div>
+
+                        <button type="submit" class="contact-submit-btn">
+                            <i class="bi bi-send"></i>
+                            Gönder
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3008.2329499999997!2d28.9772!3d41.0370!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDAyJzEzLjIiTiAyOMKwNTgnMzcuOSJF!5e0!3m2!1str!2str!4v1234567890!5m2!1str!2str" 
+                    width="100%" 
+                    height="450" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ContactModel contactModel = new();
+
+    private async Task HandleValidSubmit()
+    {
+        // TODO: Form gönderme işlemleri burada yapılacak
+        await Task.CompletedTask;
+    }
+
+    public class ContactModel
+    {
+        [Required(ErrorMessage = "Adınız ve soyadınız zorunludur")]
+        [StringLength(100, ErrorMessage = "Adınız ve soyadınız en fazla 100 karakter olabilir")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "E-posta adresiniz zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Konu seçimi zorunludur")]
+        public string Subject { get; set; } = "";
+
+        [Required(ErrorMessage = "Mesajınız zorunludur")]
+        [StringLength(1000, ErrorMessage = "Mesajınız en fazla 1000 karakter olabilir")]
+        public string Message { get; set; } = "";
+    }
+} 

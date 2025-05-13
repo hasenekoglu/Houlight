@@ -1,0 +1,200 @@
+/* Kimlik Doğrulama Sayfaları */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    padding: 0.5rem;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--houlight-radius-lg);
+    box-shadow: var(--houlight-shadow-lg);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    backdrop-filter: blur(10px);
+}
+
+.register-card {
+    max-width: 600px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h2 {
+    color: var(--houlight-accent);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: var(--houlight-text-muted);
+    font-size: 1.1rem;
+}
+
+.auth-form {
+    margin-bottom: 2rem;
+}
+
+.auth-form .form-floating > .form-control {
+    border: 2px solid #eee;
+    border-radius: var(--houlight-radius-md);
+    padding: 1rem 0.75rem;
+    height: calc(3.5rem + 2px);
+    font-size: 1rem;
+    transition: all var(--houlight-transition-normal);
+}
+
+.auth-submit-btn {
+    width: 100%;
+    background: var(--houlight-accent);
+    color: var(--houlight-text-light);
+    border: none;
+    border-radius: var(--houlight-radius-md);
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all var(--houlight-transition-normal);
+}
+
+/* Dashboard Sayfası */
+.dashboard-card {
+    transition: all var(--houlight-transition-normal);
+    border-radius: var(--houlight-radius-md);
+    color: inherit;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--houlight-shadow-lg) !important;
+    color: var(--houlight-accent);
+}
+
+.dashboard-stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--houlight-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-stat-icon i {
+    font-size: 1.5rem;
+}
+
+.dashboard-title {
+    color: var(--houlight-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-stat-value {
+    color: var(--houlight-accent);
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Offers Sayfası */
+.modern-offer-card {
+    border-radius: var(--houlight-radius-lg);
+    background: var(--houlight-bg-light);
+    box-shadow: var(--houlight-shadow-sm);
+    overflow: hidden;
+}
+
+.bg-offer-orange {
+    background: linear-gradient(135deg, #ff7f50 80%, #ffb347 100%);
+    color: var(--houlight-text-light) !important;
+}
+
+.expand-offer-box {
+    position: relative;
+    width: 100%;
+}
+
+.expand-offer-summary {
+    background: #fff8f1 !important;
+    color: var(--houlight-text-dark) !important;
+    border: 2px solid #ffb74d !important;
+}
+
+.expand-offer-details {
+    background: var(--houlight-bg-light);
+    color: var(--houlight-text-dark);
+    border: 1.5px solid #ffb74d;
+    box-shadow: var(--houlight-shadow-sm);
+}
+
+/* Profil Sayfası */
+.profile-card {
+    transition: all var(--houlight-transition-normal);
+    border: 1px solid rgba(255, 102, 0, 0.1);
+}
+
+.profile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--houlight-shadow-lg) !important;
+}
+
+.profile-info .profile-value {
+    padding: 0.7rem 0;
+    font-size: 1.1rem;
+    color: var(--houlight-primary);
+    border-bottom: 1px solid rgba(255, 102, 0, 0.1);
+    transition: all var(--houlight-transition-normal);
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .auth-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .dashboard-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-info .profile-value {
+        font-size: 1rem;
+        padding: 0.5rem 0;
+    }
+    
+    .expand-offer-details {
+        padding: 0.7rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .auth-container {
+        padding: 1rem;
+    }
+    
+    .auth-form .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .auth-form .col-md-6 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+} 

@@ -1,4 +1,5 @@
 @page "/"
+@page "/anasayfa"
 @using Blazored.LocalStorage
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -12,8 +13,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        isAuthenticated = !string.IsNullOrEmpty(token);
+        StateHasChanged();
     }
 }
 
@@ -32,20 +34,13 @@
                 teslimatlarınızı hızlı ve güvenli bir şekilde gerçekleştiriyoruz.
             </p>
             <div class="hero-actions">
-                @if (isAuthenticated)
+                @if (!isAuthenticated)
                 {
-                    <a href="/dashboard" class="hero-btn hero-btn-primary">
-                        <span>Panele Git</span>
-                        <span class="btn-shine"></span>
-                    </a>
-                }
-                else
-                {
-                    <a href="/auth/register" class="hero-btn hero-btn-primary">
+                    <a href="/register" class="hero-btn hero-btn-primary">
                         <span>Hemen Başla</span>
                         <span class="btn-shine"></span>
                     </a>
-                    <a href="/auth/login" class="hero-btn hero-btn-secondary">Giriş Yap</a>
+                    <a href="/login" class="hero-btn hero-btn-secondary">Giriş Yap</a>
                 }
             </div>
         </div>
@@ -63,35 +58,56 @@
     </div>
     <div class="features-container">
         <h2 class="features-title">Neden Houlight?</h2>
-        <p class="features-subtitle">Modern teknolojimiz ve uzman ekibimizle teslimat süreçlerinizi kolaylaştırıyoruz</p>
+        <p class="features-subtitle">Güvenilir, yenilikçi ve kullanıcı odaklı çözümlerimizle taşımacılıkta fark yaratıyoruz.</p>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon-wrapper">
-                    <img src="images/icon-fast.svg" alt="Hızlı Teslimat" class="feature-icon bright" />
+                    <!-- Akıllı Takip SVG -->
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16" stroke="#ff6600" stroke-width="2.5" fill="none"/>
+                      <path d="M20 12v8l6 4" stroke="#ff6600" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </div>
-                <h3>Hızlı Teslimat</h3>
-                <p>Akıllı eşleştirme sistemi ile en kısa sürede teslimat yapıyoruz. Zaman kaybetmeyin!</p>
+                <h3>Akıllı Takip</h3>
+                <p>Tüm gönderilerinizi gerçek zamanlı takip edin, sürecin her anında kontrol sizde olsun.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon-wrapper">
-                    <img src="images/icon-price.svg" alt="Uygun Fiyat" class="feature-icon bright" />
+                    <!-- Kolay Rezervasyon SVG -->
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="8" y="12" width="24" height="16" rx="4" stroke="#ff6600" stroke-width="2.5" fill="none"/>
+                      <path d="M14 18h12M14 22h8" stroke="#ff6600" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
                 </div>
-                <h3>Uygun Fiyat</h3>
-                <p>Rekabetçi fiyatlar ve şeffaf ücretlendirme ile bütçenizi koruyoruz.</p>
+                <h3>Kolay Rezervasyon</h3>
+                <p>İhtiyacınıza uygun taşımayı saniyeler içinde planlayın, zaman kazanın.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon-wrapper">
-                    <img src="images/icon-secure.svg" alt="Güvenli Taşıma" class="feature-icon bright" />
+                    <!-- Güçlü Ağ SVG -->
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16" stroke="#ff6600" stroke-width="2.5" fill="none"/>
+                      <circle cx="20" cy="20" r="4" stroke="#ff6600" stroke-width="2.5" fill="none"/>
+                      <line x1="20" y1="8" x2="20" y2="16" stroke="#ff6600" stroke-width="2.5"/>
+                      <line x1="20" y1="24" x2="20" y2="32" stroke="#ff6600" stroke-width="2.5"/>
+                      <line x1="8" y1="20" x2="16" y2="20" stroke="#ff6600" stroke-width="2.5"/>
+                      <line x1="24" y1="20" x2="32" y2="20" stroke="#ff6600" stroke-width="2.5"/>
+                    </svg>
                 </div>
-                <h3>Güvenli Taşıma</h3>
-                <p>Sigortalı ve güvenli taşıma hizmeti ile eşyalarınız güvende.</p>
+                <h3>Güçlü Lojistik Ağı</h3>
+                <p>Türkiye genelinde yaygın ve güvenilir iş ortaklarımızla her noktaya hızlı erişim.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon-wrapper">
-                    <img src="images/icon-support.svg" alt="7/24 Destek" class="feature-icon bright" />
+                    <!-- 7/24 Destek SVG -->
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16" stroke="#ff6600" stroke-width="2.5" fill="none"/>
+                      <path d="M16 24c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#ff6600" stroke-width="2.5"/>
+                      <circle cx="20" cy="16" r="2" fill="#ff6600"/>
+                    </svg>
                 </div>
-                <h3>7/24 Destek</h3>
-                <p>Uzman ekibimiz her an yanınızda. Sorularınızı yanıtlıyor, sorunlarınızı çözüyoruz.</p>
+                <h3>Gerçek Destek</h3>
+                <p>Alanında uzman ekibimizle her zaman yanınızdayız, tüm sorularınıza hızlı çözüm.</p>
             </div>
         </div>
     </div>
@@ -203,9 +219,6 @@
         @if (!isAuthenticated)
         {
             <div class="join-actions-dark">
-                <a href="/auth/register" class="join-btn-dark join-btn-primary-dark">
-                    <i class="bi bi-person-plus me-2"></i>Ücretsiz Üye Ol
-                </a>
                 <a href="/contact" class="join-btn-dark join-btn-secondary-dark">
                     <i class="bi bi-telephone me-2"></i>Bize Ulaşın
                 </a>

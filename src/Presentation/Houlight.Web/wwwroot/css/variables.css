@@ -1,0 +1,42 @@
+:root {
+    /* Ana Renkler */
+    --houlight-primary: #2C3E50;
+    --houlight-secondary: #34495E;
+    --houlight-accent: #ff6600;
+    --houlight-success: #27AE60;
+    --houlight-danger: #E74C3C;
+    --houlight-warning: #F1C40F;
+    --houlight-info: #2980B9;
+
+    /* Arka Plan Renkleri */
+    --houlight-bg-light: #fff;
+    --houlight-bg-dark: #181818;
+    --houlight-bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #232323 100%);
+
+    /* Metin Renkleri */
+    --houlight-text-light: #fff;
+    --houlight-text-dark: #222;
+    --houlight-text-muted: #666;
+
+    /* Gölgeler */
+    --houlight-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --houlight-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --houlight-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+    /* Border Radius */
+    --houlight-radius-sm: 8px;
+    --houlight-radius-md: 12px;
+    --houlight-radius-lg: 20px;
+
+    /* Geçiş Süreleri */
+    --houlight-transition-fast: 0.2s;
+    --houlight-transition-normal: 0.3s;
+    --houlight-transition-slow: 0.5s;
+
+    /* Boşluklar */
+    --houlight-spacing-xs: 0.5rem;
+    --houlight-spacing-sm: 1rem;
+    --houlight-spacing-md: 1.5rem;
+    --houlight-spacing-lg: 2rem;
+    --houlight-spacing-xl: 3rem;
+} 
