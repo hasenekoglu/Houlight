@@ -1,39 +1,44 @@
-@page "/customer/profile"
+@page "/company/profile"
+
 @using Houlight.Application.Features.Customers.Commands.ChangePassword
-@using Houlight.Application.Features.Customers.Commands.UpdateCustomer
+@using Houlight.Application.Features.LogisticsCompanies.Queries.GetLogisticsCompanyById
+@using Houlight.Application.Features.LogisticsCompanies.Commands.UpdateLogisticsCompany
 @using Houlight.Domain.Entities
 @using Houlight.Web.Extensions
 @using Houlight.Web.Services
 @using Blazored.LocalStorage
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Json
+@using System.Text.Json
 @inject AuthHttpClient Http
 @inject ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
+@inject ILogger<Profile> Logger
 
-<PageTitle>Profilim - Houlight</PageTitle>
+<PageTitle>Şirket Profili - Houlight</PageTitle>
 
 <div class="container py-4">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @errorMessage
             <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
         </div>
-                    }
+    }
 
-                    @if (!string.IsNullOrEmpty(successMessage))
-                    {
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>
             @successMessage
             <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
         </div>
-                    }
+    }
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Profil Bilgilerim</h4>
-        <a href="/customer/dashboard" class="dashboard-back-btn">
+        <h4 class="mb-0">Şirket Profili</h4>
+        <a href="/company/dashboard" class="dashboard-back-btn">
             <i class="bi bi-arrow-left"></i>
             Dashboard'a Dön
         </a>
@@ -44,8 +49,8 @@
             <div class="card shadow-sm border-0 mb-4 profile-card">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-person-circle text-houlight-accent fs-4 me-2"></i>
-                        <h5 class="card-title mb-0">Profil Bilgilerim</h5>
+                        <i class="bi bi-building text-houlight-accent fs-4 me-2"></i>
+                        <h5 class="card-title mb-0">Şirket Bilgileri</h5>
                     </div>
                     @if (!isEditing)
                     {
@@ -60,49 +65,49 @@
                     {
                         <div class="profile-info">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium text-muted">Ad</label>
-                                    <div class="profile-value">@profileModel.Name</div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium text-muted">Şirket Adı</label>
+                                    <div class="profile-value">@profileModel.CompanyName</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium text-muted">Soyad</label>
-                                    <div class="profile-value">@profileModel.Surname</div>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium text-muted">Şirket Adresi</label>
+                                    <div class="profile-value">@profileModel.CompanyAddress</div>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-medium text-muted">E-posta</label>
-                                    <div class="profile-value">@profileModel.Email</div>
+                                    <div class="profile-value">@profileModel.CompanyEmail</div>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-medium text-muted">Telefon</label>
-                                    <div class="profile-value">+90 @profileModel.PhoneNumber</div>
-                            </div>
+                                    <div class="profile-value">+90 @profileModel.CompanyPhoneNumber</div>
+                                </div>
                             </div>
                         </div>
                     }
                     else
                     {
-                        <EditForm Model="@profileModel" OnValidSubmit="HandleProfileUpdate">
+                        <EditForm Model="@profileModel" OnValidSubmit="HandleSubmit">
                             <DataAnnotationsValidator />
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium">Ad</label>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Şirket Adı</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-person text-muted"></i>
+                                            <i class="bi bi-building text-muted"></i>
                                         </span>
-                                        <InputText @bind-Value="profileModel.Name" class="form-control border-start-0" placeholder="Adınız" />
+                                        <InputText @bind-Value="profileModel.CompanyName" class="form-control border-start-0" placeholder="Şirket adınız" />
                                     </div>
-                                    <ValidationMessage For="@(() => profileModel.Name)" class="text-danger small mt-1" />
+                                    <ValidationMessage For="@(() => profileModel.CompanyName)" class="text-danger small mt-1" />
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium">Soyad</label>
+                                <div class="col-12">
+                                    <label class="form-label fw-medium">Şirket Adresi</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-person text-muted"></i>
+                                            <i class="bi bi-geo-alt text-muted"></i>
                                         </span>
-                                        <InputText @bind-Value="profileModel.Surname" class="form-control border-start-0" placeholder="Soyadınız" />
+                                        <InputTextArea @bind-Value="profileModel.CompanyAddress" class="form-control border-start-0" placeholder="Şirket adresiniz" rows="3" />
                                     </div>
-                                    <ValidationMessage For="@(() => profileModel.Surname)" class="text-danger small mt-1" />
+                                    <ValidationMessage For="@(() => profileModel.CompanyAddress)" class="text-danger small mt-1" />
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-medium">E-posta</label>
@@ -110,9 +115,9 @@
                                         <span class="input-group-text bg-light border-end-0">
                                             <i class="bi bi-envelope text-muted"></i>
                                         </span>
-                                        <InputText type="email" @bind-Value="profileModel.Email" class="form-control border-start-0" placeholder="ornek@email.com" />
+                                        <InputText type="email" @bind-Value="profileModel.CompanyEmail" class="form-control border-start-0" placeholder="sirket@email.com" />
                                     </div>
-                                    <ValidationMessage For="@(() => profileModel.Email)" class="text-danger small mt-1" />
+                                    <ValidationMessage For="@(() => profileModel.CompanyEmail)" class="text-danger small mt-1" />
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-medium">Telefon</label>
@@ -121,14 +126,14 @@
                                             <i class="bi bi-telephone text-muted"></i>
                                         </span>
                                         <span class="input-group-text bg-light border-end-0 border-start-0">+90</span>
-                                        <InputText @bind-Value="profileModel.PhoneNumber" class="form-control border-start-0" placeholder="5XX XXX XX XX" maxlength="10" />
-                        </div>
-                                    <ValidationMessage For="@(() => profileModel.PhoneNumber)" class="text-danger small mt-1" />
+                                        <InputText @bind-Value="profileModel.CompanyPhoneNumber" class="form-control border-start-0" placeholder="5XX XXX XX XX" maxlength="10" />
+                                    </div>
+                                    <ValidationMessage For="@(() => profileModel.CompanyPhoneNumber)" class="text-danger small mt-1" />
                                     <small class="text-muted mt-1 d-block">
                                         <i class="bi bi-info-circle me-1"></i>
                                         Telefon numaranızı başında 0 olmadan giriniz (Örnek: 5XX XXX XX XX)
                                     </small>
-                        </div>
+                                </div>
                                 <div class="col-12 mt-4 d-flex gap-2">
                                     <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelEditing" disabled="@(isLoading)">
                                         <i class="bi bi-x-circle me-2"></i>
@@ -145,10 +150,10 @@
                                             <i class="bi bi-check-circle me-2"></i>
                                             <span>Kaydet</span>
                                         }
-                            </button>
+                                    </button>
                                 </div>
-                        </div>
-                    </EditForm>
+                            </div>
+                        </EditForm>
                     }
                 </div>
             </div>
@@ -232,9 +237,9 @@
                                             <i class="bi bi-lock-fill text-muted"></i>
                                         </span>
                                         <InputText type="password" @bind-Value="passwordModel.ConfirmPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi tekrar giriniz" />
-                        </div>
+                                    </div>
                                     <ValidationMessage For="@(() => passwordModel.ConfirmPassword)" class="text-danger small mt-1" />
-                        </div>
+                                </div>
                                 <div class="col-12 mt-4 d-flex gap-2">
                                     <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelPasswordChange" disabled="@(isLoading)">
                                         <i class="bi bi-x-circle me-2"></i>
@@ -251,10 +256,10 @@
                                             <i class="bi bi-shield-check me-2"></i>
                                             <span>Şifreyi Değiştir</span>
                                         }
-                            </button>
+                                    </button>
                                 </div>
-                        </div>
-                    </EditForm>
+                            </div>
+                        </EditForm>
                     }
                 </div>
             </div>
@@ -275,22 +280,23 @@
     private class ProfileModel
     {
         public Guid Id { get; set; }
-        [Required(ErrorMessage = "Ad alanı boş olamaz.")]
-        [StringLength(50, ErrorMessage = "Ad alanı 50 karakterden uzun olamaz.")]
-        public string Name { get; set; } = "";
 
-        [Required(ErrorMessage = "Soyad alanı boş olamaz.")]
-        [StringLength(50, ErrorMessage = "Soyad alanı 50 karakterden uzun olamaz.")]
-        public string Surname { get; set; } = "";
+        [Required(ErrorMessage = "Şirket adı alanı boş olamaz.")]
+        [StringLength(100, ErrorMessage = "Şirket adı 100 karakterden uzun olamaz.")]
+        public string CompanyName { get; set; } = "";
+
+        [Required(ErrorMessage = "Şirket adresi alanı boş olamaz.")]
+        [StringLength(500, ErrorMessage = "Şirket adresi 500 karakterden uzun olamaz.")]
+        public string CompanyAddress { get; set; } = "";
 
         [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
         [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
         [StringLength(100, ErrorMessage = "E-posta alanı 100 karakterden uzun olamaz.")]
-        public string Email { get; set; } = "";
+        public string CompanyEmail { get; set; } = "";
 
         [Required(ErrorMessage = "Telefon numarası alanı boş olamaz.")]
-        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası 10 haneli olmalıdır.")]
-        public string PhoneNumber { get; set; } = "";
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası başında 0 olmadan 10 haneli olmalıdır (Örnek: 5XX XXX XX XX).")]
+        public string CompanyPhoneNumber { get; set; } = "";
     }
 
     private class PasswordModel
@@ -311,36 +317,36 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("[Profile] OnInitializedAsync başladı");
-        await LoadCustomerProfile();
-        if (!string.IsNullOrEmpty(profileModel.PhoneNumber))
-        {
-            profileModel.PhoneNumber = profileModel.PhoneNumber.TrimStart('0');
-        }
-        Console.WriteLine("[Profile] OnInitializedAsync bitti");
+        Console.WriteLine("[Company Profile] OnInitializedAsync başladı");
+        await LoadProfile();
+        Console.WriteLine("[Company Profile] OnInitializedAsync bitti");
     }
 
-    private async Task LoadCustomerProfile()
+    private async Task LoadProfile()
     {
         try
         {
-            Console.WriteLine("[Profile] API çağrısı başlıyor");
-            var response = await Http.GetAsync<ProfileModel>("api/customers/profile");
-            Console.WriteLine("[Profile] API çağrısı bitti");
+            Console.WriteLine("[Company Profile] API çağrısı başlıyor");
+            var response = await Http.GetAsync<GetLogisticsCompanyByIdResponse>("api/logisticscompanies/profile");
+            Console.WriteLine("[Company Profile] API çağrısı bitti");
+            
             if (response != null)
             {
-                profileModel = response;
-                if (!string.IsNullOrEmpty(profileModel.PhoneNumber))
+                profileModel = new ProfileModel
                 {
-                    profileModel.PhoneNumber = profileModel.PhoneNumber.TrimStart('0');
-                }
-                Console.WriteLine("[Profile] Profil modeli güncellendi");
+                    Id = response.Id,
+                    CompanyName = response.CompanyName,
+                    CompanyAddress = response.CompanyAddress,
+                    CompanyEmail = response.CompanyEmail,
+                    CompanyPhoneNumber = response.CompanyPhoneNumber
+                };
+                Console.WriteLine("[Company Profile] Profil modeli güncellendi");
             }
         }
         catch(Exception ex)
         {
             errorMessage = "Profil bilgileri yüklenirken bir hata oluştu.";
-            Console.WriteLine($"[Profile] Hata: {ex}");
+            Console.WriteLine($"[Company Profile] Hata: {ex}");
         }
     }
 
@@ -349,10 +355,10 @@
         originalProfileModel = new ProfileModel
         {
             Id = profileModel.Id,
-            Name = profileModel.Name,
-            Surname = profileModel.Surname,
-            Email = profileModel.Email,
-            PhoneNumber = profileModel.PhoneNumber
+            CompanyName = profileModel.CompanyName,
+            CompanyAddress = profileModel.CompanyAddress,
+            CompanyEmail = profileModel.CompanyEmail,
+            CompanyPhoneNumber = profileModel.CompanyPhoneNumber
         };
         isEditing = true;
     }
@@ -375,7 +381,7 @@
         isChangingPassword = false;
     }
 
-    private async Task HandleProfileUpdate()
+    private async Task HandleSubmit()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
@@ -383,38 +389,34 @@
 
         try
         {
-            var command = new UpdateCustomerCommand
+            var command = new UpdateLogisticsCompanyCommand
             {
                 Id = profileModel.Id,
-                Name = profileModel.Name.Trim(),
-                Surname = profileModel.Surname.Trim(),
-                Email = profileModel.Email.Trim().ToLower(),
-                PhoneNumber = profileModel.PhoneNumber.Trim()
+                CompanyName = profileModel.CompanyName.Trim(),
+                CompanyAddress = profileModel.CompanyAddress.Trim(),
+                CompanyEmail = profileModel.CompanyEmail.Trim().ToLower(),
+                CompanyPhoneNumber = profileModel.CompanyPhoneNumber.Trim()
             };
 
-            var response = await Http.PutAsync<UpdateCustomerCommandResponse>($"api/customers/{profileModel.Id}", command);
+            Console.WriteLine($"[Company Profile] Güncelleme isteği gönderiliyor: {System.Text.Json.JsonSerializer.Serialize(command)}");
+            var response = await Http.PutAsync<UpdateLogisticsCompanyResponse>($"api/logisticscompanies/{profileModel.Id}", command);
+            Console.WriteLine($"[Company Profile] Güncelleme yanıtı alındı: {System.Text.Json.JsonSerializer.Serialize(response)}");
             
             if (response != null)
             {
-                successMessage = "Profil bilgileriniz başarıyla güncellendi.";
-                profileModel = new ProfileModel
-                {
-                    Id = response.Id,
-                    Name = response.Name,
-                    Surname = response.Surname,
-                    Email = response.Email,
-                    PhoneNumber = response.PhoneNumber
-                };
-                await localStorage.SetItemAsync("userName", $"{response.Name} {response.Surname}");
+                successMessage = "Şirket bilgileriniz başarıyla güncellendi.";
+                await LoadProfile(); // Profili yeniden yükle
+                await localStorage.SetItemAsync("companyName", response.CompanyName);
                 isEditing = false;
             }
             else
-        {
+            {
                 errorMessage = "Profil güncellenirken beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
             }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[Company Profile] Güncelleme hatası: {ex}");
             HandleError(ex);
         }
 
@@ -436,7 +438,7 @@
                 NewPassword = passwordModel.NewPassword
             };
 
-            var response = await Http.PutAsync<ChangePasswordCommandResponse>("api/customers/change-password", command);
+            var response = await Http.PutAsync<ChangePasswordCommandResponse>("api/logisticscompanies/change-password", command);
             
             if (response?.Success == true)
             {

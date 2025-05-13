@@ -21,4 +21,6 @@ public class LoadOfferListDto
     public string LogisticsCompanyName { get; set; }
     public string? VehiclePlate { get; set; }
     public string? DriverName { get; set; }
+    public DateTime CreateDate { get; set; }
+    public Guid LogisticsCompanyId { get; set; }
 } 

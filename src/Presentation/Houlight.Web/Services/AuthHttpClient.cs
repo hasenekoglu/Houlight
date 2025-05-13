@@ -110,7 +110,7 @@ public class AuthHttpClient
     {
         try
         {
-            await SetAuthHeader();
+        await SetAuthHeader();
             var token = await _localStorage.GetItemAsync<string>("authToken");
             var userId = await _localStorage.GetItemAsync<string>("userId");
             
@@ -120,7 +120,7 @@ public class AuthHttpClient
             Console.WriteLine($"AuthHttpClient.PutAsync: Gönderilen veri: {System.Text.Json.JsonSerializer.Serialize(data)}");
             Console.WriteLine($"AuthHttpClient.PutAsync: Authorization Header: {_httpClient.DefaultRequestHeaders.Authorization}");
 
-            var response = await _httpClient.PutAsJsonAsync(url, data);
+        var response = await _httpClient.PutAsJsonAsync(url, data);
             var responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"AuthHttpClient.PutAsync: Yanıt durumu: {response.StatusCode}");
             Console.WriteLine($"AuthHttpClient.PutAsync: Yanıt içeriği: {responseContent}");

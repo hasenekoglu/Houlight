@@ -25,6 +25,5 @@ public class UpdateDriverResponse
     public string Email { get; set; }
     public DriverStatus DriverStatus { get; set; }
     public Guid LogisticsCompanyId { get; set; }
-    public string LogisticsCompanyName { get; set; }
     public DateTime UpdateDate { get; set; }
 } 

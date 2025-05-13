@@ -29,7 +29,9 @@ public class LoadOfferMappingProfile : Profile
             .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.CustomerEntity.Name))
             .ForMember(dest => dest.LogisticsCompanyName, opt => opt.MapFrom(src => src.LogisticsCompanyEntity.CompanyName))
             .ForMember(dest => dest.VehiclePlate, opt => opt.MapFrom(src => src.VehicleEntity != null ? src.VehicleEntity.PlateNumber : null))
-            .ForMember(dest => dest.DriverName, opt => opt.MapFrom(src => src.DriverEntity != null ? src.DriverEntity.Name : null));
+            .ForMember(dest => dest.DriverName, opt => opt.MapFrom(src => src.DriverEntity != null ? src.DriverEntity.Name : null))
+            .ForMember(dest => dest.CreateDate, opt => opt.MapFrom(src => src.CreateDate))
+            .ForMember(dest => dest.LogisticsCompanyId, opt => opt.MapFrom(src => src.LogisticsCompanyId));
 
         CreateMap<UpdateLoadOfferCommand, LoadOfferEntity>()
             .ForMember(dest => dest.CompanyOfferedPrice, opt => opt.MapFrom(src => src.CompanyOfferedPrice))

@@ -17,7 +17,7 @@
             @if (!isAuthenticated)
             {
                 <div class="dropdown" @onclick="ToggleDropdown">
-                    <button class="navbar-btn navbar-btn-primary">Giriş / Üye Ol</button>
+                    <button class="houlight-login-btn"><i class="bi bi-person"></i> Giriş / Üye Ol</button>
                     <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
                         <a href="/login" class="houlight-dropdown-item">
                             <i class="bi bi-person"></i> Müşteri Girişi
@@ -31,7 +31,7 @@
             else
             {
                 <div class="dropdown" @onclick="ToggleDropdown">
-                    <button class="navbar-btn navbar-btn-primary">
+                    <button class="houlight-login-btn">
                         <i class="bi bi-person-circle me-2"></i>@userName
                     </button>
                     <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
@@ -68,7 +68,7 @@
         <a href="/contact">İletişim</a>
         @if (!isAuthenticated)
         {
-            <button class="navbar-btn navbar-btn-primary" @onclick="ToggleDropdown">Giriş / Üye Ol</button>
+            <button class="houlight-login-btn" @onclick="ToggleDropdown"><i class="bi bi-person"></i> Giriş / Üye Ol</button>
             <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
                 <a href="/login" class="houlight-dropdown-item">
                     <i class="bi bi-person"></i> Müşteri Girişi
@@ -80,7 +80,7 @@
         }
         else
         {
-            <button class="navbar-btn navbar-btn-primary" @onclick="ToggleDropdown">
+            <button class="houlight-login-btn" @onclick="ToggleDropdown">
                 <i class="bi bi-person-circle me-2"></i>@userName
             </button>
             <div class="houlight-dropdown-menu" style="@(isDropdownOpen ? "display:block;" : "display:none;")">
@@ -146,6 +146,6 @@
         isAuthenticated = false;
         userType = null;
         userName = null;
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/anasayfa", true);
     }
 } 

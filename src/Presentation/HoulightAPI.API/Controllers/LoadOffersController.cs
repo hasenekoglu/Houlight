@@ -29,15 +29,36 @@ public class LoadOffersController : ControllerBase
             x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         Guid? customerId = null;
-        if (Guid.TryParse(userId, out var parsedId))
-            customerId = parsedId;
+        Guid? logisticsCompanyId = null;
 
-        var query = new GetLoadOfferListQuery { CustomerId = customerId };
+        if (Guid.TryParse(userId, out var parsedId))
+        {
+            // Kullanıcı tipine göre ID'yi ayarla
+            var userType = User.Claims.FirstOrDefault(x => x.Type == "userType")?.Value;
+            if (userType == "Customer")
+                customerId = parsedId;
+            else if (userType == "LogisticsCompany")
+                logisticsCompanyId = parsedId;
+        }
+
+        var query = new GetLoadOfferListQuery 
+        { 
+            CustomerId = customerId,
+            LogisticsCompanyId = logisticsCompanyId
+        };
         var result = await _mediator.Send(query);
         return Ok(result);
     }
 
-    [HttpPost]
+    [HttpGet("company/{companyId}")]
+    public async Task<IActionResult> GetCompanyLoadOffers(Guid companyId)
+    {
+        var query = new GetLoadOfferListQuery { LogisticsCompanyId = companyId };
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpPost("create")]
     public async Task<IActionResult> CreateLoadOffer([FromBody] CreateLoadOfferCommand command)
     {
         var result = await _mediator.Send(command);

@@ -20,6 +20,11 @@ public class GetDriversByFilterQueryHandler : IRequestHandler<GetDriversByFilter
     {
         var drivers = await _driverRepository.GetAll();
         
+        if (request.LogisticsCompanyId.HasValue)
+        {
+            drivers = drivers.Where(x => x.LogisticsCompanyId == request.LogisticsCompanyId.Value).ToList();
+        }
+
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             drivers = drivers.Where(x => 
@@ -28,6 +33,11 @@ public class GetDriversByFilterQueryHandler : IRequestHandler<GetDriversByFilter
                 x.Email.Contains(request.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
                 x.PhoneNumber.Contains(request.SearchTerm, StringComparison.OrdinalIgnoreCase)
             ).ToList();
+        }
+
+        if (request.DriverStatus.HasValue)
+        {
+            drivers = drivers.Where(x => x.DriverStatus == request.DriverStatus.Value).ToList();
         }
 
         //if (!string.IsNullOrEmpty(request.LicenseType))

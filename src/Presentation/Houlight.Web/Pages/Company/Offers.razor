@@ -1,0 +1,256 @@
+@page "/company/offers"
+@using Houlight.Application.Features.LoadOffers.Queries.GetLoadOfferList;
+@using Houlight.Domain.Enums;
+@using Houlight.Web.Services;
+@inject AuthHttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<PageTitle>Tüm Şirket Teklifleri - Houlight</PageTitle>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Tüm Şirketlerin Yük Teklifleri</h4>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/company/dashboard" class="dashboard-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+            <span class="my-offers-toggle @(onlyMine ? "active" : "")" @onclick="ToggleOnlyMine">
+                <i class="bi bi-person-badge"></i> Kendi Tekliflerim
+            </span>
+        </div>
+    </div>
+    <!-- Filtreleme Alanları -->
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedLoadType">
+                <option value="">Tüm Yük Tipleri</option>
+                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                {
+                    <option value="@type">@GetLoadTypeText(type)</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedStatus">
+                <option value="">Tüm Durumlar</option>
+                <option value="Pending">Beklemede</option>
+                <option value="Accepted">Kabul Edildi</option>
+                <option value="Rejected">Reddedildi</option>
+                <option value="Assigned">Atandı</option>
+                <option value="InTransit">Yolda</option>
+                <option value="Delivered">Teslim Edildi</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <input class="form-control" placeholder="Arama..." @bind="searchText" />
+        </div>
+        <div class="col-12 col-md-2 d-grid align-items-center">
+            <button class="btn btn-houlight-accent w-100" type="button" @onclick="ApplyFilters">
+                <i class="bi bi-funnel me-1"></i>
+                Filtrele
+            </button>
+        </div>
+    </div>
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-houlight-accent" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted mt-2">Teklifler yükleniyor...</p>
+        </div>
+    }
+    else if (filteredOffers == null || !filteredOffers.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-cash-coin fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Henüz teklif bulunmuyor.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var group in filteredOffers.GroupBy(x => x.LoadId))
+            {
+                var first = group.First();
+                <div class="col">
+                    <div class="modern-offer-card card shadow-lg border-0 h-100 p-0">
+                        <!-- Üst: Yük Bilgileri -->
+                        <div class="bg-offer-orange d-flex flex-column justify-content-center p-4 rounded-top">
+                            <div class="mb-2">
+                                <span class="badge @GetLoadTypeBadgeClass(first.LoadType) mb-2">@GetLoadTypeText(first.LoadType)</span>
+                            </div>
+                            <h5 class="fw-bold mb-3">@first.FromLocation <i class="bi bi-arrow-right mx-2"></i> @first.ToLocation</h5>
+                            <div class="mb-2 small"><i class="bi bi-box-seam me-1"></i> @first.Description</div>
+                            <div class="mb-2 small"><i class="bi bi-weight me-1"></i> @first.Weight kg | <i class="bi bi-arrows-angle-expand ms-2 me-1"></i> @first.Volume m³</div>
+                            <div class="mb-2 small"><i class="bi bi-cash-coin me-1"></i> Müşteri Beklentisi: <span class="fw-bold text-warning">@first.CustomerExpectedPrice?.ToString("N2") TL</span></div>
+                        </div>
+                        <!-- Alt: Teklifler -->
+                        <div class="p-4">
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var offer in group.OrderByDescending(x => x.CreateDate))
+                                {
+                                    var isMine = offer.LogisticsCompanyId == myCompanyId;
+                                    var expanded = expandedOfferId == offer.Id;
+                                    <div class="expand-offer-box position-relative">
+                                        @if (isMine)
+                                        {
+                                            <span class="senin-teklifin-ribbon">SENİN TEKLİFİN</span>
+                                        }
+                                        <div class="expand-offer-summary d-flex align-items-center justify-content-between px-3 py-2 rounded-3 bg-offer-yellow shadow-sm @((isMine ? "border-houlight-accent offer-mine" : ""))" style="color:#222; background: linear-gradient(90deg, #ffe0b2 80%, #ffd180 100%) !important; border:2px solid #ffb74d;" @onclick="() => ToggleOfferDetails(offer.Id)">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="fw-bold">@offer.LogisticsCompanyName</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="fw-bold text-houlight-accent">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
+                                                <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span>
+                                                <i class="bi @(expanded ? "bi-chevron-up" : "bi-chevron-down") fs-5 text-houlight-accent"></i>
+                                            </div>
+                                        </div>
+                                        @if (expanded)
+                                        {
+                                            <div class="expand-offer-details bg-white rounded-3 shadow-sm mt-1 px-3 py-2 animate-fade-in">
+                                                <div class="row g-2">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="mb-1"><span class="fw-bold">Araç:</span> @offer.VehiclePlate</div>
+                                                        <div class="mb-1"><span class="fw-bold">Sürücü:</span> @offer.DriverName</div>
+                                                        <div class="mb-1"><span class="fw-bold">Tarih:</span> @offer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="mb-1"><span class="fw-bold">Not:</span> <span class="text-muted">@offer.Description</span></div>
+                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<LoadOfferListDto> offers = new();
+    private List<LoadOfferListDto> filteredOffers = new();
+    private bool isLoading = true;
+    private Guid myCompanyId;
+    private Guid expandedOfferId = Guid.Empty;
+    private string selectedLoadType = "";
+    private string selectedStatus = "";
+    private string searchText = "";
+    private bool onlyMine = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var companyIdStr = await localStorage.GetItemAsync<string>("companyId");
+        Guid.TryParse(companyIdStr, out myCompanyId);
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            offers = await Http.GetAsync<List<LoadOfferListDto>>("api/loadoffers") ?? new List<LoadOfferListDto>();
+            ApplyFilters();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var filtered = offers.AsEnumerable();
+        if (!string.IsNullOrEmpty(selectedLoadType))
+            filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
+        if (!string.IsNullOrEmpty(selectedStatus))
+            filtered = filtered.Where(x => x.LoadStatus.ToString() == selectedStatus);
+        if (!string.IsNullOrWhiteSpace(searchText))
+            filtered = filtered.Where(x => (x.FromLocation != null && x.FromLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           (x.ToLocation != null && x.ToLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           (x.Description != null && x.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           (x.LogisticsCompanyName != null && x.LogisticsCompanyName.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+        if (onlyMine)
+            filtered = filtered.Where(x => x.LogisticsCompanyId == myCompanyId);
+        filteredOffers = filtered.ToList();
+    }
+
+    private void ToggleOfferDetails(Guid offerId)
+    {
+        expandedOfferId = expandedOfferId == offerId ? Guid.Empty : offerId;
+    }
+
+    private void ToggleOnlyMine()
+    {
+        onlyMine = !onlyMine;
+        ApplyFilters();
+    }
+
+    private string GetOfferStatusBadgeClass(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "bg-warning",
+            LoadStatus.Accepted => "bg-success",
+            LoadStatus.Rejected => "bg-danger",
+            LoadStatus.Assigned => "bg-primary",
+            LoadStatus.InTransit => "bg-info",
+            LoadStatus.Delivered => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+    private string GetOfferStatusText(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "Beklemede",
+            LoadStatus.Accepted => "Kabul Edildi",
+            LoadStatus.Rejected => "Reddedildi",
+            LoadStatus.Assigned => "Atandı",
+            LoadStatus.InTransit => "Yolda",
+            LoadStatus.Delivered => "Teslim Edildi",
+            _ => status.ToString()
+        };
+    }
+    private string GetLoadTypeText(LoadType loadType)
+    {
+        return loadType switch
+        {
+            LoadType.GeneralCargo => "Genel Kargo",
+            LoadType.PerishableGoods => "Bozulabilir Ürünler",
+            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+            LoadType.FragileItems => "Kırılabilir Eşyalar",
+            LoadType.BulkCargo => "Dökme Kargo",
+            LoadType.Liquid => "Sıvı Kargo",
+            LoadType.HighValue => "Yüksek Değerli Ürünler",
+            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+            LoadType.DangerousGoods => "Tehlikeli Mallar",
+            _ => loadType.ToString()
+        };
+    }
+    private string GetLoadTypeBadgeClass(LoadType loadType)
+    {
+        return loadType switch
+        {
+            LoadType.GeneralCargo => "badge-loadtype-general",
+            LoadType.PerishableGoods => "badge-loadtype-perishable",
+            LoadType.HazardousMaterials => "badge-loadtype-hazardous",
+            LoadType.FragileItems => "badge-loadtype-fragile",
+            LoadType.BulkCargo => "badge-loadtype-bulk",
+            LoadType.Liquid => "badge-loadtype-liquid",
+            LoadType.HighValue => "badge-loadtype-highvalue",
+            LoadType.TemperatureSensitive => "badge-loadtype-temperature",
+            LoadType.DangerousGoods => "badge-loadtype-dangerous",
+            _ => "bg-secondary"
+        };
+    }
+} 

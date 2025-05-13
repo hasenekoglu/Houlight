@@ -24,7 +24,6 @@ public class UpdateLogisticsCompanyCommandValidator : AbstractValidator<UpdateLo
 
         RuleFor(x => x.CompanyPhoneNumber)
             .NotEmpty().WithMessage("Telefon numarası boş olamaz.")
-            .Matches(@"^[0-9]+$").WithMessage("Telefon numarası sadece rakamlardan oluşmalıdır.")
-            .Length(11).WithMessage("Telefon numarası 11 haneli olmalıdır.");
+            .Matches(@"^0[0-9]{10}$").WithMessage("Telefon numarası 0 ile başlamalı ve toplam 11 haneli olmalıdır (Örnek: 05XX XXX XX XX).");
     }
 } 

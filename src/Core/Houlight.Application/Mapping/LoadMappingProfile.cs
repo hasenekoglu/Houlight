@@ -2,6 +2,7 @@ using AutoMapper;
 using Houlight.Application.Features.Loads.Commands.CreateLoad;
 using Houlight.Application.Features.Loads.Commands.CustomerLoadUpdate;
 using Houlight.Application.Features.Loads.Commands.DeleteLoad;
+using Houlight.Application.Features.Loads.Commands.LogisticsCompanyLoadUpdate;
 using Houlight.Application.Features.Loads.Queries.GetAllLoads;
 using Houlight.Application.Features.Loads.Queries.GetLoadById;
 using Houlight.Application.Features.Loads.Queries.GetLoadsByFilter;
@@ -51,5 +52,8 @@ public class LoadMappingProfile : Profile
             .ForMember(dest => dest.AssignedVehiclePlate, opt => opt.MapFrom(src => src.VehicleEntity != null ? src.VehicleEntity.PlateNumber : null))
             .ForMember(dest => dest.AssignedDriverName, opt => opt.MapFrom(src => 
                 src.DriverEntity != null ? $"{src.DriverEntity.Name} {src.DriverEntity.Surname}" : null));
+
+        CreateMap<LoadEntity, LogisticsCompanyLoadUpdateResponse>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
     }
 } 

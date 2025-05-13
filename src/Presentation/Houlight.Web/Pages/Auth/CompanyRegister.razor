@@ -1,0 +1,140 @@
+@page "/company/register"
+@using Blazored.LocalStorage
+@using Houlight.Web.Services
+@using System.ComponentModel.DataAnnotations
+@inject AuthHttpClient Http
+@inject NavigationManager NavigationManager
+
+<PageTitle>Şirket Kaydı - Houlight</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4" style="color: var(--primary-color);">Şirket Kaydı</h2>
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+                    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="companyName" class="form-label">Şirket Adı</label>
+                            <InputText id="companyName" class="form-control" @bind-Value="registerModel.CompanyName" />
+                            <ValidationMessage For="@(() => registerModel.CompanyName)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="companyAddress" class="form-label">Şirket Adresi</label>
+                            <InputTextArea id="companyAddress" class="form-control" @bind-Value="registerModel.CompanyAddress" rows="3" />
+                            <ValidationMessage For="@(() => registerModel.CompanyAddress)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="companyPhoneNumber" class="form-label">Telefon</label>
+                            <InputText id="companyPhoneNumber" class="form-control" @bind-Value="registerModel.CompanyPhoneNumber" placeholder="5XXXXXXXXX" />
+                            <ValidationMessage For="@(() => registerModel.CompanyPhoneNumber)" class="text-danger" />
+                            <small class="text-muted">Örnek: 5XXXXXXXXX (10 haneli)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="companyEmail" class="form-label">E-posta</label>
+                            <InputText type="email" id="companyEmail" class="form-control" @bind-Value="registerModel.CompanyEmail" placeholder="sirket@email.com" />
+                            <ValidationMessage For="@(() => registerModel.CompanyEmail)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre</label>
+                            <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" />
+                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
+                            <small class="text-muted">En az 6 karakter</small>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
+                            <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" />
+                            @if (!string.IsNullOrEmpty(passwordError))
+                            {
+                                <div class="text-danger">@passwordError</div>
+                            }
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
+                                @(isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol")
+                            </button>
+                        </div>
+                    </EditForm>
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Zaten kayıtlı bir şirket misiniz? <a href="/company/login" class="text-decoration-none" style="color: var(--primary-color);">Giriş Yap</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel = new();
+    private string confirmPassword = "";
+    private string passwordError = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private class RegisterModel
+    {
+        [Required(ErrorMessage = "Şirket adı alanı boş olamaz.")]
+        [StringLength(100, ErrorMessage = "Şirket adı 100 karakterden uzun olamaz.")]
+        public string CompanyName { get; set; } = "";
+
+        [Required(ErrorMessage = "Şirket adresi alanı boş olamaz.")]
+        [StringLength(200, ErrorMessage = "Şirket adresi 200 karakterden uzun olamaz.")]
+        public string CompanyAddress { get; set; } = "";
+
+        [Required(ErrorMessage = "Telefon numarası alanı boş olamaz.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası 10 haneli olmalıdır.")]
+        public string CompanyPhoneNumber { get; set; } = "";
+
+        [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
+        [StringLength(100, ErrorMessage = "E-posta alanı 100 karakterden uzun olamaz.")]
+        public string CompanyEmail { get; set; } = "";
+
+        [Required(ErrorMessage = "Şifre alanı boş olamaz.")]
+        [StringLength(50, MinimumLength = 6, ErrorMessage = "Şifre 6-50 karakter arasında olmalıdır.")]
+        public string Password { get; set; } = "";
+    }
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+        passwordError = string.Empty;
+
+        if (registerModel.Password != confirmPassword)
+        {
+            passwordError = "Şifreler uyuşmuyor.";
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            var response = await Http.PostAsync<object>("api/logisticscompanies", new {
+                CompanyName = registerModel.CompanyName,
+                CompanyAddress = registerModel.CompanyAddress,
+                CompanyPhoneNumber = registerModel.CompanyPhoneNumber,
+                CompanyEmail = registerModel.CompanyEmail,
+                Password = registerModel.Password
+            });
+            
+            if (response != null)
+            {
+                NavigationManager.NavigateTo("/company/login", true);
+            }
+            else
+            {
+                errorMessage = "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
+        }
+        isLoading = false;
+    }
+} 

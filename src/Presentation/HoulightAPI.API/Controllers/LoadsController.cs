@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using FluentValidation;
+using Houlight.Application.Features.Loads.Commands.LogisticsCompanyLoadUpdate;
+
 
 namespace HoulightAPI.API.Controllers;
 
@@ -54,7 +56,8 @@ public class LoadsController : ControllerBase
             return Unauthorized(new { message = "Geçersiz oturum bilgisi. Lütfen tekrar giriş yapın." });
         }
 
-        query.CustomerId = parsedId;
+        // query.CustomerId = parsedId; // Şirket panelinde bu satır kapalı olmalı
+
         var result = await _mediator.Send(query);
         return Ok(result);
     }
@@ -125,6 +128,17 @@ public class LoadsController : ControllerBase
     public async Task<IActionResult> DeleteLoad(Guid id)
     {
         var command = new DeleteLoadCommand { Id = id };
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPut("company/{id}/status")]
+    [Authorize]
+    public async Task<IActionResult> UpdateLoadStatusByCompany(Guid id, [FromBody] LogisticsCompanyLoadUpdateCommand command)
+    {
+        if (id != command.Id)
+            return BadRequest();
+
         var result = await _mediator.Send(command);
         return Ok(result);
     }

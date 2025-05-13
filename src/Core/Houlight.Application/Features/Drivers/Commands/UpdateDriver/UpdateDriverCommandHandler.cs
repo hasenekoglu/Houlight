@@ -39,7 +39,7 @@ public class UpdateDriverCommandHandler : IRequestHandler<UpdateDriverCommand, U
 
         await _driverRepository.UpdateAsync(driver);
         var response = _mapper.Map<UpdateDriverResponse>(driver);
-        response.LogisticsCompanyName = logisticsCompany.CompanyName;
+    
         return response;
 
     }

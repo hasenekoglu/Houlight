@@ -1,0 +1,541 @@
+@page "/company/my-offers"
+@using Houlight.Domain.Entities
+@using Houlight.Domain.Enums
+@using Houlight.Web.Services
+@using Blazored.LocalStorage
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<PageTitle>Tekliflerim - Houlight</PageTitle>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @successMessage
+        <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+    </div>
+}
+
+<div class="container py-4">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Tekliflerim</h4>
+        <div>
+            <a href="/company/loads" class="btn btn-outline-houlight-accent me-2">
+                <i class="bi bi-box-seam me-1"></i>
+                Yükler
+            </a>
+            <a href="/company/dashboard" class="dashboard-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-houlight-accent" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted mt-2">Teklifler yükleniyor...</p>
+        </div>
+    }
+    else if (offers == null || !offers.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-cash-coin fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Henüz teklif vermediniz.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var offer in offers)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@offer.LoadTitle</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-geo-alt me-1"></i>@offer.FromLocation - @offer.ToLocation
+                                    </p>
+                                </div>
+                                <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Teklif Fiyatı</small>
+                                            <span class="fw-bold">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Müşteri Beklentisi</small>
+                                            <span>@(offer.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(offer.Note))
+                            {
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Not</small>
+                                    <p class="mb-0 small">@offer.Note</p>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    @offer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-houlight-accent" @onclick="() => ShowOfferDetails(offer)">
+                                        <i class="bi bi-eye me-1"></i>
+                                        Detaylar
+                                    </button>
+                                    @if (offer.LoadStatus == LoadStatus.Pending)
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(offer)">
+                                            <i class="bi bi-pencil"></i>
+                                            Düzenle
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(offer)">
+                                            <i class="bi bi-trash"></i>
+                                            Sil
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showDetailsModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Teklif Detayları</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetailsModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (selectedOffer != null)
+                    {
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="mb-3">Yük Bilgileri</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Başlık</small>
+                                        <span>@selectedOffer.LoadTitle</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Güzergah</small>
+                                        <span>@selectedOffer.FromLocation - @selectedOffer.ToLocation</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Yük Tipi</small>
+                                        <span>@GetLoadTypeText(selectedOffer.LoadType)</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Ağırlık</small>
+                                        <span>@(selectedOffer.Weight.ToString("N0")) kg</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Hacim</small>
+                                        <span>@(selectedOffer.Volume.ToString("N0")) m³</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(selectedOffer.Description))
+                                    {
+                                        <div>
+                                            <small class="text-muted d-block">Açıklama</small>
+                                            <span>@selectedOffer.Description</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="mb-3">Teklif Bilgileri</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Teklif Fiyatı</small>
+                                        <span class="fw-bold">@selectedOffer.CompanyOfferedPrice.ToString("N2") TL</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Müşteri Beklentisi</small>
+                                        <span>@(selectedOffer.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Durum</small>
+                                        <span class="badge @GetOfferStatusBadgeClass(selectedOffer.LoadStatus)">
+                                            @GetOfferStatusText(selectedOffer.LoadStatus)
+                                        </span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(selectedOffer.Note))
+                                    {
+                                        <div>
+                                            <small class="text-muted d-block">Not</small>
+                                            <span>@selectedOffer.Note</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="p-3 bg-light rounded mt-3">
+                                    <h6 class="mb-3">Zaman Bilgileri</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Teklif Tarihi</small>
+                                        <span>@selectedOffer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                    </div>
+                                    @if (selectedOffer.UpdateDate.HasValue)
+                                    {
+                                        <div>
+                                            <small class="text-muted d-block">Son Güncelleme</small>
+                                            <span>@selectedOffer.UpdateDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetailsModal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showEditModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Teklif Düzenle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <EditForm Model="@editOfferModel" OnValidSubmit="HandleEditSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Teklif Fiyatı (TL)</label>
+                            <InputNumber @bind-Value="editOfferModel.CompanyOfferedPrice" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Araç Seçin</label>
+                            <select @bind="editOfferModel.AssignedVehicleId" class="form-select">
+                                <option value="">Araç Seçin</option>
+                                @foreach (var vehicle in availableVehicles)
+                                {
+                                    <option value="@vehicle.Id">@vehicle.PlateNumber - @vehicle.VehicleTypeType (@vehicle.Capacity.ToString("N0") kg)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sürücü Seçin</label>
+                            <select @bind="editOfferModel.AssignedDriverId" class="form-select">
+                                <option value="">Sürücü Seçin</option>
+                                @foreach (var driver in availableDrivers)
+                                {
+                                    <option value="@driver.Id">@driver.Name @driver.Surname - @driver.LicenseNumber</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">İptal</button>
+                        <button type="submit" class="btn btn-houlight-accent">Kaydet</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Teklif Sil</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@selectedOffer?.CompanyOfferedPrice.ToString("N2") TL tutarındaki teklifi silmek istediğinize emin misiniz?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">İptal</button>
+                    <button type="button" class="btn btn-danger" @onclick="HandleDelete">Sil</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<OfferModel> offers = new();
+    private bool isLoading = true;
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool showDetailsModal = false;
+    private bool showEditModal = false;
+    private bool showDeleteModal = false;
+    private OfferModel selectedOffer;
+    private OfferModel editOfferModel = new();
+    private List<VehicleModel> availableVehicles = new();
+    private List<DriverModel> availableDrivers = new();
+
+    private class OfferModel
+    {
+        public Guid Id { get; set; }
+        public Guid LoadId { get; set; }
+        public string LoadTitle { get; set; } = string.Empty;
+        public string FromLocation { get; set; } = string.Empty;
+        public string ToLocation { get; set; } = string.Empty;
+        public LoadType LoadType { get; set; }
+        public int Weight { get; set; }
+        public int Volume { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal CompanyOfferedPrice { get; set; }
+        public decimal? CustomerExpectedPrice { get; set; }
+        public string Note { get; set; } = string.Empty;
+        public LoadStatus LoadStatus { get; set; }
+        public DateTime CreateDate { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public Guid? AssignedVehicleId { get; set; }
+        public Guid? AssignedDriverId { get; set; }
+    }
+
+    private class VehicleModel
+    {
+        public Guid Id { get; set; }
+        public string PlateNumber { get; set; } = string.Empty;
+        public string VehicleTypeType { get; set; } = string.Empty;
+        public int Capacity { get; set; }
+        public bool IsAvailable { get; set; }
+    }
+
+    private class DriverModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
+        public string LicenseNumber { get; set; } = string.Empty;
+        public DriverStatus DriverStatus { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                return;
+            }
+
+            offers = await Http.GetAsync<List<OfferModel>>($"api/loadoffers/company/{companyId}") ?? new List<OfferModel>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Teklifler yüklenirken bir hata oluştu: " + ex.Message;
+            Console.WriteLine($"[MyOffers] Hata: {ex}");
+            offers = new List<OfferModel>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<Guid> GetCompanyId()
+    {
+        var companyId = await localStorage.GetItemAsync<Guid>("companyId");
+        if (companyId == Guid.Empty)
+        {
+            NavigationManager.NavigateTo("/login");
+            return Guid.Empty;
+        }
+        return companyId;
+    }
+
+    private void ShowOfferDetails(OfferModel offer)
+    {
+        selectedOffer = offer;
+        showDetailsModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseDetailsModal()
+    {
+        showDetailsModal = false;
+        selectedOffer = null;
+        StateHasChanged();
+    }
+
+    private async Task ShowEditModal(OfferModel offer)
+    {
+        editOfferModel = new OfferModel
+        {
+            Id = offer.Id,
+            CompanyOfferedPrice = offer.CompanyOfferedPrice,
+            Note = offer.Note,
+            AssignedVehicleId = offer.AssignedVehicleId,
+            AssignedDriverId = offer.AssignedDriverId
+        };
+        selectedOffer = offer;
+        var companyId = await localStorage.GetItemAsync<string>("companyId");
+        var vehiclesResponse = await Http.GetAsync<List<VehicleModel>>($"api/vehicles/filter?logisticsCompanyId={companyId}");
+        availableVehicles = vehiclesResponse?.Where(v => v.IsAvailable).ToList() ?? new List<VehicleModel>();
+        var driversResponse = await Http.GetAsync<List<DriverModel>>($"api/drivers/filter?logisticsCompanyId={companyId}&driverStatus=Available");
+        availableDrivers = driversResponse?.Where(d => d.DriverStatus == DriverStatus.Available).ToList() ?? new List<DriverModel>();
+        showEditModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedOffer = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        try
+        {
+            var updateCommand = new {
+                Id = editOfferModel.Id,
+                CompanyOfferedPrice = editOfferModel.CompanyOfferedPrice,
+                AssignedVehicleId = editOfferModel.AssignedVehicleId,
+                AssignedDriverId = editOfferModel.AssignedDriverId
+            };
+            var response = await Http.PutAsync<object>($"api/loadoffers/{editOfferModel.Id}", updateCommand);
+            if (response != null)
+            {
+                successMessage = "Teklif başarıyla güncellendi.";
+                await LoadData();
+                CloseEditModal();
+            }
+            else
+            {
+                errorMessage = "Teklif güncellenirken bir hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Teklif güncellenirken bir hata oluştu: " + ex.Message;
+        }
+    }
+
+    private void ShowDeleteModal(OfferModel offer)
+    {
+        selectedOffer = offer;
+        showDeleteModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        selectedOffer = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleDelete()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/loadoffers/{selectedOffer.Id}");
+            if (response)
+            {
+                successMessage = "Teklif başarıyla silindi.";
+                await LoadData();
+                CloseDeleteModal();
+            }
+            else
+            {
+                errorMessage = "Teklif silinirken bir hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Teklif silinirken bir hata oluştu: " + ex.Message;
+        }
+    }
+
+    private string GetOfferStatusBadgeClass(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "bg-warning",
+            LoadStatus.Accepted => "bg-success",
+            LoadStatus.Rejected => "bg-danger",
+            LoadStatus.Assigned => "bg-primary",
+            LoadStatus.InTransit => "bg-info",
+            LoadStatus.Delivered => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetOfferStatusText(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "Beklemede",
+            LoadStatus.Accepted => "Kabul Edildi",
+            LoadStatus.Rejected => "Reddedildi",
+            LoadStatus.Assigned => "Atandı",
+            LoadStatus.InTransit => "Yolda",
+            LoadStatus.Delivered => "Teslim Edildi",
+            _ => status.ToString()
+        };
+    }
+
+    private string GetLoadTypeText(LoadType loadType)
+    {
+        return loadType switch
+        {
+            LoadType.GeneralCargo => "Genel Kargo",
+            LoadType.PerishableGoods => "Bozulabilir Ürünler",
+            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+            LoadType.FragileItems => "Kırılabilir Eşyalar",
+            LoadType.BulkCargo => "Dökme Kargo",
+            LoadType.Liquid => "Sıvı Kargo",
+            LoadType.HighValue => "Yüksek Değerli Ürünler",
+            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+            LoadType.DangerousGoods => "Tehlikeli Mallar",
+            _ => loadType.ToString()
+        };
+    }
+} 

@@ -26,6 +26,36 @@
             </button>
         </div>
     </div>
+    <!-- Filtreleme Alanları -->
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedLoadType">
+                <option value="">Tüm Yük Tipleri</option>
+                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                {
+                    <option value="@type">@GetLoadTypeName(type)</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedStatus">
+                <option value="">Tüm Durumlar</option>
+                <option value="Pending">Beklemede</option>
+                <option value="InTransit">Yolda</option>
+                <option value="Delivered">Teslim Edildi</option>
+                <option value="Assigned">Atandı</option>
+                <option value="Accepted">Kabul Edildi</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <input class="form-control" placeholder="Arama..." @bind="searchText" />
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-outline-secondary" type="button" @onclick="ClearFilters">
+                <i class="bi bi-x-circle"></i> Temizle
+            </button>
+        </div>
+    </div>
     
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -47,7 +77,7 @@
     else
     {
         <div class="row g-3">
-            @foreach (var load in loads)
+            @foreach (var load in filteredLoads)
             {
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100 shadow-sm border-0">
@@ -109,54 +139,54 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-column">
-                                    <div class="mb-3">
-                                        <label class="form-label required">Nereden</label>
+                        <div class="mb-3">
+                            <label class="form-label required">Nereden</label>
                                         <InputText @bind-Value="newLoad.FromLocation" class="form-control houlight-input" placeholder="Örn: İstanbul" />
-                                        <ValidationMessage For="@(() => newLoad.FromLocation)" class="text-danger" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label required">Nereye</label>
+                            <ValidationMessage For="@(() => newLoad.FromLocation)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Nereye</label>
                                         <InputText @bind-Value="newLoad.ToLocation" class="form-control houlight-input" placeholder="Örn: Ankara" />
-                                        <ValidationMessage For="@(() => newLoad.ToLocation)" class="text-danger" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label required">Yük Tipi</label>
+                            <ValidationMessage For="@(() => newLoad.ToLocation)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Yük Tipi</label>
                                         <InputSelect @bind-Value="newLoad.LoadType" class="form-select houlight-select">
-                                            @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
-                                            {
-                                                <option value="@type">@GetLoadTypeName(type)</option>
-                                            }
-                                        </InputSelect>
-                                        <ValidationMessage For="@(() => newLoad.LoadType)" class="text-danger" />
-                                    </div>
+                                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                                {
+                                    <option value="@type">@GetLoadTypeName(type)</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newLoad.LoadType)" class="text-danger" />
+                        </div>
                                     <div class="mb-3">
-                                        <label class="form-label required">Ağırlık (kg)</label>
+                                <label class="form-label required">Ağırlık (kg)</label>
                                         <InputNumber @bind-Value="newLoad.Weight" class="form-control houlight-input" min="1" max="100000" />
-                                        <ValidationMessage For="@(() => newLoad.Weight)" class="text-danger" />
+                                <ValidationMessage For="@(() => newLoad.Weight)" class="text-danger" />
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-column">
                                     <div class="mb-3">
-                                        <label class="form-label required">Hacim (m³)</label>
+                                <label class="form-label required">Hacim (m³)</label>
                                         <InputNumber @bind-Value="newLoad.Volume" class="form-control houlight-input" min="1" max="1000" />
-                                        <ValidationMessage For="@(() => newLoad.Volume)" class="text-danger" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Beklenen Fiyat (₺)</label>
+                                <ValidationMessage For="@(() => newLoad.Volume)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Beklenen Fiyat (₺)</label>
                                         <InputNumber @bind-Value="newLoad.CustomerExpectedPrice" class="form-control houlight-input" min="0" />
-                                        <ValidationMessage For="@(() => newLoad.CustomerExpectedPrice)" class="text-danger" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Teslimat Tarihi</label>
+                            <ValidationMessage For="@(() => newLoad.CustomerExpectedPrice)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teslimat Tarihi</label>
                                         <InputDate @bind-Value="newLoad.DeliveryDate" class="form-control houlight-input" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
-                                        <ValidationMessage For="@(() => newLoad.DeliveryDate)" class="text-danger" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Açıklama</label>
+                            <ValidationMessage For="@(() => newLoad.DeliveryDate)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
                                         <InputTextArea @bind-Value="newLoad.Description" class="form-control houlight-input" rows="3" placeholder="Yük hakkında detaylı bilgi..." />
-                                        <ValidationMessage For="@(() => newLoad.Description)" class="text-danger" />
+                            <ValidationMessage For="@(() => newLoad.Description)" class="text-danger" />
                                     </div>
                                 </div>
                             </div>
@@ -259,11 +289,55 @@
 
 @code {
     private List<GetLoadsByFilterResponse> loads = new();
+    private List<GetLoadsByFilterResponse> filteredLoads = new();
     private GetLoadsByFilterResponse? selectedLoad;
     private bool ShowNewLoadModal;
     private CreateLoadCommand newLoad = new CreateLoadCommand { LoadType = LoadType.GeneralCargo };
     private string errorMessage = "";
     private bool isLoading = false;
+
+    // Filtreleme için ek alanlar
+    private string selectedLoadType
+    {
+        get => _selectedLoadType;
+        set
+        {
+            if (_selectedLoadType != value)
+            {
+                _selectedLoadType = value;
+                ApplyFilters();
+            }
+        }
+    }
+    private string _selectedLoadType = "";
+
+    private string selectedStatus
+    {
+        get => _selectedStatus;
+        set
+        {
+            if (_selectedStatus != value)
+            {
+                _selectedStatus = value;
+                ApplyFilters();
+            }
+        }
+    }
+    private string _selectedStatus = "";
+
+    private string searchText
+    {
+        get => _searchText;
+        set
+        {
+            if (_searchText != value)
+            {
+                _searchText = value;
+                ApplyFilters();
+            }
+        }
+    }
+    private string _searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -295,6 +369,7 @@
             if (response != null)
             {
                 loads = response;
+                ApplyFilters();
             }
             else
             {
@@ -306,6 +381,20 @@
             errorMessage = "Yükler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
             Console.WriteLine($"Yük yükleme hatası: {ex}");
         }
+    }
+
+    private void ApplyFilters()
+    {
+        var filtered = loads.AsEnumerable();
+        if (!string.IsNullOrEmpty(selectedLoadType))
+            filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
+        if (!string.IsNullOrEmpty(selectedStatus))
+            filtered = filtered.Where(x => x.Status.ToString() == selectedStatus);
+        if (!string.IsNullOrWhiteSpace(searchText))
+            filtered = filtered.Where(x => (x.FromLocation != null && x.FromLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           (x.ToLocation != null && x.ToLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           (x.Description != null && x.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+        filteredLoads = filtered.ToList();
     }
 
     private async Task HandleNewLoadSubmit()
@@ -497,6 +586,14 @@
     private void ShowLoadDetails(GetLoadsByFilterResponse load)
     {
         selectedLoad = load;
+    }
+
+    private void ClearFilters()
+    {
+        selectedLoadType = "";
+        selectedStatus = "";
+        searchText = "";
+        ApplyFilters();
     }
 
     private class ErrorResponse

@@ -56,18 +56,18 @@
                 <div class="col-md-6 mb-4">
                     <a href="/customer/loads" class="text-decoration-none">
                         <div class="card shadow-sm border-0 h-100 dashboard-card">
-                            <div class="card-body">
+                        <div class="card-body">
                                 <h5 class="dashboard-title d-flex align-items-center">
                                     <i class="bi bi-truck me-2 text-houlight-accent"></i>
                                     Aktif Yükler
                                 </h5>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
                                         <div class="dashboard-stat-icon bg-houlight-accent-light">
                                             <i class="bi bi-truck text-houlight-accent"></i>
                                         </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
                                         <div class="dashboard-stat-value">@activeLoads</div>
                                         <div class="dashboard-stat-label">Aktif Yük</div>
                                     </div>
@@ -81,18 +81,18 @@
                 <div class="col-md-6 mb-4">
                     <a href="/customer/offers" class="text-decoration-none">
                         <div class="card shadow-sm border-0 h-100 dashboard-card">
-                            <div class="card-body">
+                        <div class="card-body">
                                 <h5 class="dashboard-title d-flex align-items-center">
                                     <i class="bi bi-cart me-2 text-houlight-accent"></i>
                                     Bekleyen Teklifler
                                 </h5>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
                                         <div class="dashboard-stat-icon bg-houlight-accent-light">
                                             <i class="bi bi-cart text-houlight-accent"></i>
                                         </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
                                         <div class="dashboard-stat-value">@pendingOffers</div>
                                         <div class="dashboard-stat-label">Bekleyen Teklif</div>
                                     </div>
@@ -156,7 +156,7 @@
                         <div class="text-center py-5">
                             <div class="dashboard-empty-state">
                                 <i class="bi bi-truck display-4 text-houlight-accent mb-3"></i>
-                                <p class="text-muted mb-0">Henüz yük bulunmuyor.</p>
+                            <p class="text-muted mb-0">Henüz yük bulunmuyor.</p>
                                 <a href="/customer/loads" class="dashboard-back-btn mt-3">
                                     <i class="bi bi-plus-circle"></i>
                                     Yeni Yük Ekle
@@ -253,10 +253,10 @@
     private async Task HandleLogout()
     {
         try
-        {
-            await localStorage.RemoveItemAsync("authToken");
-            await localStorage.RemoveItemAsync("userType");
-            await localStorage.RemoveItemAsync("userName");
+    {
+        await localStorage.RemoveItemAsync("authToken");
+        await localStorage.RemoveItemAsync("userType");
+        await localStorage.RemoveItemAsync("userName");
             await localStorage.RemoveItemAsync("userId");
             NavigationManager.NavigateTo("/login", true);
         }

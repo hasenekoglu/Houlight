@@ -22,7 +22,7 @@ public class CreateDriverCommandHandler : IRequestHandler<CreateDriverCommand, C
     {
         var logisticsCompany = await _logisticsCompanyRepository.GetByIdAsync(request.LogisticsCompanyId);
         if (logisticsCompany == null)
-            throw new Exception("Lojistik þirket bulunamadý.");
+            throw new Exception("Lojistik ï¿½irket bulunamadï¿½.");
 
 
         var driver = new DriverEntity
@@ -33,6 +33,7 @@ public class CreateDriverCommandHandler : IRequestHandler<CreateDriverCommand, C
             PhoneNumber = request.PhoneNumber,
             Email = request.Email,
             LicenseNumber = request.LicenseNumber,
+            DriverStatus = request.DriverStatus,
             //LicenseType = request.LicenseType,
             //LicenseExpiryDate = request.LicenseExpiryDate,
             CreateDate = DateTime.UtcNow

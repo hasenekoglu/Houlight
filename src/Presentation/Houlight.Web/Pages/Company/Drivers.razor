@@ -1,0 +1,577 @@
+@page "/company/drivers"
+@using Houlight.Application.Features.Drivers.Commands.CreateDriver
+@using Houlight.Application.Features.Drivers.Commands.UpdateDriver
+@using Houlight.Application.Features.Drivers.Commands.DeleteDriver
+@using Houlight.Application.Features.Drivers.Queries.GetDriversByFilter
+@using Houlight.Domain.Entities
+@using Houlight.Domain.Enums
+@using Houlight.Web.Services
+@using Blazored.LocalStorage
+@using System.ComponentModel.DataAnnotations
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<PageTitle>Sürücüler - Houlight</PageTitle>
+
+<div class="container py-4">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @successMessage
+            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Sürücüler</h4>
+        <div>
+            <button class="btn btn-houlight-accent" @onclick="() => ShowCreateModal()">
+                <i class="bi bi-plus-circle me-1"></i>
+                Yeni Sürücü Ekle
+            </button>
+            <a href="/company/dashboard" class="dashboard-back-btn ms-2">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-houlight-accent" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted mt-2">Sürücüler yükleniyor...</p>
+        </div>
+    }
+    else if (drivers == null || !drivers.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-person-badge fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Henüz sürücü bulunmuyor.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var driver in drivers)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@driver.Name @driver.Surname</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-envelope me-1"></i>@driver.Email
+                                    </p>
+                                </div>
+                                <span class="badge @GetDriverStatusBadgeClass(driver.DriverStatus)">
+                                    @GetDriverStatusText(driver.DriverStatus)
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-telephone text-houlight-accent me-2"></i>
+                                    <span>@driver.PhoneNumber</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-card-text text-houlight-accent me-2"></i>
+                                    <span>@driver.LicenseNumber</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    @driver.CreateDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                </small>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(driver)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(driver)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title">
+                        <i class="bi @(selectedDriver == null ? "bi-person-plus" : "bi-person-gear") text-houlight-accent me-2"></i>
+                        @(selectedDriver == null ? "Yeni Sürücü Ekle" : "Sürücü Düzenle")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <EditForm Model="@driverModel" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger mb-3" />
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="driverModel.Name" class="form-control" placeholder="Ad" />
+                                    <label>Ad</label>
+                                    <ValidationMessage For="@(() => driverModel.Name)" class="text-danger small mt-1" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="driverModel.Surname" class="form-control" placeholder="Soyad" />
+                                    <label>Soyad</label>
+                                    <ValidationMessage For="@(() => driverModel.Surname)" class="text-danger small mt-1" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="driverModel.Email" class="form-control" placeholder="E-posta" />
+                            <label>E-posta</label>
+                            <ValidationMessage For="@(() => driverModel.Email)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="driverModel.PhoneNumber" class="form-control" placeholder="Telefon" />
+                            <label>Telefon (5XX XXX XX XX)</label>
+                            <ValidationMessage For="@(() => driverModel.PhoneNumber)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="driverModel.LicenseNumber" class="form-control" placeholder="Ehliyet Numarası" />
+                            <label>Ehliyet Numarası (11 haneli)</label>
+                            <ValidationMessage For="@(() => driverModel.LicenseNumber)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <InputSelect @bind-Value="driverModel.DriverStatus" class="form-select">
+                                <option value="@DriverStatus.Available">Müsait</option>
+                                <option value="@DriverStatus.NotAvailable">Müsait Değil</option>
+                                <option value="@DriverStatus.OnDuty">Görevde</option>
+                                <option value="@DriverStatus.OffDuty">İzinli</option>
+                            </InputSelect>
+                            <label>Durum</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary flex-grow-1" @onclick="CloseModal" disabled="@(isSubmitting)">
+                                <i class="bi bi-x-circle me-2"></i>
+                                İptal
+                            </button>
+                            <button type="submit" class="btn btn-houlight-accent flex-grow-1" disabled="@(isSubmitting)">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Kaydediliyor...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <span>Kaydet</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sürücü Sil</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@selectedDriver?.Name @selectedDriver?.Surname isimli sürücüyü silmek istediğinize emin misiniz?</p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary flex-grow-1" @onclick="CloseDeleteModal" disabled="@(isDeleting)">
+                            <i class="bi bi-x-circle me-2"></i>
+                            İptal
+                        </button>
+                        <button type="button" class="btn btn-danger flex-grow-1" @onclick="HandleDelete" disabled="@(isDeleting)">
+                            @if (isDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Siliniyor...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-trash me-2"></i>
+                                <span>Sil</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<DriverModel> drivers;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool isDeleting = false;
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool showModal = false;
+    private bool showDeleteModal = false;
+    private DriverModel selectedDriver;
+    private DriverFormModel driverModel = new();
+
+    private class DriverModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public string LicenseNumber { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public DriverStatus DriverStatus { get; set; }
+        public Guid LogisticsCompanyId { get; set; }
+        public DateTime CreateDate { get; set; }
+    }
+
+    private class DriverFormModel
+    {
+        [Required(ErrorMessage = "Ad alanı zorunludur.")]
+        [StringLength(50, ErrorMessage = "Ad en fazla 50 karakter olabilir.")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Soyad alanı zorunludur.")]
+        [StringLength(50, ErrorMessage = "Soyad en fazla 50 karakter olabilir.")]
+        public string Surname { get; set; }
+
+        [Required(ErrorMessage = "E-posta alanı zorunludur.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
+        [StringLength(100, ErrorMessage = "E-posta adresi en fazla 100 karakter olabilir.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Telefon alanı zorunludur.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Telefon numarası 10 haneli olmalıdır (5XX XXX XX XX).")]
+        public string PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "Ehliyet numarası zorunludur.")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Ehliyet numarası 11 haneli olmalıdır.")]
+        public string LicenseNumber { get; set; }
+
+        public DriverStatus DriverStatus { get; set; } = DriverStatus.Available;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                errorMessage = "Şirket bilgisi alınamadı.";
+                return;
+            }
+
+            var queryParams = new Dictionary<string, string>
+            {
+                { "logisticsCompanyId", companyId.ToString() }
+            };
+
+            var queryString = string.Join("&", queryParams.Select(x => $"{x.Key}={x.Value}"));
+            var response = await Http.GetAsync<List<DriverModel>>($"api/drivers/filter?{queryString}");
+
+            if (response == null)
+            {
+                errorMessage = "Sürücü listesi alınamadı.";
+                drivers = new List<DriverModel>();
+            }
+            else
+            {
+                drivers = response.Where(d => d.LogisticsCompanyId == companyId).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Sürücüler yüklenirken bir hata oluştu: " + ex.Message;
+            Console.WriteLine($"[Drivers] Hata: {ex}");
+            drivers = new List<DriverModel>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<Guid> GetCompanyId()
+    {
+        var company = await Http.GetAsync<CompanyModel>("api/logisticscompanies/profile");
+        return company?.Id ?? Guid.Empty;
+    }
+
+    private void ShowCreateModal()
+    {
+        selectedDriver = null;
+        driverModel = new DriverFormModel
+        {
+            DriverStatus = DriverStatus.Available
+        };
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void ShowEditModal(DriverModel driver)
+    {
+        selectedDriver = driver;
+        driverModel = new DriverFormModel
+        {
+            Name = driver.Name,
+            Surname = driver.Surname,
+            Email = driver.Email,
+            PhoneNumber = driver.PhoneNumber,
+            LicenseNumber = driver.LicenseNumber,
+            DriverStatus = driver.DriverStatus
+        };
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedDriver = null;
+        driverModel = new DriverFormModel();
+        StateHasChanged();
+    }
+
+    private void ShowDeleteModal(DriverModel driver)
+    {
+        selectedDriver = driver;
+        showDeleteModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        selectedDriver = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting) return;
+
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isSubmitting = true;
+
+        try
+        {
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                errorMessage = "Şirket bilgisi alınamadı.";
+                return;
+            }
+
+            if (selectedDriver != null)
+            {
+                var updateCommand = new UpdateDriverCommand
+                {
+                    Id = selectedDriver.Id,
+                    Name = driverModel.Name,
+                    Surname = driverModel.Surname,
+                    Email = driverModel.Email,
+                    PhoneNumber = driverModel.PhoneNumber,
+                    LicenseNumber = driverModel.LicenseNumber,
+                    DriverStatus = driverModel.DriverStatus,
+                    LogisticsCompanyId = companyId
+                };
+
+                var response = await Http.PutAsync<UpdateDriverResponse>($"api/drivers/{selectedDriver.Id}", updateCommand);
+                if (response?.Id != Guid.Empty)
+                {
+                    successMessage = "Sürücü başarıyla güncellendi.";
+                    CloseModal();
+                    await LoadData();
+                }
+                else
+                {
+                    errorMessage = "Sürücü güncellenirken bir hata oluştu.";
+                }
+            }
+            else
+            {
+                var createCommand = new CreateDriverCommand
+                {
+                    Name = driverModel.Name,
+                    Surname = driverModel.Surname,
+                    Email = driverModel.Email,
+                    PhoneNumber = driverModel.PhoneNumber,
+                    LicenseNumber = driverModel.LicenseNumber,
+                    DriverStatus = driverModel.DriverStatus,
+                    LogisticsCompanyId = companyId
+                };
+
+                var response = await Http.PostAsync<CreateDriverResponse>("api/drivers", createCommand);
+                if (response?.Id != Guid.Empty)
+                {
+                    successMessage = "Sürücü başarıyla eklendi.";
+                    CloseModal();
+                    await LoadData();
+                }
+                else
+                {
+                    errorMessage = "Sürücü eklenirken bir hata oluştu.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (selectedDriver == null || isDeleting) return;
+
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isDeleting = true;
+
+        try
+        {
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                errorMessage = "Şirket bilgisi alınamadı.";
+                return;
+            }
+
+            // Önce sürücünün şirkete ait olduğunu kontrol et
+            if (selectedDriver.LogisticsCompanyId != companyId)
+            {
+                errorMessage = "Bu sürücüyü silme yetkiniz yok.";
+                return;
+            }
+
+            var command = new DeleteDriverCommand
+            {
+                Id = selectedDriver.Id
+            };
+
+            var response = await Http.DeleteAsync($"api/drivers/{selectedDriver.Id}");
+            if (response)
+            {
+                successMessage = "Sürücü başarıyla silindi.";
+                CloseDeleteModal();
+                await LoadData();
+            }
+            else
+            {
+                errorMessage = "Sürücü silinirken bir hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+        finally
+        {
+            isDeleting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleError(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx)
+        {
+            errorMessage = httpEx.Message;
+            if (httpEx.InnerException != null)
+            {
+                errorMessage += $" Detay: {httpEx.InnerException.Message}";
+            }
+        }
+        else if (ex.Message.Contains("yetkiniz yok"))
+        {
+            errorMessage = ex.Message;
+        }
+        else
+        {
+            errorMessage = "İşlem sırasında beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"[Drivers] Hata: {ex}");
+        }
+    }
+
+    private string GetDriverStatusBadgeClass(DriverStatus status)
+    {
+        return status switch
+        {
+            DriverStatus.Available => "bg-success",
+            DriverStatus.NotAvailable => "bg-danger",
+            DriverStatus.OnDuty => "bg-primary",
+            DriverStatus.OffDuty => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetDriverStatusText(DriverStatus status)
+    {
+        return status switch
+        {
+            DriverStatus.Available => "Müsait",
+            DriverStatus.NotAvailable => "Müsait Değil",
+            DriverStatus.OnDuty => "Görevde",
+            DriverStatus.OffDuty => "İzinli",
+            _ => status.ToString()
+        };
+    }
+
+    private class CompanyModel
+    {
+        public Guid Id { get; set; }
+        public string CompanyName { get; set; }
+    }
+} 

@@ -1,0 +1,565 @@
+@page "/company/vehicles"
+@using Houlight.Application.Features.Vehicles.Commands.CreateVehicle
+@using Houlight.Application.Features.Vehicles.Commands.UpdateVehicle
+@using Houlight.Application.Features.Vehicles.Commands.DeleteVehicle
+@using Houlight.Application.Features.Vehicles.Queries.GetVehiclesByFilter
+@using Houlight.Application.Features.VehicleTypes.Queries.GetAllVehicleTypes
+@using Houlight.Application.Features.Drivers.Queries.GetDriversByFilter
+@using Houlight.Domain.Entities
+@using Houlight.Domain.Enums
+@using Houlight.Web.Services
+@using Blazored.LocalStorage
+@using System.ComponentModel.DataAnnotations
+@inject AuthHttpClient Http
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<PageTitle>Araçlar - Houlight</PageTitle>
+
+<div class="container py-4">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @successMessage
+            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Araçlar</h4>
+        <div>
+            <button class="btn btn-houlight-accent" @onclick="() => ShowCreateModal()">
+                <i class="bi bi-plus-circle me-1"></i>
+                Yeni Araç Ekle
+            </button>
+            <a href="/company/dashboard" class="dashboard-back-btn ms-2">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-houlight-accent" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted mt-2">Araçlar yükleniyor...</p>
+        </div>
+    }
+    else if (vehicles == null || !vehicles.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-truck fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Henüz araç bulunmuyor.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var vehicle in vehicles)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@vehicle.PlateNumber</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-truck me-1"></i>@vehicle.VehicleTypeType
+                                    </p>
+                                </div>
+                                <span class="badge @(vehicle.IsAvailable ? "bg-success" : "bg-danger")">
+                                    @(vehicle.IsAvailable ? "Müsait" : "Müsait Değil")
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Kapasite</small>
+                                            <span>@(vehicle.Capacity.ToString("N0")) kg</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Mevcut Yük</small>
+                                            <span>@(vehicle.CurrentWeight.ToString("N0")) kg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (vehicle.AssignedDriverName != null)
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-badge text-houlight-accent me-2"></i>
+                                        <span>@vehicle.AssignedDriverName</span>
+                                    </div>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    @vehicle.CreateDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                </small>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(vehicle)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(vehicle)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title">
+                        <i class="bi @(selectedVehicle == null ? "bi-truck" : "bi-truck-front") text-houlight-accent me-2"></i>
+                        @(selectedVehicle == null ? "Yeni Araç Ekle" : "Araç Düzenle")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <EditForm Model="@vehicleModel" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger mb-3" />
+                        
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="vehicleModel.PlateNumber" class="form-control" placeholder="Plaka" />
+                            <label>Plaka (34ABC123)</label>
+                            <ValidationMessage For="@(() => vehicleModel.PlateNumber)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputSelect @bind-Value="vehicleModel.VehicleTypeId" class="form-select">
+                                <option value="">Seçiniz...</option>
+                                @foreach (var type in vehicleTypes)
+                                {
+                                    <option value="@type.Id">@type.Type</option>
+                                }
+                            </InputSelect>
+                            <label>Araç Tipi</label>
+                            <ValidationMessage For="@(() => vehicleModel.VehicleTypeId)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputNumber @bind-Value="vehicleModel.Capacity" class="form-control" placeholder="Kapasite" />
+                            <label>Kapasite (kg)</label>
+                            <ValidationMessage For="@(() => vehicleModel.Capacity)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputSelect @bind-Value="vehicleModel.AssignedDriverId" class="form-select">
+                                <option value="">Sürücü Atanmamış</option>
+                                @foreach (var driver in availableDrivers)
+                                {
+                                    <option value="@driver.Id">@driver.Name @driver.Surname</option>
+                                }
+                            </InputSelect>
+                            <label>Sürücü</label>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <InputCheckbox @bind-Value="vehicleModel.IsAvailable" class="form-check-input" id="isAvailable" />
+                            <label class="form-check-label" for="isAvailable">Müsait</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary flex-grow-1" @onclick="CloseModal" disabled="@(isSubmitting)">
+                                <i class="bi bi-x-circle me-2"></i>
+                                İptal
+                            </button>
+                            <button type="submit" class="btn btn-houlight-accent flex-grow-1" disabled="@(isSubmitting)">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Kaydediliyor...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <span>Kaydet</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="z-index: 1051;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Araç Sil</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@selectedVehicle?.PlateNumber plakalı aracı silmek istediğinize emin misiniz?</p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary flex-grow-1" @onclick="CloseDeleteModal" disabled="@(isDeleting)">
+                            <i class="bi bi-x-circle me-2"></i>
+                            İptal
+                        </button>
+                        <button type="button" class="btn btn-danger flex-grow-1" @onclick="HandleDelete" disabled="@(isDeleting)">
+                            @if (isDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Siliniyor...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-trash me-2"></i>
+                                <span>Sil</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<VehicleModel> vehicles;
+    private List<VehicleTypeModel> vehicleTypes;
+    private List<DriverModel> availableDrivers;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool isDeleting = false;
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool showModal = false;
+    private bool showDeleteModal = false;
+    private VehicleModel selectedVehicle;
+    private VehicleFormModel vehicleModel = new();
+
+    private class VehicleModel
+    {
+        public Guid Id { get; set; }
+        public string PlateNumber { get; set; }
+        public int Capacity { get; set; }
+        public bool IsAvailable { get; set; }
+        public int CurrentWeight { get; set; }
+        public int CurrentVolume { get; set; }
+        public Guid VehicleTypeId { get; set; }
+        public string VehicleTypeType { get; set; }
+        public Guid? AssignedDriverId { get; set; }
+        public string AssignedDriverName { get; set; }
+        public DateTime CreateDate { get; set; }
+    }
+
+    private class VehicleTypeModel
+    {
+        public Guid Id { get; set; }
+        public string Type { get; set; }
+        public string Description { get; set; }
+    }
+
+    private class DriverModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public DriverStatus DriverStatus { get; set; }
+    }
+
+    private class VehicleFormModel
+    {
+        [Required(ErrorMessage = "Plaka alanı zorunludur.")]
+        [RegularExpression(@"^[0-9]{2}[A-Z]{1,3}[0-9]{2,4}$", ErrorMessage = "Geçersiz plaka formatı (34ABC123).")]
+        public string PlateNumber { get; set; }
+
+        [Required(ErrorMessage = "Araç tipi seçimi zorunludur.")]
+        public Guid VehicleTypeId { get; set; }
+
+        [Required(ErrorMessage = "Kapasite alanı zorunludur.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Kapasite 0'dan büyük olmalıdır.")]
+        public int Capacity { get; set; }
+
+        public Guid? AssignedDriverId { get; set; }
+        public bool IsAvailable { get; set; } = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                errorMessage = "Şirket bilgisi alınamadı.";
+                return;
+            }
+
+            // Araçları getir
+            var vehiclesTask = Http.GetAsync<List<VehicleModel>>($"api/vehicles/filter?logisticsCompanyId={companyId}");
+            
+            // Araç tiplerini getir
+            var vehicleTypesTask = Http.GetAsync<List<VehicleTypeModel>>("api/vehicletypes");
+            
+            // Sürücüleri getir
+            var driversTask = Http.GetAsync<List<DriverModel>>($"api/drivers/filter?logisticsCompanyId={companyId}&driverStatus=Available");
+
+            await Task.WhenAll(vehiclesTask, vehicleTypesTask, driversTask);
+
+            vehicles = await vehiclesTask;
+            vehicleTypes = await vehicleTypesTask;
+            availableDrivers = await driversTask ?? new List<DriverModel>();
+
+            if (vehicles == null)
+            {
+                vehicles = new List<VehicleModel>();
+            }
+            if (vehicleTypes == null)
+            {
+                vehicleTypes = new List<VehicleTypeModel>();
+            }
+            if (availableDrivers == null)
+            {
+                availableDrivers = new List<DriverModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Veriler yüklenirken bir hata oluştu: " + ex.Message;
+            Console.WriteLine($"[Vehicles] Hata: {ex}");
+            vehicles = new List<VehicleModel>();
+            vehicleTypes = new List<VehicleTypeModel>();
+            availableDrivers = new List<DriverModel>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<Guid> GetCompanyId()
+    {
+        var company = await Http.GetAsync<CompanyModel>("api/logisticscompanies/profile");
+        return company?.Id ?? Guid.Empty;
+    }
+
+    private void ShowCreateModal()
+    {
+        selectedVehicle = null;
+        vehicleModel = new VehicleFormModel
+        {
+            IsAvailable = true
+        };
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void ShowEditModal(VehicleModel vehicle)
+    {
+        selectedVehicle = vehicle;
+        vehicleModel = new VehicleFormModel
+        {
+            PlateNumber = vehicle.PlateNumber,
+            VehicleTypeId = vehicle.VehicleTypeId,
+            Capacity = vehicle.Capacity,
+            AssignedDriverId = vehicle.AssignedDriverId,
+            IsAvailable = vehicle.IsAvailable
+        };
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedVehicle = null;
+        vehicleModel = new VehicleFormModel();
+        StateHasChanged();
+    }
+
+    private void ShowDeleteModal(VehicleModel vehicle)
+    {
+        selectedVehicle = vehicle;
+        showDeleteModal = true;
+        StateHasChanged();
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        selectedVehicle = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting) return;
+
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isSubmitting = true;
+
+        try
+        {
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty)
+            {
+                errorMessage = "Şirket bilgisi alınamadı.";
+                return;
+            }
+
+            if (selectedVehicle != null)
+            {
+                var updateCommand = new UpdateVehicleCommand
+                {
+                    Id = selectedVehicle.Id,
+                    PlateNumber = vehicleModel.PlateNumber,
+                    VehicleTypeId = vehicleModel.VehicleTypeId,
+                    Capacity = vehicleModel.Capacity,
+                    AssignedDriverId = vehicleModel.AssignedDriverId,
+                    IsAvailable = vehicleModel.IsAvailable,
+                    LogisticsCompanyId = companyId,
+                    CurrentWeight = selectedVehicle.CurrentWeight,
+                    CurrentVolume = selectedVehicle.CurrentVolume
+                };
+
+                var response = await Http.PutAsync<UpdateVehicleResponse>($"api/vehicles/{selectedVehicle.Id}", updateCommand);
+                if (response?.Id != Guid.Empty)
+                {
+                    successMessage = "Araç başarıyla güncellendi.";
+                    CloseModal();
+                    await LoadData();
+                }
+                else
+                {
+                    errorMessage = "Araç güncellenirken bir hata oluştu.";
+                }
+            }
+            else
+            {
+                var createCommand = new CreateVehicleCommand
+                {
+                    PlateNumber = vehicleModel.PlateNumber,
+                    VehicleTypeId = vehicleModel.VehicleTypeId,
+                    Capacity = vehicleModel.Capacity,
+                    AssignedDriverId = vehicleModel.AssignedDriverId,
+                    IsAvailable = vehicleModel.IsAvailable,
+                    LogisticsCompanyId = companyId,
+                    CurrentWeight = 0,
+                    CurrentVolume = 0
+                };
+
+                var response = await Http.PostAsync<CreateVehicleResponse>("api/vehicles", createCommand);
+                if (response?.Id != Guid.Empty)
+                {
+                    successMessage = "Araç başarıyla eklendi.";
+                    CloseModal();
+                    await LoadData();
+                }
+                else
+                {
+                    errorMessage = "Araç eklenirken bir hata oluştu.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (selectedVehicle == null || isDeleting) return;
+
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isDeleting = true;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/vehicles/{selectedVehicle.Id}");
+            if (response)
+            {
+                successMessage = "Araç başarıyla silindi.";
+                CloseDeleteModal();
+                await LoadData();
+            }
+            else
+            {
+                errorMessage = "Araç silinirken bir hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+        finally
+        {
+            isDeleting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleError(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx)
+        {
+            errorMessage = httpEx.Message;
+            if (httpEx.InnerException != null)
+            {
+                errorMessage += $" Detay: {httpEx.InnerException.Message}";
+            }
+        }
+        else
+        {
+            errorMessage = "İşlem sırasında beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"[Vehicles] Hata: {ex}");
+        }
+    }
+
+    private class CompanyModel
+    {
+        public Guid Id { get; set; }
+        public string CompanyName { get; set; }
+    }
+} 
