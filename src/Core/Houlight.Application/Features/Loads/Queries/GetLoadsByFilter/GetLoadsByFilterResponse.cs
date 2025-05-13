@@ -19,4 +19,5 @@ public class GetLoadsByFilterResponse
     public string? LogisticsCompanyName { get; set; }
     public string? AssignedVehiclePlate { get; set; }
     public string? AssignedDriverName { get; set; }
+    public Guid CustomerId { get; set; }
 } 

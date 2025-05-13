@@ -51,7 +51,8 @@ public class LoadMappingProfile : Profile
             .ForMember(dest => dest.LogisticsCompanyName, opt => opt.MapFrom(src => src.LogisticsCompanyEntity != null ? src.LogisticsCompanyEntity.CompanyName : null))
             .ForMember(dest => dest.AssignedVehiclePlate, opt => opt.MapFrom(src => src.VehicleEntity != null ? src.VehicleEntity.PlateNumber : null))
             .ForMember(dest => dest.AssignedDriverName, opt => opt.MapFrom(src => 
-                src.DriverEntity != null ? $"{src.DriverEntity.Name} {src.DriverEntity.Surname}" : null));
+                src.DriverEntity != null ? $"{src.DriverEntity.Name} {src.DriverEntity.Surname}" : null))
+            .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId));
 
         CreateMap<LoadEntity, LogisticsCompanyLoadUpdateResponse>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));

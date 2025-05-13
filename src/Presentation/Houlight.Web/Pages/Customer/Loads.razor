@@ -295,6 +295,7 @@
     private CreateLoadCommand newLoad = new CreateLoadCommand { LoadType = LoadType.GeneralCargo };
     private string errorMessage = "";
     private bool isLoading = false;
+    private Guid? currentUserId;
 
     // Filtreleme için ek alanlar
     private string selectedLoadType
@@ -343,12 +344,16 @@
     {
         var token = await localStorage.GetItemAsync<string>("authToken");
         var userType = await localStorage.GetItemAsync<string>("userType");
-        
+        var userId = await localStorage.GetItemAsync<string>("userId");
+
         if (string.IsNullOrEmpty(token) || userType != "customer")
         {
             NavigationManager.NavigateTo("/login");
             return;
         }
+
+        if (Guid.TryParse(userId, out var parsedId))
+            currentUserId = parsedId;
 
         await LoadCustomerLoads();
     }
@@ -386,6 +391,11 @@
     private void ApplyFilters()
     {
         var filtered = loads.AsEnumerable();
+
+        // Sadece giriş yapan kullanıcının yükleri
+        if (currentUserId.HasValue)
+            filtered = filtered.Where(x => x.CustomerId == currentUserId.Value);
+
         if (!string.IsNullOrEmpty(selectedLoadType))
             filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
         if (!string.IsNullOrEmpty(selectedStatus))

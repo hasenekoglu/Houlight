@@ -55,17 +55,10 @@
                         <option value="">Tüm Durumlar</option>
                         <option value="@LoadStatus.Pending">Beklemede</option>
                         <option value="@LoadStatus.Assigned">Atandı</option>
+                        <option value="@LoadStatus.InTransit">Yolda</option>
+                        <option value="@LoadStatus.Delivered">Teslim Edildi</option>
                         <option value="@LoadStatus.Accepted">Kabul Edildi</option>
                         <option value="@LoadStatus.Rejected">Reddedildi</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" @bind="selectedVehicleType">
-                        <option value="">Tüm Araç Tipleri</option>
-                        @foreach (var type in vehicleTypes)
-                        {
-                            <option value="@type.Id">@type.Name</option>
-                        }
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -125,14 +118,14 @@
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <div class="p-2 bg-light rounded">
-                                        <small class="text-muted d-block">Araç Tipi</small>
-                                        <span>@load.VehicleTypeName</span>
+                                        <small class="text-muted d-block">Teslimat Tarihi</small>
+                                        <span>@(load.DeliveryDate.HasValue ? load.DeliveryDate.Value.ToString("dd.MM.yyyy") : "-")</span>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="p-2 bg-light rounded">
                                         <small class="text-muted d-block">Ağırlık</small>
-                                        <span>@load.Weight ton</span>
+                                        <span>@load.Weight kg</span>
                                     </div>
                                 </div>
                             </div>
@@ -301,13 +294,16 @@
         public decimal? CustomerExpectedPrice { get; set; }
         public LoadStatus Status { get; set; }
         public Guid VehicleTypeId { get; set; }
-        public string VehicleTypeName { get; set; } = string.Empty;
+        public string VehicleTypeType { get; set; } = string.Empty;
     }
 
     private class VehicleTypeModel
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime CreateDate { get; set; }
+        public DateTime? UpdateDate { get; set; }
     }
 
     private class OfferModel
@@ -414,7 +410,7 @@
 
         if (selectedVehicleType.HasValue)
         {
-            filteredLoads = filteredLoads.Where(x => x.VehicleTypeId == selectedVehicleType.Value).ToList();
+            // filteredLoads = filteredLoads.Where(x => x.VehicleTypeId == selectedVehicleType.Value).ToList();
         }
     }
 

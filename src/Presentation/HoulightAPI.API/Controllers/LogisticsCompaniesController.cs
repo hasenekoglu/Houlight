@@ -12,9 +12,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Houlight.Application.Features.Drivers.Queries.GetDriversByFilter;
 using Houlight.Application.Features.Vehicles.Queries.GetVehiclesByFilter;
-using Houlight.Application.Features.Customers.Commands.ChangePassword;
+using Houlight.Application.Features.LogisticsCompanies.Commands.ChangePassword;
 
-namespace Houlight.WebAPI.Controllers;
+namespace HoulightAPI.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -132,7 +132,7 @@ public class LogisticsCompaniesController : ControllerBase
         var query = new GetLoadsByFilterQuery 
         { 
             LogisticsCompanyId = parsedId,
-            Status = Domain.Enums.LoadStatus.Pending // Aktif yükleri getir
+            Status = Houlight.Domain.Enums.LoadStatus.Pending // Aktif yükleri getir
         };
         
         var response = await _mediator.Send(query);
@@ -154,7 +154,7 @@ public class LogisticsCompaniesController : ControllerBase
         var query = new GetLoadsByFilterQuery 
         { 
             LogisticsCompanyId = parsedId,
-            Status = Domain.Enums.LoadStatus.Accepted // Kabul edilmiş teklifleri getir
+            Status = Houlight.Domain.Enums.LoadStatus.Accepted // Kabul edilmiş teklifleri getir
         };
         
         var response = await _mediator.Send(query);
@@ -177,7 +177,7 @@ public class LogisticsCompaniesController : ControllerBase
         var activeLoadsQuery = new GetLoadsByFilterQuery 
         { 
             LogisticsCompanyId = parsedId,
-            Status = Domain.Enums.LoadStatus.Pending
+            Status = Houlight.Domain.Enums.LoadStatus.Pending
         };
         var activeLoads = await _mediator.Send(activeLoadsQuery);
 
@@ -185,7 +185,7 @@ public class LogisticsCompaniesController : ControllerBase
         var acceptedOffersQuery = new GetLoadsByFilterQuery 
         { 
             LogisticsCompanyId = parsedId,
-            Status = Domain.Enums.LoadStatus.Accepted
+            Status = Houlight.Domain.Enums.LoadStatus.Accepted
         };
         var acceptedOffers = await _mediator.Send(acceptedOffersQuery);
 
@@ -212,8 +212,8 @@ public class LogisticsCompaniesController : ControllerBase
         });
     }
 
-    [HttpPut("change-password")]
-    public async Task<ActionResult<ChangePasswordCommandResponse>> ChangePassword([FromBody] ChangePasswordCommand command)
+    [HttpPut("change-company-password")]
+    public async Task<ActionResult<ChangeCompanyPasswordCommandResponse>> ChangeCompanyPassword([FromBody] ChangeCompanyPasswordCommand command)
     {
         var userIdClaim = User.Claims.FirstOrDefault(x =>
             x.Type == "sub" ||

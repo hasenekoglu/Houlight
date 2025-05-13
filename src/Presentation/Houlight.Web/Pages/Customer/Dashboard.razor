@@ -177,10 +177,14 @@
     private List<LoadEntity> recentLoads = new();
     private string errorMessage = "";
     private bool isLoading = false;
+    private Guid? currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
+        var userId = await localStorage.GetItemAsync<string>("userId");
+        if (Guid.TryParse(userId, out var parsedId))
+            currentUserId = parsedId;
         await LoadDashboardData();
         isLoading = false;
     }
@@ -200,6 +204,10 @@
             var loads = await Http.GetAsync<List<LoadEntity>>("api/loads/filter");
             if (loads != null)
             {
+                // Sadece giriş yapan kullanıcıya ait yükler
+                if (currentUserId.HasValue)
+                    loads = loads.Where(x => x.CustomerId == currentUserId.Value).ToList();
+
                 // Aktif yükleri say (Beklemede, Yolda, Atandı ve Kabul Edildi durumundaki yükler)
                 activeLoads = loads.Count(x => 
                     x.Status == LoadStatus.Pending || 

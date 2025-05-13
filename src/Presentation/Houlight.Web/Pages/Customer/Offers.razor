@@ -28,198 +28,138 @@
             Dashboard'a Dön
         </a>
     </div>
-    
+
+    <!-- Filtreleme Alanları -->
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedLoadType">
+                <option value="">Tüm Yük Tipleri</option>
+                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                {
+                    <option value="@type">@GetLoadTypeText(type)</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
+            <select class="form-select" @bind="selectedStatus">
+                <option value="">Tüm Durumlar</option>
+                <option value="Pending">Beklemede</option>
+                <option value="Accepted">Kabul Edildi</option>
+                <option value="Rejected">Reddedildi</option>
+                <option value="Assigned">Atandı</option>
+                <option value="InTransit">Yolda</option>
+                <option value="Delivered">Teslim Edildi</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <input class="form-control" placeholder="Arama..." @bind="searchText" />
+        </div>
+        <div class="col-12 col-md-2 d-grid align-items-center">
+            <button class="btn btn-houlight-accent w-100" type="button" @onclick="ApplyFilters">
+                <i class="bi bi-funnel me-1"></i>
+                Filtrele
+            </button>
+        </div>
+    </div>
+
     @if (isLoading)
     {
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
+        <div class="text-center py-5">
+            <div class="spinner-border text-houlight-accent" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
+            <p class="text-muted mt-2">Teklifler yükleniyor...</p>
         </div>
     }
-    else if (offers.Count == 0)
+    else if (filteredOffers == null || !filteredOffers.Any())
     {
-        <div class="alert alert-info">Henüz teklifiniz bulunmamaktadır.</div>
+        <div class="text-center py-5">
+            <i class="bi bi-cash-coin fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Henüz teklif bulunmuyor.</p>
+        </div>
     }
     else
     {
-        @foreach (var loadGroup in GroupedOffers)
-        {
-            var firstOffer = loadGroup.First();
-            <div class="mb-4">
-                <div class="card shadow-sm border-0 mb-2 bg-light">
-                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
-                        <div>
-                            <strong>Yük No:</strong> @firstOffer.LoadId.ToString().Substring(0, 8)
-                            <span class="mx-2">|</span>
-                            <strong>Rota:</strong> @firstOffer.FromLocation → @firstOffer.ToLocation
-                            <span class="mx-2">|</span>
-                            <strong>Tip:</strong> @GetLoadTypeName(firstOffer.LoadType)
-                            <span class="mx-2">|</span>
-                            <strong>Ağırlık:</strong> @firstOffer.Weight kg
-                            <span class="mx-2">|</span>
-                            <strong>Hacim:</strong> @firstOffer.Volume m³
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var group in filteredOffers.GroupBy(x => x.LoadId))
+            {
+                var first = group.First();
+                <div class="col">
+                    <div class="modern-offer-card card shadow-lg border-0 h-100 p-0">
+                        <!-- Üst: Yük Bilgileri -->
+                        <div class="bg-offer-orange d-flex flex-column justify-content-center p-4 rounded-top">
+                            <div class="mb-2">
+                                <span class="badge @GetLoadTypeBadgeClass(first.LoadType) mb-2">@GetLoadTypeText(first.LoadType)</span>
+                            </div>
+                            <h5 class="fw-bold mb-3">@first.FromLocation <i class="bi bi-arrow-right mx-2"></i> @first.ToLocation</h5>
+                            <div class="mb-2 small"><i class="bi bi-box-seam me-1"></i> @first.Description</div>
+                            <div class="mb-2 small"><i class="bi bi-weight me-1"></i> @first.Weight kg | <i class="bi bi-arrows-angle-expand ms-2 me-1"></i> @first.Volume m³</div>
+                            <div class="mb-2 small"><i class="bi bi-calendar me-1"></i> Teslimat: @first.DeliveryDate?.ToShortDateString()</div>
                         </div>
-                        <div>
-                            <strong>Teslimat:</strong> @firstOffer.DeliveryDate?.ToShortDateString()
+                        <!-- Alt: Teklifler -->
+                        <div class="p-4">
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var offer in group.OrderByDescending(x => x.CreateDate))
+                                {
+                                    var expanded = expandedOfferId == offer.Id;
+                                    <div class="expand-offer-box position-relative">
+                                        <div class="expand-offer-summary d-flex align-items-center justify-content-between px-3 py-2 rounded-3 bg-offer-yellow shadow-sm" style="color:#222; background: linear-gradient(90deg, #ffe0b2 80%, #ffd180 100%) !important; border:2px solid #ffb74d;" @onclick="() => ToggleOfferDetails(offer.Id)">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="fw-bold">@offer.LogisticsCompanyName</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="fw-bold text-houlight-accent">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
+                                                <span class="badge @GetStatusBadgeClass(offer.LoadStatus)">@GetStatusText(offer.LoadStatus)</span>
+                                                <i class="bi @(expanded ? "bi-chevron-up" : "bi-chevron-down") fs-5 text-houlight-accent"></i>
+                                            </div>
+                                        </div>
+                                        @if (expanded)
+                                        {
+                                            <div class="expand-offer-details bg-white rounded-3 shadow-sm mt-1 px-3 py-2 animate-fade-in">
+                                                <div class="row g-2">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="mb-1"><span class="fw-bold">Araç:</span> @offer.VehiclePlate</div>
+                                                        <div class="mb-1"><span class="fw-bold">Sürücü:</span> @offer.DriverName</div>
+                                                        <div class="mb-1"><span class="fw-bold">Tarih:</span> @offer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="mb-1"><span class="fw-bold">Not:</span> <span class="text-muted">@offer.Description</span></div>
+                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetStatusBadgeClass(offer.LoadStatus)">@GetStatusText(offer.LoadStatus)</span></div>
+                                                    </div>
+                                                </div>
+                                                @if (offer.LoadStatus == LoadStatus.Pending && !group.Any(x => x.LoadStatus == LoadStatus.Accepted))
+                                                {
+                                                    <div class="d-flex justify-content-end gap-2 mt-3">
+                                                        <button class="btn btn-sm btn-success" @onclick="() => AcceptOffer(offer)">
+                                                            <i class="bi bi-check-lg me-1"></i> Kabul Et
+                                                        </button>
+                                                        <button class="btn btn-sm btn-danger" @onclick="() => RejectOffer(offer)">
+                                                            <i class="bi bi-x-lg me-1"></i> Reddet
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row g-3">
-                    @foreach (var offer in loadGroup)
-                    {
-                        var cardClass = offer.IsAccepted ? "border-success" : "border-danger";
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card h-100 @cardClass shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="fw-bold">@offer.LogisticsCompanyName</span>
-                                        @if (offer.IsAccepted)
-                                        {
-                                            <span class="badge bg-success">Kabul Edildi</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">Reddedildi</span>
-                                        }
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Fiyat:</strong> @offer.CompanyOfferedPrice.ToString("C")
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Araç:</strong> @offer.VehiclePlate
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Şoför:</strong> @offer.DriverName
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Açıklama:</strong> @offer.Description
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-white border-0 d-flex justify-content-end">
-                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ShowOfferDetails(offer)">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    @if (!offer.IsAccepted)
-                                    {
-                                        <button class="btn btn-sm btn-outline-success me-2" @onclick="() => AcceptOffer(offer)">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RejectOffer(offer)">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
+            }
+        </div>
     }
 </div>
 
-@if (selectedOffer != null)
-{
-    <div class="modal fade show" style="display: block;" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Teklif Detayları</h5>
-                    <button type="button" class="btn-close" @onclick="() => selectedOffer = null"></button>
-                </div>
-                <div class="modal-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">Teklif No</dt>
-                        <dd class="col-sm-8">@selectedOffer.Id.ToString().Substring(0, 8)</dd>
-                        
-                        <dt class="col-sm-4">Yük No</dt>
-                        <dd class="col-sm-8">@selectedOffer.LoadId.ToString().Substring(0, 8)</dd>
-                        
-                        <dt class="col-sm-4">Durum</dt>
-                        <dd class="col-sm-8">
-                            @if (selectedOffer.IsAccepted)
-                            {
-                                <span class="badge bg-success">Kabul Edildi</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Reddedildi</span>
-                            }
-                        </dd>
-                        
-                        <dt class="col-sm-4">Yük Bilgileri</dt>
-                        <dd class="col-sm-8">
-                            <div>@selectedOffer.FromLocation → @selectedOffer.ToLocation</div>
-                            <div>Yük Tipi: @GetLoadTypeName(selectedOffer.LoadType)</div>
-                            <div>Ağırlık: @selectedOffer.Weight kg</div>
-                            <div>Hacim: @selectedOffer.Volume m³</div>
-                        </dd>
-                        
-                        <dt class="col-sm-4">Şirket</dt>
-                        <dd class="col-sm-8">@selectedOffer.LogisticsCompanyName</dd>
-                        
-                        <dt class="col-sm-4">Fiyat</dt>
-                        <dd class="col-sm-8">@selectedOffer.CompanyOfferedPrice.ToString("C")</dd>
-                        
-                        <dt class="col-sm-4">Araç</dt>
-                        <dd class="col-sm-8">@selectedOffer.VehiclePlate</dd>
-                        
-                        <dt class="col-sm-4">Şoför</dt>
-                        <dd class="col-sm-8">@selectedOffer.DriverName</dd>
-                        
-                        <dt class="col-sm-4">Teslimat Tarihi</dt>
-                        <dd class="col-sm-8">@selectedOffer.DeliveryDate?.ToShortDateString()</dd>
-                        
-                        <dt class="col-sm-4">Açıklama</dt>
-                        <dd class="col-sm-8">@selectedOffer.Description</dd>
-                    </dl>
-                </div>
-                <div class="modal-footer">
-                    @if (!selectedOffer.IsAccepted)
-                    {
-                        <button type="button" class="btn btn-success me-2" @onclick="() => AcceptOffer(selectedOffer)">
-                            <i class="bi bi-check-lg me-1"></i> Kabul Et
-                        </button>
-                        <button type="button" class="btn btn-danger me-2" @onclick="() => RejectOffer(selectedOffer)">
-                            <i class="bi bi-x-lg me-1"></i> Reddet
-                        </button>
-                    }
-                    <button type="button" class="btn btn-secondary" @onclick="() => selectedOffer = null">
-                        Kapat
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal-backdrop fade show"></div>
-}
-
 @code {
     private List<LoadOfferListDto> offers = new();
-    private LoadOfferListDto? selectedOffer;
+    private List<LoadOfferListDto> filteredOffers = new();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
-
-    // Yükleri LoadId'ye göre gruplama
-    private IEnumerable<IGrouping<Guid, LoadOfferListDto>> GroupedOffers => offers.GroupBy(x => x.LoadId);
-
-    private string GetLoadTypeName(LoadType type)
-    {
-        return type switch
-        {
-            LoadType.GeneralCargo => "Genel Kargo",
-            LoadType.PerishableGoods => "Bozulabilir Ürünler",
-            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
-            LoadType.FragileItems => "Kırılabilir Eşyalar",
-            LoadType.BulkCargo => "Dökme Kargo",
-            LoadType.Liquid => "Sıvı Kargo",
-            LoadType.HighValue => "Yüksek Değerli Ürünler",
-            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
-            LoadType.DangerousGoods => "Tehlikeli Mallar",
-            _ => "Bilinmiyor"
-        };
-    }
+    private Guid expandedOfferId = Guid.Empty;
+    private string selectedLoadType = "";
+    private string selectedStatus = "";
+    private string searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -235,6 +175,7 @@
             if (response != null)
             {
                 offers = response;
+                ApplyFilters();
             }
         }
         catch
@@ -247,16 +188,45 @@
         }
     }
 
+    private void ApplyFilters()
+    {
+        var filtered = offers.AsEnumerable();
+        if (!string.IsNullOrEmpty(selectedLoadType))
+            filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
+        if (!string.IsNullOrEmpty(selectedStatus))
+            filtered = filtered.Where(x => x.LoadStatus.ToString() == selectedStatus);
+        if (!string.IsNullOrWhiteSpace(searchText))
+            filtered = filtered.Where(x => (x.FromLocation != null && x.FromLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                         (x.ToLocation != null && x.ToLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                         (x.Description != null && x.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                                         (x.LogisticsCompanyName != null && x.LogisticsCompanyName.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+        filteredOffers = filtered.ToList();
+    }
+
+    private void ToggleOfferDetails(Guid offerId)
+    {
+        expandedOfferId = expandedOfferId == offerId ? Guid.Empty : offerId;
+    }
+
     private async Task AcceptOffer(LoadOfferListDto offer)
     {
         try
         {
             isLoading = true;
+            // Önce seçilen teklifi kabul et
             var response = await Http.PostAsync<AcceptLoadOfferResponse>($"api/loadoffers/{offer.Id}/accept", null);
             if (response != null && response.Success)
             {
-                await LoadCustomerOffers();
-                selectedOffer = null; // Modal'ı kapat
+                // Tüm tekliflerin durumunu güncelle (kart silinmesin, sadece statü değişsin)
+                foreach (var o in offers.Where(x => x.LoadId == offer.LoadId))
+                {
+                    if (o.Id == offer.Id)
+                        o.LoadStatus = LoadStatus.Accepted;
+                    else
+                        o.LoadStatus = LoadStatus.Rejected;
+                }
+                ApplyFilters();
+                expandedOfferId = Guid.Empty;
             }
             else
             {
@@ -281,9 +251,12 @@
             var response = await Http.PostAsync<DeleteLoadOfferResponse>($"api/loadoffers/{offer.Id}/reject", null);
             if (response != null && response.Success)
             {
-                // Reddedilen teklifi listeden kaldır
-                offers = offers.Where(x => x.Id != offer.Id).ToList();
-                selectedOffer = null; // Modal'ı kapat
+                // Sadece ilgili teklifin LoadStatus'unu güncelle
+                var o = offers.FirstOrDefault(x => x.Id == offer.Id);
+                if (o != null)
+                    o.LoadStatus = LoadStatus.Rejected;
+                ApplyFilters();
+                expandedOfferId = Guid.Empty;
             }
             else
             {
@@ -300,9 +273,65 @@
         }
     }
 
-    private void ShowOfferDetails(LoadOfferListDto offer)
+    private string GetLoadTypeText(LoadType loadType)
     {
-        selectedOffer = offer;
-        errorMessage = string.Empty; // Modal açıldığında hata mesajını temizle
+        return loadType switch
+        {
+            LoadType.GeneralCargo => "Genel Kargo",
+            LoadType.PerishableGoods => "Bozulabilir Ürünler",
+            LoadType.HazardousMaterials => "Tehlikeli Maddeler",
+            LoadType.FragileItems => "Kırılabilir Eşyalar",
+            LoadType.BulkCargo => "Dökme Kargo",
+            LoadType.Liquid => "Sıvı Kargo",
+            LoadType.HighValue => "Yüksek Değerli Ürünler",
+            LoadType.TemperatureSensitive => "Sıcaklık Hassas Ürünler",
+            LoadType.DangerousGoods => "Tehlikeli Mallar",
+            _ => loadType.ToString()
+        };
+    }
+
+    private string GetLoadTypeBadgeClass(LoadType loadType)
+    {
+        return loadType switch
+        {
+            LoadType.GeneralCargo => "badge-loadtype-general",
+            LoadType.PerishableGoods => "badge-loadtype-perishable",
+            LoadType.HazardousMaterials => "badge-loadtype-hazardous",
+            LoadType.FragileItems => "badge-loadtype-fragile",
+            LoadType.BulkCargo => "badge-loadtype-bulk",
+            LoadType.Liquid => "badge-loadtype-liquid",
+            LoadType.HighValue => "badge-loadtype-highvalue",
+            LoadType.TemperatureSensitive => "badge-loadtype-temperature",
+            LoadType.DangerousGoods => "badge-loadtype-dangerous",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusBadgeClass(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "bg-warning",
+            LoadStatus.Accepted => "bg-success",
+            LoadStatus.Rejected => "bg-danger",
+            LoadStatus.Assigned => "bg-primary",
+            LoadStatus.InTransit => "bg-info",
+            LoadStatus.Delivered => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusText(LoadStatus status)
+    {
+        return status switch
+        {
+            LoadStatus.Pending => "Beklemede",
+            LoadStatus.Accepted => "Kabul Edildi",
+            LoadStatus.Rejected => "Reddedildi",
+            LoadStatus.Assigned => "Atandı",
+            LoadStatus.InTransit => "Yolda",
+            LoadStatus.Delivered => "Teslim Edildi",
+            _ => status.ToString()
+        };
     }
 } 

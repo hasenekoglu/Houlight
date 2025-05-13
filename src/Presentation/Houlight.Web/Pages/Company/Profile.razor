@@ -286,12 +286,12 @@
         public string CompanyName { get; set; } = "";
 
         [Required(ErrorMessage = "Şirket adresi alanı boş olamaz.")]
-        [StringLength(500, ErrorMessage = "Şirket adresi 500 karakterden uzun olamaz.")]
+        [StringLength(200, ErrorMessage = "Şirket adresi 200 karakterden uzun olamaz.")]
         public string CompanyAddress { get; set; } = "";
 
         [Required(ErrorMessage = "E-posta alanı boş olamaz.")]
         [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
-        [StringLength(100, ErrorMessage = "E-posta alanı 100 karakterden uzun olamaz.")]
+        [StringLength(50, ErrorMessage = "E-posta alanı 50 karakterden uzun olamaz.")]
         public string CompanyEmail { get; set; } = "";
 
         [Required(ErrorMessage = "Telefon numarası alanı boş olamaz.")]
@@ -319,6 +319,10 @@
     {
         Console.WriteLine("[Company Profile] OnInitializedAsync başladı");
         await LoadProfile();
+        if (!string.IsNullOrEmpty(profileModel.CompanyPhoneNumber))
+        {
+            profileModel.CompanyPhoneNumber = profileModel.CompanyPhoneNumber.TrimStart('0');
+        }
         Console.WriteLine("[Company Profile] OnInitializedAsync bitti");
     }
 
@@ -340,6 +344,10 @@
                     CompanyEmail = response.CompanyEmail,
                     CompanyPhoneNumber = response.CompanyPhoneNumber
                 };
+                if (!string.IsNullOrEmpty(profileModel.CompanyPhoneNumber))
+                {
+                    profileModel.CompanyPhoneNumber = profileModel.CompanyPhoneNumber.TrimStart('0');
+                }
                 Console.WriteLine("[Company Profile] Profil modeli güncellendi");
             }
         }
@@ -395,7 +403,7 @@
                 CompanyName = profileModel.CompanyName.Trim(),
                 CompanyAddress = profileModel.CompanyAddress.Trim(),
                 CompanyEmail = profileModel.CompanyEmail.Trim().ToLower(),
-                CompanyPhoneNumber = profileModel.CompanyPhoneNumber.Trim()
+                CompanyPhoneNumber = "0" + profileModel.CompanyPhoneNumber.Trim() // Başına 0 ekliyoruz
             };
 
             Console.WriteLine($"[Company Profile] Güncelleme isteği gönderiliyor: {System.Text.Json.JsonSerializer.Serialize(command)}");
@@ -406,8 +414,9 @@
             {
                 successMessage = "Şirket bilgileriniz başarıyla güncellendi.";
                 await LoadProfile(); // Profili yeniden yükle
-                await localStorage.SetItemAsync("companyName", response.CompanyName);
+                await localStorage.SetItemAsync("userName", response.CompanyName);
                 isEditing = false;
+              //  NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true); // Header güncellensin diye sayfayı yenile
             }
             else
             {
@@ -431,14 +440,14 @@
 
         try
         {
-            var command = new ChangePasswordCommand
+            var command = new Houlight.Application.Features.LogisticsCompanies.Commands.ChangePassword.ChangeCompanyPasswordCommand
             {
                 Id = profileModel.Id,
                 CurrentPassword = passwordModel.CurrentPassword,
                 NewPassword = passwordModel.NewPassword
             };
 
-            var response = await Http.PutAsync<ChangePasswordCommandResponse>("api/logisticscompanies/change-password", command);
+            var response = await Http.PutAsync<Houlight.Application.Features.LogisticsCompanies.Commands.ChangePassword.ChangeCompanyPasswordCommandResponse>("api/logisticscompanies/change-company-password", command);
             
             if (response?.Success == true)
             {
