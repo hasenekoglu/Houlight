@@ -1,77 +1,126 @@
 @page "/"
-@page "/anasayfa"
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+
+<PageTitle>Houlight - Hızlı ve Güvenli Teslimat</PageTitle>
 
 @code {
-    private bool isAuthenticated = false;
+    private bool isAuthenticated;
+
     protected override async Task OnInitializedAsync()
     {
-        var token = await localStorage.GetItemAsync<string>("authToken");
-        isAuthenticated = !string.IsNullOrEmpty(token);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
     }
 }
 
 <div class="hero-section">
+    <div class="hero-background">
+        <div class="hero-circle hero-circle-1"></div>
+        <div class="hero-circle hero-circle-2"></div>
+        <div class="hero-circle hero-circle-3"></div>
+    </div>
+    
     <div class="hero-content">
         <div class="hero-text">
-            <h1>Houlight ile Teslimat Artık Çok Kolay!</h1>
-            <p>Modern ve güvenilir teslimat çözümleriyle işletmenizi bir adım öne taşıyın. Hızlı, güvenli ve ekonomik teslimat seçenekleriyle Houlight yanınızda.</p>
-            @if (!isAuthenticated)
-            {
-                <div class="hero-actions">
-                    <a href="/register" class="hero-btn hero-btn-primary">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Hemen Başla
+            <h1 class="hero-title">Hızlı ve Güvenli Teslimatın Yeni Adresi</h1>
+            <p class="hero-subtitle">
+                Houlight ile teslimatlarınızı güvenle yönetin. Modern teknolojimiz ve uzman ekibimizle 
+                teslimatlarınızı hızlı ve güvenli bir şekilde gerçekleştiriyoruz.
+            </p>
+            <div class="hero-actions">
+                @if (isAuthenticated)
+                {
+                    <a href="/dashboard" class="hero-btn hero-btn-primary">
+                        <span>Panele Git</span>
+                        <span class="btn-shine"></span>
                     </a>
-                    <a href="/about" class="hero-btn hero-btn-secondary">
-                        <i class="bi bi-info-circle me-2"></i>Daha Fazla Bilgi
+                }
+                else
+                {
+                    <a href="/auth/register" class="hero-btn hero-btn-primary">
+                        <span>Hemen Başla</span>
+                        <span class="btn-shine"></span>
                     </a>
-                </div>
-            }
+                    <a href="/auth/login" class="hero-btn hero-btn-secondary">Giriş Yap</a>
+                }
+            </div>
         </div>
         <div class="hero-image">
-            <img src="images/hero-delivery.svg" alt="Houlight Teslimat" />
+            <img src="images/hero-delivery.svg" alt="Houlight Teslimat" class="floating-animation" />
         </div>
     </div>
 </div>
 
-<div class="houlight-features">
-    <div class="feature-card">
-        <i class="bi bi-lightning-charge-fill feature-icon"></i>
-        <h3>Hızlı Yük Eşleşmesi</h3>
-        <p>Taşımacılık talepleriniz sistem üzerinden kısa sürede uygun araçlarla eşleştirilir.</p>
+<div class="features-section">
+    <div class="features-background">
+        <div class="features-circle features-circle-1"></div>
+        <div class="features-circle features-circle-2"></div>
+        <div class="features-circle features-circle-3"></div>
     </div>
-    <div class="feature-card">
-        <i class="bi bi-shield-check feature-icon"></i>
-        <h3>Güvenli Süreç Yönetimi</h3>
-        <p>Tüm taşımalar kayıt altında ilerler, firmalar ve şoförler sistem üzerinden doğrulanır.</p>
-    </div>
-    <div class="feature-card">
-        <i class="bi bi-graph-up-arrow feature-icon"></i>
-        <h3>Verimli ve Ekonomik</h3>
-        <p>Boş araç maliyetini azaltır, firmalara uygun fiyatlı ve zamanında lojistik çözümler sunar.</p>
+    <div class="features-container">
+        <h2 class="features-title">Neden Houlight?</h2>
+        <p class="features-subtitle">Modern teknolojimiz ve uzman ekibimizle teslimat süreçlerinizi kolaylaştırıyoruz</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                    <img src="images/icon-fast.svg" alt="Hızlı Teslimat" class="feature-icon bright" />
+                </div>
+                <h3>Hızlı Teslimat</h3>
+                <p>Akıllı eşleştirme sistemi ile en kısa sürede teslimat yapıyoruz. Zaman kaybetmeyin!</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                    <img src="images/icon-price.svg" alt="Uygun Fiyat" class="feature-icon bright" />
+                </div>
+                <h3>Uygun Fiyat</h3>
+                <p>Rekabetçi fiyatlar ve şeffaf ücretlendirme ile bütçenizi koruyoruz.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                    <img src="images/icon-secure.svg" alt="Güvenli Taşıma" class="feature-icon bright" />
+                </div>
+                <h3>Güvenli Taşıma</h3>
+                <p>Sigortalı ve güvenli taşıma hizmeti ile eşyalarınız güvende.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                    <img src="images/icon-support.svg" alt="7/24 Destek" class="feature-icon bright" />
+                </div>
+                <h3>7/24 Destek</h3>
+                <p>Uzman ekibimiz her an yanınızda. Sorularınızı yanıtlıyor, sorunlarınızı çözüyoruz.</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="how-section-modern">
+    <div class="how-background">
+        <div class="how-circle how-circle-1"></div>
+        <div class="how-circle how-circle-2"></div>
+        <div class="how-circle how-circle-3"></div>
+    </div>
     <div class="how-modern-content">
         <div class="how-modern-steps">
-            <h2>Nasıl Çalışır?</h2>
+            <h2 class="how-title">Nasıl Çalışır?</h2>
             <ul>
                 <li>
-                    <i class="bi bi-1-circle-fill step-icon"></i>
+                    <span class="how-step-number">1</span>
                     <span>Ücretsiz üye olun ve hesabınızı oluşturun. Şirket veya bireysel hesap seçenekleriyle size en uygun planı belirleyin.</span>
                 </li>
                 <li>
-                    <i class="bi bi-2-circle-fill step-icon"></i>
+                    <span class="how-step-number">2</span>
                     <span>Gönderinizi oluşturun. Teslimat detaylarını, paket bilgilerini ve tercih ettiğiniz hizmeti seçin.</span>
                 </li>
                 <li>
-                    <i class="bi bi-3-circle-fill step-icon"></i>
+                    <span class="how-step-number">3</span>
                     <span>Gönderinizi teslim alalım. Eşyanızı güvenle paketleyip, hızlıca teslim noktasına ulaştıralım.</span>
                 </li>
                 <li>
-                    <i class="bi bi-4-circle-fill step-icon"></i>
+                    <span class="how-step-number">4</span>
                     <span>Canlı takip edin. Gönderinizin her anını uygulamamızdan veya web sitemizden takip edin.</span>
                 </li>
             </ul>
@@ -82,72 +131,85 @@
     </div>
 </div>
 
-<div class="houlight-why-modern">
-    <h2 class="advantages-title">Houlight Sizi Neden Öne Çıkarır?</h2>
-    <div class="why-container">
-        <div class="why-box">
-            <img src="images/icon-fast.svg" alt="Anında Yük Yayını" />
-            <h3>Anında Yük Yayını</h3>
-            <p>Tek panelden yüklerinizi sisteme ekleyin, onlarca şoföre aynı anda ulaşın. Zaman kaybetmeyin.</p>
-        </div>
-        <div class="why-box">
-            <img src="images/icon-secure.svg" alt="Doğrulanmış Kullanıcılar" />
-            <h3>Doğrulanmış Kullanıcılar</h3>
-            <p>Sistemde yalnızca onaylı lojistik firmaları ve şoförler yer alır. Her işlem kayıt altında ilerler.</p>
-        </div>
-        <div class="why-box">
-            <img src="images/icon-support.svg" alt="Operasyonel Kolaylık" />
-            <h3>Operasyonel Kolaylık</h3>
-            <p>Tek bir platform üzerinden tüm teklifleri, eşleşmeleri ve geçmiş taşıma kayıtlarını yönetin.</p>
-        </div>
-        <div class="why-box">
-            <img src="images/icon-price.svg" alt="Esnek Fiyatlandırma" />
-            <h3>Esnek Fiyatlandırma</h3>
-            <p>Pazar dinamiklerine göre fiyat belirleyin veya gelen teklifleri değerlendirin. Kontrol sizde.</p>
+<div class="why-houlight-section">
+    <div class="why-houlight-background">
+        <div class="why-houlight-circle why-houlight-circle-1"></div>
+        <div class="why-houlight-circle why-houlight-circle-2"></div>
+        <div class="why-houlight-circle why-houlight-circle-3"></div>
+    </div>
+    <div class="why-houlight-container">
+        <h2 class="why-houlight-title">Houlight Sizi Neden Öne Çıkarır?</h2>
+        <p class="why-houlight-subtitle">Modern teknolojimiz ve yenilikçi çözümlerimizle lojistik süreçlerinizi optimize ediyoruz</p>
+        <div class="why-houlight-grid">
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-fast.svg" alt="Anında Yük Yayını" class="why-houlight-icon" />
+                </div>
+                <h3>Anında Yük Yayını</h3>
+                <p>Tek panelden yüklerinizi sisteme ekleyin, onlarca şoföre aynı anda ulaşın. Zaman kaybetmeyin, rekabet avantajı elde edin.</p>
+            </div>
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-secure.svg" alt="Doğrulanmış Kullanıcılar" class="why-houlight-icon" />
+                </div>
+                <h3>Doğrulanmış Kullanıcılar</h3>
+                <p>Sistemde yalnızca onaylı lojistik firmaları ve şoförler yer alır. Her işlem kayıt altında, güvenle ilerler.</p>
+            </div>
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-support.svg" alt="Operasyonel Kolaylık" class="why-houlight-icon" />
+                </div>
+                <h3>Operasyonel Kolaylık</h3>
+                <p>Tek bir platform üzerinden tüm teklifleri, eşleşmeleri ve geçmiş taşıma kayıtlarını yönetin. İşlerinizi kolaylaştırın.</p>
+            </div>
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-price.svg" alt="Esnek Fiyatlandırma" class="why-houlight-icon" />
+                </div>
+                <h3>Esnek Fiyatlandırma</h3>
+                <p>Pazar dinamiklerine göre fiyat belirleyin veya gelen teklifleri değerlendirin. Kontrol sizde, karar sizde.</p>
+            </div>
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-tracking.svg" alt="Gerçek Zamanlı Takip" class="why-houlight-icon" />
+                </div>
+                <h3>Gerçek Zamanlı Takip</h3>
+                <p>Yüklerinizin konumunu ve durumunu anlık olarak takip edin. Şeffaf ve güvenilir bir süreç yönetimi sağlayın.</p>
+            </div>
+            <div class="why-houlight-card">
+                <div class="why-houlight-icon-wrapper">
+                    <img src="images/icon-analytics.svg" alt="Detaylı Analitik" class="why-houlight-icon" />
+                </div>
+                <h3>Detaylı Analitik</h3>
+                <p>Performans metriklerinizi ve operasyonel verilerinizi analiz edin. Veriye dayalı kararlar alın, verimliliğinizi artırın.</p>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="houlight-cta">
-    <div class="cta-content">
-        <h2>Hemen Başlayın!</h2>
-        <p>Houlight ile teslimat süreçlerinizi modernleştirin. Ücretsiz üye olun, avantajlardan yararlanın.</p>
+<!-- Bize Katılın Bölümü (Koyu ve Uyumlu, Toplu, Çizgisiz) -->
+<div class="houlight-join-section-dark">
+    <div class="join-background">
+        <div class="join-circle join-circle-1"></div>
+        <div class="join-circle join-circle-2"></div>
+        <div class="join-circle join-circle-3"></div>
+    </div>
+    <div class="join-content-dark">
+        <div class="join-illustration-dark-wrapper">
+            <img src="images/hero-delivery.svg" alt="Houlight Topluluğu" class="join-illustration-dark" />
+        </div>
+        <h2 class="join-title-dark">Houlight Topluluğuna Katılın, Lojistikte Fark Yaratın!</h2>
+        <p class="join-desc-dark">Binlerce mutlu müşteri ve iş ortağıyla büyüyen Houlight ailesinin bir parçası olun. Güvenli, hızlı ve yenilikçi teslimat deneyimini birlikte yaşayın.</p>
         @if (!isAuthenticated)
         {
-            <div class="cta-actions">
-                <a href="/register" class="cta-btn cta-btn-primary">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Ücretsiz Üye Ol
+            <div class="join-actions-dark">
+                <a href="/auth/register" class="join-btn-dark join-btn-primary-dark">
+                    <i class="bi bi-person-plus me-2"></i>Ücretsiz Üye Ol
                 </a>
-                <a href="/contact" class="cta-btn cta-btn-secondary">
+                <a href="/contact" class="join-btn-dark join-btn-secondary-dark">
                     <i class="bi bi-telephone me-2"></i>Bize Ulaşın
                 </a>
             </div>
         }
     </div>
 </div>
-
-<style>
-    .hero-section {
-        background-color: #212529;
-    }
-
-    .features-section {
-        background-color: #f8f9fa;
-    }
-
-    .cta-section {
-        background-color: #212529;
-    }
-
-    .btn-warning {
-        background-color: #ffc107;
-        border-color: #ffc107;
-        color: #000;
-    }
-
-    .btn-warning:hover {
-        background-color: #ffca2c;
-        border-color: #ffc720;
-        color: #000;
-    }
-</style>
