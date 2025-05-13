@@ -25,4 +25,5 @@ public class LoadOfferEntity : BaseEntity
     public virtual LogisticsCompanyEntity LogisticsCompanyEntity { get; set; } = null!;
     public virtual VehicleEntity? VehicleEntity { get; set; }
     public virtual DriverEntity? DriverEntity { get; set; }
+    public LoadStatus OfferStatus { get; set; } = LoadStatus.Pending;
 } 

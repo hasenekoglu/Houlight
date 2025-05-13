@@ -227,44 +227,65 @@
 
 @if (showEditModal)
 {
-    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1051;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Teklif Düzenle</h5>
+    <div class="modal fade show" style="display: block; background: rgba(33,37,41,0.4); z-index: 1050;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px; z-index: 1051;">
+            <div class="modal-content shadow rounded-3 border-0">
+                <div class="modal-header bg-white border-bottom-0 rounded-top-3">
+                    <h5 class="modal-title d-flex align-items-center text-houlight-accent">
+                        <i class="bi bi-pencil-square me-2"></i> Teklif Düzenle
+                    </h5>
                     <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
                 </div>
                 <EditForm Model="@editOfferModel" OnValidSubmit="HandleEditSubmit">
                     <DataAnnotationsValidator />
-                    <div class="modal-body">
+                    <div class="modal-body p-3 bg-white">
                         <div class="mb-3">
-                            <label class="form-label">Teklif Fiyatı (TL)</label>
-                            <InputNumber @bind-Value="editOfferModel.CompanyOfferedPrice" class="form-control" />
+                            <label class="form-label text-houlight-accent small fw-semibold">
+                                <i class="bi bi-cash-coin me-1"></i> Teklif Fiyatı (TL)
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-currency-lira"></i></span>
+                                <InputNumber @bind-Value="editOfferModel.CompanyOfferedPrice" class="form-control border-0 bg-light" placeholder="Teklif Fiyatı" />
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Araç Seçin</label>
-                            <select @bind="editOfferModel.AssignedVehicleId" class="form-select">
-                                <option value="">Araç Seçin</option>
-                                @foreach (var vehicle in availableVehicles)
-                                {
-                                    <option value="@vehicle.Id">@vehicle.PlateNumber - @vehicle.VehicleTypeType (@vehicle.Capacity.ToString("N0") kg)</option>
-                                }
-                            </select>
+                            <label class="form-label text-houlight-accent small fw-semibold">
+                                <i class="bi bi-truck me-1"></i> Araç Seçin
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-truck"></i></span>
+                                <select @bind="editOfferModel.AssignedVehicleId" class="form-select border-0 bg-light" style="min-width: 0;">
+                                    <option value="">Araç Seçin</option>
+                                    @foreach (var vehicle in availableVehicles)
+                                    {
+                                        <option value="@vehicle.Id">@vehicle.PlateNumber - @vehicle.VehicleTypeType (@vehicle.Capacity.ToString("N0") kg)</option>
+                                    }
+                                </select>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Sürücü Seçin</label>
-                            <select @bind="editOfferModel.AssignedDriverId" class="form-select">
-                                <option value="">Sürücü Seçin</option>
-                                @foreach (var driver in availableDrivers)
-                                {
-                                    <option value="@driver.Id">@driver.Name @driver.Surname - @driver.LicenseNumber</option>
-                                }
-                            </select>
+                            <label class="form-label text-houlight-accent small fw-semibold">
+                                <i class="bi bi-person-badge me-1"></i> Sürücü Seçin
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                                <select @bind="editOfferModel.AssignedDriverId" class="form-select border-0 bg-light" style="min-width: 0;">
+                                    <option value="">Sürücü Seçin</option>
+                                    @foreach (var driver in availableDrivers)
+                                    {
+                                        <option value="@driver.Id">@driver.Name @driver.Surname - @driver.LicenseNumber</option>
+                                    }
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">İptal</button>
-                        <button type="submit" class="btn btn-houlight-accent">Kaydet</button>
+                    <div class="modal-footer bg-white border-top-0 rounded-bottom-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-1 rounded-pill" @onclick="CloseEditModal">
+                            <i class="bi bi-x-lg me-1"></i> İptal
+                        </button>
+                        <button type="submit" class="btn btn-houlight-accent btn-sm px-3 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i> Kaydet
+                        </button>
                     </div>
                 </EditForm>
             </div>
@@ -417,8 +438,20 @@
         var companyId = await localStorage.GetItemAsync<string>("companyId");
         var vehiclesResponse = await Http.GetAsync<List<VehicleModel>>($"api/vehicles/filter?logisticsCompanyId={companyId}");
         availableVehicles = vehiclesResponse?.Where(v => v.IsAvailable).ToList() ?? new List<VehicleModel>();
+        if (offer.AssignedVehicleId.HasValue && !availableVehicles.Any(v => v.Id == offer.AssignedVehicleId.Value))
+        {
+            var assignedVehicle = vehiclesResponse?.FirstOrDefault(v => v.Id == offer.AssignedVehicleId.Value);
+            if (assignedVehicle != null)
+                availableVehicles.Add(assignedVehicle);
+        }
         var driversResponse = await Http.GetAsync<List<DriverModel>>($"api/drivers/filter?logisticsCompanyId={companyId}&driverStatus=Available");
         availableDrivers = driversResponse?.Where(d => d.DriverStatus == DriverStatus.Available).ToList() ?? new List<DriverModel>();
+        if (offer.AssignedDriverId.HasValue && !availableDrivers.Any(d => d.Id == offer.AssignedDriverId.Value))
+        {
+            var assignedDriver = driversResponse?.FirstOrDefault(d => d.Id == offer.AssignedDriverId.Value);
+            if (assignedDriver != null)
+                availableDrivers.Add(assignedDriver);
+        }
         showEditModal = true;
         StateHasChanged();
     }

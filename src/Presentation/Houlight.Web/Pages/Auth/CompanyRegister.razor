@@ -7,64 +7,85 @@
 
 <PageTitle>Şirket Kaydı - Houlight</PageTitle>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4" style="color: var(--primary-color);">Şirket Kaydı</h2>
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">@errorMessage</div>
-                    }
-                    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-                        <DataAnnotationsValidator />
-                        <div class="mb-3">
-                            <label for="companyName" class="form-label">Şirket Adı</label>
-                            <InputText id="companyName" class="form-control" @bind-Value="registerModel.CompanyName" />
-                            <ValidationMessage For="@(() => registerModel.CompanyName)" class="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="companyAddress" class="form-label">Şirket Adresi</label>
-                            <InputTextArea id="companyAddress" class="form-control" @bind-Value="registerModel.CompanyAddress" rows="3" />
-                            <ValidationMessage For="@(() => registerModel.CompanyAddress)" class="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="companyPhoneNumber" class="form-label">Telefon</label>
-                            <InputText id="companyPhoneNumber" class="form-control" @bind-Value="registerModel.CompanyPhoneNumber" placeholder="5XXXXXXXXX" />
-                            <ValidationMessage For="@(() => registerModel.CompanyPhoneNumber)" class="text-danger" />
-                            <small class="text-muted">Örnek: 5XXXXXXXXX (10 haneli)</small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="companyEmail" class="form-label">E-posta</label>
-                            <InputText type="email" id="companyEmail" class="form-control" @bind-Value="registerModel.CompanyEmail" placeholder="sirket@email.com" />
-                            <ValidationMessage For="@(() => registerModel.CompanyEmail)" class="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Şifre</label>
-                            <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" />
-                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
-                            <small class="text-muted">En az 6 karakter</small>
-                        </div>
-                        <div class="mb-4">
-                            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
-                            <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" />
-                            @if (!string.IsNullOrEmpty(passwordError))
-                            {
-                                <div class="text-danger">@passwordError</div>
-                            }
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
-                                @(isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol")
-                            </button>
-                        </div>
-                    </EditForm>
-                    <div class="text-center mt-4">
-                        <p class="mb-0">Zaten kayıtlı bir şirket misiniz? <a href="/company/login" class="text-decoration-none" style="color: var(--primary-color);">Giriş Yap</a></p>
-                    </div>
-                </div>
+<div class="auth-container">
+    <div class="auth-card register-card">
+        <div class="auth-header">
+            <h2>Şirket Kaydı</h2>
+            <p class="auth-subtitle">Houlight'a hoş geldiniz</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="auth-alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>@errorMessage</span>
             </div>
+        }
+
+        <EditForm Model="@registerModel" OnValidSubmit="HandleRegister" class="auth-form">
+            <DataAnnotationsValidator />
+            
+            <div class="form-floating mb-3">
+                <InputText id="companyName" class="form-control" @bind-Value="registerModel.CompanyName" placeholder="Şirket Adı" />
+                <label for="companyName">Şirket Adı</label>
+                <ValidationMessage For="@(() => registerModel.CompanyName)" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputTextArea id="companyAddress" class="form-control" @bind-Value="registerModel.CompanyAddress" placeholder="Şirket Adresi" style="height: 100px" />
+                <label for="companyAddress">Şirket Adresi</label>
+                <ValidationMessage For="@(() => registerModel.CompanyAddress)" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText id="companyPhoneNumber" class="form-control" @bind-Value="registerModel.CompanyPhoneNumber" placeholder="5XXXXXXXXX" />
+                <label for="companyPhoneNumber">Telefon</label>
+                <ValidationMessage For="@(() => registerModel.CompanyPhoneNumber)" class="validation-message" />
+                <small class="form-text">Örnek: 5XXXXXXXXX (10 haneli)</small>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText type="email" id="companyEmail" class="form-control" @bind-Value="registerModel.CompanyEmail" placeholder="sirket@email.com" />
+                <label for="companyEmail">E-posta</label>
+                <ValidationMessage For="@(() => registerModel.CompanyEmail)" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Şifre" />
+                <label for="password">Şifre</label>
+                <ValidationMessage For="@(() => registerModel.Password)" class="validation-message" />
+                <small class="form-text">En az 6 karakter</small>
+            </div>
+
+            <div class="form-floating mb-4">
+                <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" placeholder="Şifre Tekrar" />
+                <label for="confirmPassword">Şifre Tekrar</label>
+                @if (!string.IsNullOrEmpty(passwordError))
+                {
+                    <div class="validation-message">@passwordError</div>
+                }
+            </div>
+
+            <button type="submit" class="auth-submit-btn" disabled="@(isLoading)">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Kayıt Yapılıyor...</span>
+                }
+                else
+                {
+                    <i class="bi bi-building-add me-2"></i>
+                    <span>Kayıt Ol</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-footer">
+            <p>Zaten kayıtlı bir şirket misiniz?</p>
+            <a href="/company/login" class="auth-link">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Giriş Yap
+            </a>
         </div>
     </div>
 </div>
@@ -126,15 +147,28 @@
             {
                 NavigationManager.NavigateTo("/company/login", true);
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains("ValidationException"))
+            {
+                // Backend'den gelen validation hatası
+                errorMessage = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta adresi deneyin.";
+            }
             else
             {
-                errorMessage = "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
+                errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
             }
+            Console.WriteLine($"Kayıt hatası: {ex.Message}");
         }
-        catch
+        catch (Exception ex)
         {
-            errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
+            errorMessage = "Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"Kayıt hatası: {ex.Message}");
         }
-        isLoading = false;
+        finally
+        {
+            isLoading = false;
+        }
     }
 } 

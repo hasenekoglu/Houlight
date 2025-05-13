@@ -90,6 +90,7 @@
                         <div class="bg-offer-orange d-flex flex-column justify-content-center p-4 rounded-top">
                             <div class="mb-2">
                                 <span class="badge @GetLoadTypeBadgeClass(first.LoadType) mb-2">@GetLoadTypeText(first.LoadType)</span>
+                                <span class="badge @GetStatusBadgeClass(first.LoadStatus)">@GetStatusText(first.LoadStatus)</span>
                             </div>
                             <h5 class="fw-bold mb-3">@first.FromLocation <i class="bi bi-arrow-right mx-2"></i> @first.ToLocation</h5>
                             <div class="mb-2 small"><i class="bi bi-box-seam me-1"></i> @first.Description</div>
@@ -109,7 +110,7 @@
                                             </div>
                                             <div class="d-flex align-items-center gap-3">
                                                 <span class="fw-bold text-houlight-accent">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
-                                                <span class="badge @GetStatusBadgeClass(offer.LoadStatus)">@GetStatusText(offer.LoadStatus)</span>
+                                                <span class="badge @GetStatusBadgeClass(offer.OfferStatus)">@GetStatusText(offer.OfferStatus)</span>
                                                 <i class="bi @(expanded ? "bi-chevron-up" : "bi-chevron-down") fs-5 text-houlight-accent"></i>
                                             </div>
                                         </div>
@@ -124,10 +125,10 @@
                                                     </div>
                                                     <div class="col-12 col-md-6">
                                                         <div class="mb-1"><span class="fw-bold">Not:</span> <span class="text-muted">@offer.Description</span></div>
-                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetStatusBadgeClass(offer.LoadStatus)">@GetStatusText(offer.LoadStatus)</span></div>
+                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetStatusBadgeClass(offer.OfferStatus)">@GetStatusText(offer.OfferStatus)</span></div>
                                                     </div>
                                                 </div>
-                                                @if (offer.LoadStatus == LoadStatus.Pending && !group.Any(x => x.LoadStatus == LoadStatus.Accepted))
+                                                @if (offer.OfferStatus == LoadStatus.Pending && first.LoadStatus == LoadStatus.Pending)
                                                 {
                                                     <div class="d-flex justify-content-end gap-2 mt-3">
                                                         <button class="btn btn-sm btn-success" @onclick="() => AcceptOffer(offer)">
@@ -160,9 +161,13 @@
     private string selectedLoadType = "";
     private string selectedStatus = "";
     private string searchText = "";
+    private Guid? currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
+        var userId = await localStorage.GetItemAsync<string>("userId");
+        if (Guid.TryParse(userId, out var parsedId))
+            currentUserId = parsedId;
         await LoadCustomerOffers();
     }
 
@@ -191,10 +196,15 @@
     private void ApplyFilters()
     {
         var filtered = offers.AsEnumerable();
+
+        // Sadece giriş yapan kullanıcıya ait teklifler
+        if (currentUserId.HasValue)
+            filtered = filtered.Where(x => x.CustomerId == currentUserId.Value);
+
         if (!string.IsNullOrEmpty(selectedLoadType))
             filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
         if (!string.IsNullOrEmpty(selectedStatus))
-            filtered = filtered.Where(x => x.LoadStatus.ToString() == selectedStatus);
+            filtered = filtered.Where(x => x.OfferStatus.ToString() == selectedStatus);
         if (!string.IsNullOrWhiteSpace(searchText))
             filtered = filtered.Where(x => (x.FromLocation != null && x.FromLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                                          (x.ToLocation != null && x.ToLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
@@ -213,19 +223,17 @@
         try
         {
             isLoading = true;
-            // Önce seçilen teklifi kabul et
             var response = await Http.PostAsync<AcceptLoadOfferResponse>($"api/loadoffers/{offer.Id}/accept", null);
             if (response != null && response.Success)
             {
-                // Tüm tekliflerin durumunu güncelle (kart silinmesin, sadece statü değişsin)
                 foreach (var o in offers.Where(x => x.LoadId == offer.LoadId))
                 {
                     if (o.Id == offer.Id)
-                        o.LoadStatus = LoadStatus.Accepted;
+                        o.OfferStatus = LoadStatus.Accepted;
                     else
-                        o.LoadStatus = LoadStatus.Rejected;
+                        o.OfferStatus = LoadStatus.Rejected;
                 }
-                ApplyFilters();
+                await LoadCustomerOffers();
                 expandedOfferId = Guid.Empty;
             }
             else
@@ -251,11 +259,10 @@
             var response = await Http.PostAsync<DeleteLoadOfferResponse>($"api/loadoffers/{offer.Id}/reject", null);
             if (response != null && response.Success)
             {
-                // Sadece ilgili teklifin LoadStatus'unu güncelle
                 var o = offers.FirstOrDefault(x => x.Id == offer.Id);
                 if (o != null)
-                    o.LoadStatus = LoadStatus.Rejected;
-                ApplyFilters();
+                    o.OfferStatus = LoadStatus.Rejected;
+                await LoadCustomerOffers();
                 expandedOfferId = Guid.Empty;
             }
             else

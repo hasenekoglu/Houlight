@@ -8,39 +8,56 @@
 
 <PageTitle>Şirket Girişi - Houlight</PageTitle>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4" style="color: var(--primary-color);">Şirket Girişi</h2>
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">@errorMessage</div>
-                    }
-                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-                        <DataAnnotationsValidator />
-                        <div class="mb-3">
-                            <label for="email" class="form-label">E-posta</label>
-                            <InputText type="email" id="email" class="form-control" @bind-Value="loginModel.Email" placeholder="sirket@email.com" />
-                            <ValidationMessage For="@(() => loginModel.Email)" class="text-danger" />
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Şifre</label>
-                            <InputText type="password" id="password" class="form-control" @bind-Value="loginModel.Password" />
-                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
-                                @(isLoading ? "Giriş Yapılıyor..." : "Giriş Yap")
-                            </button>
-                        </div>
-                    </EditForm>
-                    <div class="text-center mt-4">
-                        <p class="mb-0">Şirketiniz henüz kayıtlı değil mi? <a href="/company/register" class="text-decoration-none" style="color: var(--primary-color);">Şirket Kaydı Oluştur</a></p>
-                    </div>
-                </div>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Şirket Girişi</h2>
+            <p class="auth-subtitle">Houlight'a hoş geldiniz</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="auth-alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>@errorMessage</span>
             </div>
+        }
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="auth-form">
+            <DataAnnotationsValidator />
+            
+            <div class="form-floating mb-4">
+                <InputText type="email" id="email" class="form-control" @bind-Value="loginModel.Email" placeholder="sirket@email.com" />
+                <label for="email">E-posta</label>
+                <ValidationMessage For="@(() => loginModel.Email)" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-4">
+                <InputText type="password" id="password" class="form-control" @bind-Value="loginModel.Password" placeholder="Şifre" />
+                <label for="password">Şifre</label>
+                <ValidationMessage For="@(() => loginModel.Password)" class="validation-message" />
+            </div>
+
+            <button type="submit" class="auth-submit-btn" disabled="@(isLoading)">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Giriş Yapılıyor...</span>
+                }
+                else
+                {
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    <span>Giriş Yap</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-footer">
+            <p>Şirketiniz henüz kayıtlı değil mi?</p>
+            <a href="/company/register" class="auth-link">
+                <i class="bi bi-building-add me-2"></i>
+                Şirket Kaydı Oluştur
+            </a>
         </div>
     </div>
 </div>

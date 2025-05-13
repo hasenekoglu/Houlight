@@ -31,6 +31,17 @@ public class AcceptLoadOfferCommandHandler : IRequestHandler<AcceptLoadOfferComm
         if (load.Status != LoadStatus.Pending)
             throw new Exception("Sadece bekleyen yükler için teklif kabul edilebilir");
 
+        // Tüm teklifleri getir ve statüleri güncelle
+        var allOffers = await _loadOfferRepository.GetList(x => x.LoadId == load.Id);
+        foreach (var offer in allOffers)
+        {
+            if (offer.Id == loadOffer.Id)
+                offer.OfferStatus = LoadStatus.Accepted;
+            else
+                offer.OfferStatus = LoadStatus.Rejected;
+            await _loadOfferRepository.UpdateAsync(offer);
+        }
+
         // Load'u güncelle
         load.LogisticsCompanyId = loadOffer.LogisticsCompanyId;
         load.AssignedVehicleId = loadOffer.AssignedVehicleId;

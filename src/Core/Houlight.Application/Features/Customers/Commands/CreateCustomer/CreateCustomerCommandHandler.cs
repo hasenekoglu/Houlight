@@ -28,6 +28,13 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
 
     public async Task<CreateCustomerCommandResponse> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
+        // E-posta kontrolü
+        var existingCustomer = await _customerRepository.GetByEmailAsync(request.Email);
+        if (existingCustomer != null)
+        {
+            throw new ValidationException("Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta adresi deneyin.");
+        }
+
         var customer = new CustomerEntity
         {
             Name = request.Name,

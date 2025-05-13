@@ -15,9 +15,6 @@
                 <i class="bi bi-arrow-left"></i>
                 Dashboard'a Dön
             </a>
-            <span class="my-offers-toggle @(onlyMine ? "active" : "")" @onclick="ToggleOnlyMine">
-                <i class="bi bi-person-badge"></i> Kendi Tekliflerim
-            </span>
         </div>
     </div>
     <!-- Filtreleme Alanları -->
@@ -91,20 +88,15 @@
                             <div class="d-flex flex-column gap-3">
                                 @foreach (var offer in group.OrderByDescending(x => x.CreateDate))
                                 {
-                                    var isMine = offer.LogisticsCompanyId == myCompanyId;
                                     var expanded = expandedOfferId == offer.Id;
                                     <div class="expand-offer-box position-relative">
-                                        @if (isMine)
-                                        {
-                                            <span class="senin-teklifin-ribbon">SENİN TEKLİFİN</span>
-                                        }
-                                        <div class="expand-offer-summary d-flex align-items-center justify-content-between px-3 py-2 rounded-3 bg-offer-yellow shadow-sm @((isMine ? "border-houlight-accent offer-mine" : ""))" style="color:#222; background: linear-gradient(90deg, #ffe0b2 80%, #ffd180 100%) !important; border:2px solid #ffb74d;" @onclick="() => ToggleOfferDetails(offer.Id)">
+                                        <div class="expand-offer-summary d-flex align-items-center justify-content-between px-3 py-2 rounded-3 bg-offer-yellow shadow-sm" style="color:#222; background: linear-gradient(90deg, #ffe0b2 80%, #ffd180 100%) !important; border:2px solid #ffb74d;" @onclick="() => ToggleOfferDetails(offer.Id)">
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="fw-bold">@offer.LogisticsCompanyName</span>
                                             </div>
                                             <div class="d-flex align-items-center gap-3">
                                                 <span class="fw-bold text-houlight-accent">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
-                                                <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span>
+                                                <span class="badge @GetStatusBadgeClass(offer.OfferStatus)">@GetStatusText(offer.OfferStatus)</span>
                                                 <i class="bi @(expanded ? "bi-chevron-up" : "bi-chevron-down") fs-5 text-houlight-accent"></i>
                                             </div>
                                         </div>
@@ -119,7 +111,7 @@
                                                     </div>
                                                     <div class="col-12 col-md-6">
                                                         <div class="mb-1"><span class="fw-bold">Not:</span> <span class="text-muted">@offer.Description</span></div>
-                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span></div>
+                                                        <div class="mb-1"><span class="fw-bold">Durum:</span> <span class="badge @GetStatusBadgeClass(offer.OfferStatus)">@GetStatusText(offer.OfferStatus)</span></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -144,7 +136,6 @@
     private string selectedLoadType = "";
     private string selectedStatus = "";
     private string searchText = "";
-    private bool onlyMine = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -170,17 +161,19 @@
     private void ApplyFilters()
     {
         var filtered = offers.AsEnumerable();
+
+        // Sadece giriş yapan şirkete ait teklifler
+        filtered = filtered.Where(x => x.LogisticsCompanyId == myCompanyId);
+
         if (!string.IsNullOrEmpty(selectedLoadType))
             filtered = filtered.Where(x => x.LoadType.ToString() == selectedLoadType);
         if (!string.IsNullOrEmpty(selectedStatus))
-            filtered = filtered.Where(x => x.LoadStatus.ToString() == selectedStatus);
+            filtered = filtered.Where(x => x.OfferStatus.ToString() == selectedStatus);
         if (!string.IsNullOrWhiteSpace(searchText))
             filtered = filtered.Where(x => (x.FromLocation != null && x.FromLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                                            (x.ToLocation != null && x.ToLocation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                                            (x.Description != null && x.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                                            (x.LogisticsCompanyName != null && x.LogisticsCompanyName.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
-        if (onlyMine)
-            filtered = filtered.Where(x => x.LogisticsCompanyId == myCompanyId);
         filteredOffers = filtered.ToList();
     }
 
@@ -189,13 +182,7 @@
         expandedOfferId = expandedOfferId == offerId ? Guid.Empty : offerId;
     }
 
-    private void ToggleOnlyMine()
-    {
-        onlyMine = !onlyMine;
-        ApplyFilters();
-    }
-
-    private string GetOfferStatusBadgeClass(LoadStatus status)
+    private string GetStatusBadgeClass(LoadStatus status)
     {
         return status switch
         {
@@ -208,7 +195,7 @@
             _ => "bg-secondary"
         };
     }
-    private string GetOfferStatusText(LoadStatus status)
+    private string GetStatusText(LoadStatus status)
     {
         return status switch
         {

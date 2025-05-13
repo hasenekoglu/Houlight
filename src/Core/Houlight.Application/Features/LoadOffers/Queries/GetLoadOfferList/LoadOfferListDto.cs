@@ -23,4 +23,6 @@ public class LoadOfferListDto
     public string? DriverName { get; set; }
     public DateTime CreateDate { get; set; }
     public Guid LogisticsCompanyId { get; set; }
+    public Guid CustomerId { get; set; }
+    public LoadStatus OfferStatus { get; set; }
 } 

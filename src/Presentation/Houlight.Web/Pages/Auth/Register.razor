@@ -7,66 +7,90 @@
 
 <PageTitle>Kayıt Ol - Houlight</PageTitle>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4" style="color: var(--primary-color);">Kayıt Ol</h2>
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">@errorMessage</div>
-                    }
-                    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-                        <DataAnnotationsValidator />
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Ad</label>
-                                <InputText id="name" class="form-control" @bind-Value="registerModel.Name" />
-                                <ValidationMessage For="@(() => registerModel.Name)" class="text-danger" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="surname" class="form-label">Soyad</label>
-                                <InputText id="surname" class="form-control" @bind-Value="registerModel.Surname" />
-                                <ValidationMessage For="@(() => registerModel.Surname)" class="text-danger" />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">E-posta</label>
-                            <InputText id="email" class="form-control" @bind-Value="registerModel.Email" placeholder="ornek@email.com" />
-                            <ValidationMessage For="@(() => registerModel.Email)" class="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Telefon</label>
-                            <InputText id="phone" class="form-control" @bind-Value="registerModel.Phone" placeholder="5XXXXXXXXX" />
-                            <ValidationMessage For="@(() => registerModel.Phone)" class="text-danger" />
-                            <small class="text-muted">Örnek: 5XXXXXXXXX (10 haneli)</small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Şifre</label>
-                            <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" />
-                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
-                            <small class="text-muted">En az 6 karakter</small>
-                        </div>
-                        <div class="mb-4">
-                            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
-                            <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" />
-                            @if (!string.IsNullOrEmpty(passwordError))
-                            {
-                                <div class="text-danger">@passwordError</div>
-                            }
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" disabled="@(isLoading)">
-                                @(isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol")
-                            </button>
-                        </div>
-                    </EditForm>
-                    <div class="text-center mt-4">
-                        <p class="mb-0">Zaten hesabınız var mı? <a href="/login" class="text-decoration-none" style="color: var(--primary-color);">Giriş Yap</a></p>
+<div class="auth-container">
+    <div class="auth-card register-card">
+        <div class="auth-header">
+            <h2>Kayıt Ol</h2>
+            <p class="auth-subtitle">Houlight'a hoş geldiniz</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="auth-alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>@errorMessage</span>
+            </div>
+        }
+
+        <EditForm Model="@registerModel" OnValidSubmit="HandleRegister" class="auth-form">
+            <DataAnnotationsValidator />
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="name" class="form-control" @bind-Value="registerModel.Name" placeholder="Ad" />
+                        <label for="name">Ad</label>
+                        <ValidationMessage For="@(() => registerModel.Name)" class="validation-message" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="surname" class="form-control" @bind-Value="registerModel.Surname" placeholder="Soyad" />
+                        <label for="surname">Soyad</label>
+                        <ValidationMessage For="@(() => registerModel.Surname)" class="validation-message" />
                     </div>
                 </div>
             </div>
+
+            <div class="form-floating mt-3">
+                <InputText type="email" id="email" class="form-control" @bind-Value="registerModel.Email" placeholder="ornek@email.com" />
+                <label for="email">E-posta</label>
+                <ValidationMessage For="@(() => registerModel.Email)" class="validation-message" />
+            </div>
+
+            <div class="form-floating mt-3">
+                <InputText id="phone" class="form-control" @bind-Value="registerModel.Phone" placeholder="5XXXXXXXXX" />
+                <label for="phone">Telefon</label>
+                <ValidationMessage For="@(() => registerModel.Phone)" class="validation-message" />
+                <small class="form-text">Örnek: 5XXXXXXXXX (10 haneli)</small>
+            </div>
+
+            <div class="form-floating mt-3">
+                <InputText type="password" id="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Şifre" />
+                <label for="password">Şifre</label>
+                <ValidationMessage For="@(() => registerModel.Password)" class="validation-message" />
+                <small class="form-text">En az 6 karakter</small>
+            </div>
+
+            <div class="form-floating mt-3">
+                <InputText type="password" id="confirmPassword" class="form-control" @bind-Value="confirmPassword" placeholder="Şifre Tekrar" />
+                <label for="confirmPassword">Şifre Tekrar</label>
+                @if (!string.IsNullOrEmpty(passwordError))
+                {
+                    <div class="validation-message">@passwordError</div>
+                }
+            </div>
+
+            <button type="submit" class="auth-submit-btn mt-4" disabled="@(isLoading)">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Kayıt Yapılıyor...</span>
+                }
+                else
+                {
+                    <i class="bi bi-person-plus me-2"></i>
+                    <span>Kayıt Ol</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-footer">
+            <p>Zaten hesabınız var mı?</p>
+            <a href="/login" class="auth-link">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Giriş Yap
+            </a>
         </div>
     </div>
 </div>
@@ -128,15 +152,28 @@
             {
                 NavigationManager.NavigateTo("/login", true);
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains("ValidationException"))
+            {
+                // Backend'den gelen validation hatası
+                errorMessage = "Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta adresi deneyin.";
+            }
             else
             {
-                errorMessage = "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
+                errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
             }
+            Console.WriteLine($"Kayıt hatası: {ex.Message}");
         }
-        catch
+        catch (Exception ex)
         {
-            errorMessage = "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.";
+            errorMessage = "Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            Console.WriteLine($"Kayıt hatası: {ex.Message}");
         }
-        isLoading = false;
+        finally
+        {
+            isLoading = false;
+        }
     }
 } 

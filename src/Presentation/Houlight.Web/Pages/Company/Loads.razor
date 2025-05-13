@@ -136,10 +136,21 @@
                                 </div>
                                 @if (load.Status == LoadStatus.Pending)
                                 {
-                                    <button class="btn btn-houlight-accent" @onclick="() => ShowOfferModal(load)">
-                                        <i class="bi bi-cash-coin me-1"></i>
-                                        Teklif Ver
-                                    </button>
+                                    var alreadyOffered = myOffers.Any(x => x.LoadId == load.Id);
+                                    if (alreadyOffered)
+                                    {
+                                        <a class="btn btn-outline-houlight-accent" href="/company/my-offers">
+                                            <i class="bi bi-list-check me-1"></i>
+                                            Tekliflerim
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-houlight-accent" @onclick="@(() => ShowOfferModal(load))">
+                                            <i class="bi bi-cash-coin me-1"></i>
+                                            Teklif Ver
+                                        </button>
+                                    }
                                 }
                                 else
                                 {
@@ -279,6 +290,7 @@
     private OfferModel offerModel = new();
     private List<VehicleModel> availableVehicles = new();
     private List<DriverModel> availableDrivers = new();
+    private List<OfferModel> myOffers = new();
 
     private class LoadModel
     {
@@ -340,6 +352,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
+        await LoadMyOffers();
     }
 
     private async Task LoadData()
@@ -372,6 +385,20 @@
         {
             isLoading = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task LoadMyOffers()
+    {
+        try
+        {
+            var companyId = await GetCompanyId();
+            if (companyId == Guid.Empty) return;
+            myOffers = await Http.GetAsync<List<OfferModel>>($"api/loadoffers/company/{companyId}") ?? new List<OfferModel>();
+        }
+        catch
+        {
+            myOffers = new List<OfferModel>();
         }
     }
 

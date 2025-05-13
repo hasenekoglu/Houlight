@@ -28,6 +28,13 @@ public class CreateLogisticsCompanyCommandHandler : IRequestHandler<CreateLogist
 
     public async Task<CreateLogisticsCompanyResponse> Handle(CreateLogisticsCompanyCommand request, CancellationToken cancellationToken)
     {
+        // E-posta kontrolü
+        var existingCompany = await _logisticsCompanyRepository.GetByEmailAsync(request.CompanyEmail);
+        if (existingCompany != null)
+        {
+            throw new ValidationException("Bu e-posta adresi zaten kullanılıyor. Lütfen başka bir e-posta adresi deneyin.");
+        }
+
         var company = new LogisticsCompanyEntity
         {
             CompanyName = request.CompanyName,

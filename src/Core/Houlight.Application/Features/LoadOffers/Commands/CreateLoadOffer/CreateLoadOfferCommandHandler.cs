@@ -36,6 +36,11 @@ public class CreateLoadOfferCommandHandler : IRequestHandler<CreateLoadOfferComm
         if (load.Status != LoadStatus.Pending)
             throw new Exception("Sadece bekleyen yükler için teklif verilebilir");
 
+        // Aynı şirkete aynı yük için daha önce teklif verilmiş mi kontrol et
+        var existingOffer = await _loadOfferRepository.FirstOrDefaultAsync(x => x.LoadId == request.LoadId && x.LogisticsCompanyId == request.LogisticsCompanyId);
+        if (existingOffer != null)
+            throw new Exception("Bu yüke zaten bir teklif verdiniz.");
+
         var logisticsCompany = await _logisticsCompanyRepository.GetByIdAsync(request.LogisticsCompanyId);
         if (logisticsCompany == null)
             throw new Exception("Lojistik şirket bulunamadı");
