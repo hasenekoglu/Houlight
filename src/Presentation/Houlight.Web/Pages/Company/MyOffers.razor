@@ -9,124 +9,117 @@
 
 <PageTitle>Tekliflerim - Houlight</PageTitle>
 
-@if (!string.IsNullOrEmpty(successMessage))
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        @successMessage
-        <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
-    </div>
-}
-
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-        </div>
-    }
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Tekliflerim</h4>
-        <div>
-            <a href="/company/loads" class="btn btn-outline-houlight-accent me-2">
-                <i class="bi bi-box-seam me-1"></i>
-                Yükler
-            </a>
-            <a href="/company/dashboard" class="dashboard-back-btn">
-                <i class="bi bi-arrow-left"></i>
-                Dashboard'a Dön
-            </a>
-        </div>
-    </div>
-
-    @if (isLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-houlight-accent" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+<div class="company-my-offers">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @successMessage
+                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
             </div>
-            <p class="text-muted mt-2">Teklifler yükleniyor...</p>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Tekliflerim</h4>
+            <div>
+                <a href="/company/loads" class="btn btn-outline-houlight-accent me-2">
+                    <i class="bi bi-box-seam me-1"></i>
+                    Yükler
+                </a>
+                <a href="/company/dashboard" class="dashboard-back-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    Dashboard'a Dön
+                </a>
+            </div>
         </div>
-    }
-    else if (offers == null || !offers.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-cash-coin fs-1 text-muted mb-3"></i>
-            <p class="text-muted mb-0">Henüz teklif vermediniz.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var offer in offers)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h5 class="card-title mb-1">@offer.LoadTitle</h5>
-                                    <p class="text-muted small mb-0">
-                                        <i class="bi bi-geo-alt me-1"></i>@offer.FromLocation - @offer.ToLocation
-                                    </p>
-                                </div>
-                                <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span>
-                            </div>
-                            <div class="mb-3">
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <div class="p-2 bg-light rounded">
-                                            <small class="text-muted d-block">Teklif Fiyatı</small>
-                                            <span class="fw-bold">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
-                                        </div>
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-houlight-accent" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted mt-2">Teklifler yükleniyor...</p>
+            </div>
+        }
+        else if (offers == null || !offers.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-cash-coin fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">Henüz teklif vermediniz.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var offer in offers)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-1">@offer.LoadTitle</h5>
+                                        <p class="text-muted small mb-0">
+                                            <i class="bi bi-geo-alt me-1"></i>@offer.FromLocation - @offer.ToLocation
+                                        </p>
                                     </div>
-                                    <div class="col-6">
-                                        <div class="p-2 bg-light rounded">
-                                            <small class="text-muted d-block">Müşteri Beklentisi</small>
-                                            <span>@(offer.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
-                                        </div>
-                                    </div>
+                                    <span class="badge @GetOfferStatusBadgeClass(offer.LoadStatus)">@GetOfferStatusText(offer.LoadStatus)</span>
                                 </div>
-                            </div>
-                            @if (!string.IsNullOrEmpty(offer.Note))
-                            {
                                 <div class="mb-3">
-                                    <small class="text-muted d-block">Not</small>
-                                    <p class="mb-0 small">@offer.Note</p>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="p-2 bg-light rounded">
+                                                <small class="text-muted d-block">Teklif Fiyatı</small>
+                                                <span class="fw-bold">@offer.CompanyOfferedPrice.ToString("N2") TL</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 bg-light rounded">
+                                                <small class="text-muted d-block">Müşteri Beklentisi</small>
+                                                <span>@(offer.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar me-1"></i>
-                                    @offer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
-                                </small>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-houlight-accent" @onclick="() => ShowOfferDetails(offer)">
-                                        <i class="bi bi-eye me-1"></i>
-                                        Detaylar
-                                    </button>
-                                    @if (offer.LoadStatus == LoadStatus.Pending)
-                                    {
-                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(offer)">
-                                            <i class="bi bi-pencil"></i>
-                                            Düzenle
+                                @if (!string.IsNullOrEmpty(offer.Note))
+                                {
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">Not</small>
+                                        <p class="mb-0 small">@offer.Note</p>
+                                    </div>
+                                }
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        @offer.CreateDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                    </small>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-houlight-accent" @onclick="() => ShowOfferDetails(offer)">
+                                            <i class="bi bi-eye me-1"></i>
+                                            Detaylar
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(offer)">
-                                            <i class="bi bi-trash"></i>
-                                            Sil
-                                        </button>
-                                    }
+                                        @if (offer.LoadStatus == LoadStatus.Pending)
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(offer)">
+                                                <i class="bi bi-pencil"></i>
+                                                Düzenle
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(offer)">
+                                                <i class="bi bi-trash"></i>
+                                                Sil
+                                            </button>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @if (showDetailsModal)

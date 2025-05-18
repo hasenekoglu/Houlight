@@ -9,285 +9,287 @@
 
 <PageTitle>Şirket Paneli - Houlight</PageTitle>
 
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-        </div>
-    }
-
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 dashboard-card">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="flex-shrink-0">
-                            <div class="company-icon-wrapper">
-                                <i class="bi bi-building display-4 text-houlight-accent"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5 class="mb-1 fw-bold text-dark">@company?.CompanyName</h5>
-                            <p class="text-muted mb-0 d-flex align-items-center">
-                                <i class="bi bi-envelope me-2"></i>
-                                <span class="text-truncate">@company?.CompanyEmail</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="company-actions">
-                        <a href="/company/profile" class="company-action-btn">
-                            <i class="bi bi-person"></i>
-                            <span>Profil</span>
-                        </a>
-                        <a href="/company/drivers" class="company-action-btn">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Sürücüler</span>
-                        </a>
-                        <a href="/company/vehicles" class="company-action-btn">
-                            <i class="bi bi-truck"></i>
-                            <span>Araçlar</span>
-                        </a>
-                        <a href="/company/loads" class="company-action-btn">
-                            <i class="bi bi-box"></i>
-                            <span>Yükler</span>
-                        </a>
-                    </div>
-                </div>
+<div class="company-dashboard">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @errorMessage
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
             </div>
-        </div>
+        }
 
-        <div class="col-md-8">
-            <div class="row g-4">
-                <div class="col-sm-6">
-                    <div class="card shadow-sm border-0 dashboard-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-truck display-4 text-houlight-accent"></i>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 dashboard-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="company-icon-wrapper">
+                                    <i class="bi bi-building display-4 text-houlight-accent"></i>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h6 class="text-muted mb-1">Aktif Yükler</h6>
-                                    <h3 class="mb-0 fw-bold">@activeLoadsCount</h3>
-                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-1 fw-bold text-dark">@company?.CompanyName</h5>
+                                <p class="text-muted mb-0 d-flex align-items-center">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    <span class="text-truncate">@company?.CompanyEmail</span>
+                                </p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6">
-                    <div class="card shadow-sm border-0 dashboard-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-cash-coin display-4 text-houlight-accent"></i>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h6 class="text-muted mb-1">Aktif Teklifler</h6>
-                                    <h3 class="mb-0 fw-bold">@activeOffersCount</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6">
-                    <div class="card shadow-sm border-0 dashboard-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-person-badge display-4 text-houlight-accent"></i>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h6 class="text-muted mb-1">Sürücüler</h6>
-                                    <h3 class="mb-0 fw-bold">@driversCount</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6">
-                    <div class="card shadow-sm border-0 dashboard-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-car-front display-4 text-houlight-accent"></i>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h6 class="text-muted mb-1">Araçlar</h6>
-                                    <h3 class="mb-0 fw-bold">@vehiclesCount</h3>
-                                </div>
-                            </div>
+                        <div class="company-actions">
+                            <a href="/company/profile" class="company-action-btn">
+                                <i class="bi bi-person"></i>
+                                <span>Profil</span>
+                            </a>
+                            <a href="/company/drivers" class="company-action-btn">
+                                <i class="bi bi-person-badge"></i>
+                                <span>Sürücüler</span>
+                            </a>
+                            <a href="/company/vehicles" class="company-action-btn">
+                                <i class="bi bi-truck"></i>
+                                <span>Araçlar</span>
+                            </a>
+                            <a href="/company/loads" class="company-action-btn">
+                                <i class="bi bi-box"></i>
+                                <span>Yükler</span>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0 dashboard-card h-100">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-truck text-houlight-accent me-2"></i>
-                            Aktif Yükler
-                        </h5>
-                        <a href="/company/loads" class="btn btn-link btn-sm text-houlight-accent p-0">
-                            Tümünü Gör
-                            <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    @if (activeLoads == null || !activeLoads.Any())
-                    {
-                        <div class="text-center text-muted py-5">
-                            <i class="bi bi-truck fs-1 mb-3"></i>
-                            <p class="mb-0">Henüz aktif yük bulunmuyor.</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var load in activeLoads.Take(5))
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">@load.Title</h6>
-                                            <p class="text-muted small mb-0">
-                                                <i class="bi bi-geo-alt me-1"></i>
-                                                @load.FromLocation - @load.ToLocation
-                                            </p>
-                                        </div>
-                                        <span class="badge @GetLoadStatusBadgeClass(load.Status)">@GetLoadStatusText(load.Status)</span>
+            <div class="col-md-8">
+                <div class="row g-4">
+                    <div class="col-sm-6">
+                        <div class="card shadow-sm border-0 dashboard-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-truck display-4 text-houlight-accent"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="text-muted mb-1">Aktif Yükler</h6>
+                                        <h3 class="mb-0 fw-bold">@activeLoadsCount</h3>
                                     </div>
                                 </div>
-                            }
+                            </div>
                         </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0 dashboard-card h-100">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-cash-coin text-houlight-accent me-2"></i>
-                            Son Teklifler
-                        </h5>
-                        <a href="/company/offers" class="btn btn-link btn-sm text-houlight-accent p-0">
-                            Tümünü Gör
-                            <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
                     </div>
-                </div>
-                <div class="card-body p-0">
-                    @if (recentOffers == null || !recentOffers.Any())
-                    {
-                        <div class="text-center text-muted py-5">
-                            <i class="bi bi-cash-coin fs-1 mb-3"></i>
-                            <p class="mb-0">Henüz teklif bulunmuyor.</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var offer in recentOffers.Take(5))
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">@offer.LoadTitle</h6>
-                                            <p class="text-muted small mb-0">
-                                                <i class="bi bi-currency-try me-1"></i>
-                                                @offer.CompanyOfferedPrice.ToString("N2") TL
-                                            </p>
-                                        </div>
-                                        <span class="badge @GetOfferStatusBadgeClass(offer.Status)">@GetOfferStatusText(offer.Status)</span>
+
+                    <div class="col-sm-6">
+                        <div class="card shadow-sm border-0 dashboard-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-cash-coin display-4 text-houlight-accent"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="text-muted mb-1">Aktif Teklifler</h6>
+                                        <h3 class="mb-0 fw-bold">@activeOffersCount</h3>
                                     </div>
                                 </div>
-                            }
+                            </div>
                         </div>
-                    }
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="card shadow-sm border-0 dashboard-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-person-badge display-4 text-houlight-accent"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="text-muted mb-1">Sürücüler</h6>
+                                        <h3 class="mb-0 fw-bold">@driversCount</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="card shadow-sm border-0 dashboard-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-car-front display-4 text-houlight-accent"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="text-muted mb-1">Araçlar</h6>
+                                        <h3 class="mb-0 fw-bold">@vehiclesCount</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <a href="/company/offers" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-list-check fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Tüm Teklifler</h5>
-                        <p class="text-muted mb-0">Yaptığınız tüm teklifleri görüntüleyin</p>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 dashboard-card h-100">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-truck text-houlight-accent me-2"></i>
+                                Aktif Yükler
+                            </h5>
+                            <a href="/company/loads" class="btn btn-link btn-sm text-houlight-accent p-0">
+                                Tümünü Gör
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (activeLoads == null || !activeLoads.Any())
+                        {
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-truck fs-1 mb-3"></i>
+                                <p class="mb-0">Henüz aktif yük bulunmuyor.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var load in activeLoads.Take(5))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">@load.Title</h6>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="bi bi-geo-alt me-1"></i>
+                                                    @load.FromLocation - @load.ToLocation
+                                                </p>
+                                            </div>
+                                            <span class="badge @GetLoadStatusBadgeClass(load.Status)">@GetLoadStatusText(load.Status)</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
-            </a>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 dashboard-card h-100">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-cash-coin text-houlight-accent me-2"></i>
+                                Son Teklifler
+                            </h5>
+                            <a href="/company/offers" class="btn btn-link btn-sm text-houlight-accent p-0">
+                                Tümünü Gör
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (recentOffers == null || !recentOffers.Any())
+                        {
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-cash-coin fs-1 mb-3"></i>
+                                <p class="mb-0">Henüz teklif bulunmuyor.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var offer in recentOffers.Take(5))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">@offer.LoadTitle</h6>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="bi bi-currency-try me-1"></i>
+                                                    @offer.CompanyOfferedPrice.ToString("N2") TL
+                                                </p>
+                                            </div>
+                                            <span class="badge @GetOfferStatusBadgeClass(offer.Status)">@GetOfferStatusText(offer.Status)</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4">
-            <a href="/company/my-offers" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-cash-coin fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Tekliflerim</h5>
-                        <p class="text-muted mb-0">Verdiğiniz teklifleri görüntüleyin</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <a href="/company/offers" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-list-check fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Tüm Teklifler</h5>
+                            <p class="text-muted mb-0">Yaptığınız tüm teklifleri görüntüleyin</p>
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="/company/my-accepted-loads" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-check-circle fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Kabul Edilen Yükler</h5>
-                        <p class="text-muted mb-0">Onaylanmış yüklerinizi takip edin ve durumunu güncelleyin</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/company/my-offers" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-cash-coin fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Tekliflerim</h5>
+                            <p class="text-muted mb-0">Verdiğiniz teklifleri görüntüleyin</p>
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="/company/loads" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-box-seam fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Yükler</h5>
-                        <p class="text-muted mb-0">Bekleyen yükleri görüntüle ve teklif ver</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/company/my-accepted-loads" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-check-circle fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Kabul Edilen Yükler</h5>
+                            <p class="text-muted mb-0">Onaylanmış yüklerinizi takip edin ve durumunu güncelleyin</p>
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="/company/vehicles" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-truck fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Araçlar</h5>
-                        <p class="text-muted mb-0">Araçlarınızı yönetin</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/company/loads" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-box-seam fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Yükler</h5>
+                            <p class="text-muted mb-0">Bekleyen yükleri görüntüle ve teklif ver</p>
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="/company/drivers" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-person-badge fs-1 text-houlight-accent mb-3"></i>
-                        <h5 class="card-title mb-2">Sürücüler</h5>
-                        <p class="text-muted mb-0">Sürücülerinizi yönetin</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/company/vehicles" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-truck fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Araçlar</h5>
+                            <p class="text-muted mb-0">Araçlarınızı yönetin</p>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/company/drivers" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-person-badge fs-1 text-houlight-accent mb-3"></i>
+                            <h5 class="card-title mb-2">Sürücüler</h5>
+                            <p class="text-muted mb-0">Sürücülerinizi yönetin</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </div>

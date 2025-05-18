@@ -5,7 +5,12 @@
     box-shadow: var(--houlight-shadow-md);
     min-height: 64px;
     padding: 4px 0;
-    z-index: 100;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
 }
 
 .navbar-content {
@@ -352,6 +357,17 @@
     border-color: #fff;
 }
 
+.feature-card:hover .feature-icon-wrapper svg path,
+.feature-card:hover .feature-icon-wrapper svg circle,
+.feature-card:hover .feature-icon-wrapper svg rect,
+.feature-card:hover .feature-icon-wrapper svg line {
+    stroke: #fff !important;
+}
+
+.feature-card:hover .feature-icon-wrapper svg circle[fill="#ff6600"] {
+    fill: #fff !important;
+}
+
 .feature-icon {
     width: 32px;
     height: 32px;
@@ -535,4 +551,52 @@
         gap: 1.5rem;
         padding: 1rem;
     }
+}
+
+/* Ana içerik için padding ekleyelim */
+.houlight-main {
+    padding-top: 72px; /* Header yüksekliği + ekstra boşluk */
+}
+
+.houlight-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--houlight-bg-gradient);
+    border: 1px solid rgba(255, 102, 0, 0.2);
+    border-radius: var(--houlight-radius-md);
+    box-shadow: var(--houlight-shadow-md);
+    min-width: 200px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.houlight-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
+    color: var(--houlight-text-light);
+    text-decoration: none;
+    transition: all var(--houlight-transition-normal);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.houlight-dropdown-item:hover {
+    background: var(--houlight-accent);
+    color: var(--houlight-text-light);
+}
+
+.houlight-dropdown-item:hover i {
+    color: #fff !important;
+}
+
+.houlight-dropdown-item i {
+    color: var(--houlight-accent);
+    font-size: 1.1rem;
+    transition: color var(--houlight-transition-normal);
 } 

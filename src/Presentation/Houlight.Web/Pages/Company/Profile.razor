@@ -17,250 +17,252 @@
 
 <PageTitle>Şirket Profili - Houlight</PageTitle>
 
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            @successMessage
-            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
-        </div>
-    }
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Şirket Profili</h4>
-        <a href="/company/dashboard" class="dashboard-back-btn">
-            <i class="bi bi-arrow-left"></i>
-            Dashboard'a Dön
-        </a>
-    </div>
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4 profile-card">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-building text-houlight-accent fs-4 me-2"></i>
-                        <h5 class="card-title mb-0">Şirket Bilgileri</h5>
-                    </div>
-                    @if (!isEditing)
-                    {
-                        <button class="btn btn-houlight-accent btn-sm" @onclick="StartEditing">
-                            <i class="bi bi-pencil me-1"></i>
-                            Düzenle
-                        </button>
-                    }
-                </div>
-                <div class="card-body p-4">
-                    @if (!isEditing)
-                    {
-                        <div class="profile-info">
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label class="form-label fw-medium text-muted">Şirket Adı</label>
-                                    <div class="profile-value">@profileModel.CompanyName</div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium text-muted">Şirket Adresi</label>
-                                    <div class="profile-value">@profileModel.CompanyAddress</div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium text-muted">E-posta</label>
-                                    <div class="profile-value">@profileModel.CompanyEmail</div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium text-muted">Telefon</label>
-                                    <div class="profile-value">+90 @profileModel.CompanyPhoneNumber</div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <EditForm Model="@profileModel" OnValidSubmit="HandleSubmit">
-                            <DataAnnotationsValidator />
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Şirket Adı</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-building text-muted"></i>
-                                        </span>
-                                        <InputText @bind-Value="profileModel.CompanyName" class="form-control border-start-0" placeholder="Şirket adınız" />
-                                    </div>
-                                    <ValidationMessage For="@(() => profileModel.CompanyName)" class="text-danger small mt-1" />
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Şirket Adresi</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-geo-alt text-muted"></i>
-                                        </span>
-                                        <InputTextArea @bind-Value="profileModel.CompanyAddress" class="form-control border-start-0" placeholder="Şirket adresiniz" rows="3" />
-                                    </div>
-                                    <ValidationMessage For="@(() => profileModel.CompanyAddress)" class="text-danger small mt-1" />
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">E-posta</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-envelope text-muted"></i>
-                                        </span>
-                                        <InputText type="email" @bind-Value="profileModel.CompanyEmail" class="form-control border-start-0" placeholder="sirket@email.com" />
-                                    </div>
-                                    <ValidationMessage For="@(() => profileModel.CompanyEmail)" class="text-danger small mt-1" />
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Telefon</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-telephone text-muted"></i>
-                                        </span>
-                                        <span class="input-group-text bg-light border-end-0 border-start-0">+90</span>
-                                        <InputText @bind-Value="profileModel.CompanyPhoneNumber" class="form-control border-start-0" placeholder="5XX XXX XX XX" maxlength="10" />
-                                    </div>
-                                    <ValidationMessage For="@(() => profileModel.CompanyPhoneNumber)" class="text-danger small mt-1" />
-                                    <small class="text-muted mt-1 d-block">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Telefon numaranızı başında 0 olmadan giriniz (Örnek: 5XX XXX XX XX)
-                                    </small>
-                                </div>
-                                <div class="col-12 mt-4 d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelEditing" disabled="@(isLoading)">
-                                        <i class="bi bi-x-circle me-2"></i>
-                                        <span>İptal</span>
-                                    </button>
-                                    <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
-                                        @if (isLoading)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                            <span>Güncelleniyor...</span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi bi-check-circle me-2"></i>
-                                            <span>Kaydet</span>
-                                        }
-                                    </button>
-                                </div>
-                            </div>
-                        </EditForm>
-                    }
-                </div>
+<div class="company-profile">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @errorMessage
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
             </div>
+        }
 
-            <div class="card shadow-sm border-0 profile-card">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-shield-lock text-houlight-accent fs-4 me-2"></i>
-                        <h5 class="card-title mb-0">Şifre Değiştir</h5>
-                    </div>
-                    @if (!isChangingPassword)
-                    {
-                        <button class="btn btn-houlight-accent btn-sm" @onclick="StartPasswordChange">
-                            <i class="bi bi-pencil me-1"></i>
-                            Değiştir
-                        </button>
-                    }
-                </div>
-                <div class="card-body p-4">
-                    @if (!isChangingPassword)
-                    {
-                        <div class="text-center text-muted py-3">
-                            <i class="bi bi-shield-lock fs-1 mb-3"></i>
-                            <p class="mb-0">Şifrenizi güvenli tutmak için düzenli olarak değiştirmenizi öneririz.</p>
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @successMessage
+                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Şirket Profili</h4>
+            <a href="/company/dashboard" class="dashboard-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-4 profile-card">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-building text-houlight-accent fs-4 me-2"></i>
+                            <h5 class="card-title mb-0">Şirket Bilgileri</h5>
                         </div>
-                    }
-                    else
-                    {
-                        <EditForm Model="@passwordModel" OnValidSubmit="HandlePasswordChange">
-                            <DataAnnotationsValidator />
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Mevcut Şifre</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-key text-muted"></i>
-                                        </span>
-                                        <InputText type="password" @bind-Value="passwordModel.CurrentPassword" class="form-control border-start-0" placeholder="Mevcut şifrenizi giriniz" />
+                        @if (!isEditing)
+                        {
+                            <button class="btn btn-houlight-accent btn-sm" @onclick="StartEditing">
+                                <i class="bi bi-pencil me-1"></i>
+                                Düzenle
+                            </button>
+                        }
+                    </div>
+                    <div class="card-body p-4">
+                        @if (!isEditing)
+                        {
+                            <div class="profile-info">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium text-muted">Şirket Adı</label>
+                                        <div class="profile-value">@profileModel.CompanyName</div>
                                     </div>
-                                    <ValidationMessage For="@(() => passwordModel.CurrentPassword)" class="text-danger small mt-1" />
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Yeni Şifre</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-lock text-muted"></i>
-                                        </span>
-                                        <InputText type="password" @bind-Value="passwordModel.NewPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi giriniz" />
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium text-muted">Şirket Adresi</label>
+                                        <div class="profile-value">@profileModel.CompanyAddress</div>
                                     </div>
-                                    <ValidationMessage For="@(() => passwordModel.NewPassword)" class="text-danger small mt-1" />
-                                    <div class="password-requirements mt-2 p-3 bg-light rounded">
-                                        <small class="text-muted d-block mb-1 fw-medium">Şifre Gereksinimleri:</small>
-                                        <ul class="list-unstyled mb-0 small">
-                                            <li class="mb-1">
-                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                                En az 6 karakter uzunluğunda
-                                            </li>
-                                            <li class="mb-1">
-                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                                En az bir büyük harf
-                                            </li>
-                                            <li class="mb-1">
-                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                                En az bir küçük harf
-                                            </li>
-                                            <li class="mb-1">
-                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                                En az bir rakam
-                                            </li>
-                                            <li>
-                                                <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                                En az bir özel karakter
-                                            </li>
-                                        </ul>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium text-muted">E-posta</label>
+                                        <div class="profile-value">@profileModel.CompanyEmail</div>
                                     </div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Yeni Şifre Tekrar</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="bi bi-lock-fill text-muted"></i>
-                                        </span>
-                                        <InputText type="password" @bind-Value="passwordModel.ConfirmPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi tekrar giriniz" />
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium text-muted">Telefon</label>
+                                        <div class="profile-value">+90 @profileModel.CompanyPhoneNumber</div>
                                     </div>
-                                    <ValidationMessage For="@(() => passwordModel.ConfirmPassword)" class="text-danger small mt-1" />
-                                </div>
-                                <div class="col-12 mt-4 d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelPasswordChange" disabled="@(isLoading)">
-                                        <i class="bi bi-x-circle me-2"></i>
-                                        <span>İptal</span>
-                                    </button>
-                                    <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
-                                        @if (isLoading)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                            <span>Güncelleniyor...</span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi bi-shield-check me-2"></i>
-                                            <span>Şifreyi Değiştir</span>
-                                        }
-                                    </button>
                                 </div>
                             </div>
-                        </EditForm>
-                    }
+                        }
+                        else
+                        {
+                            <EditForm Model="@profileModel" OnValidSubmit="HandleSubmit">
+                                <DataAnnotationsValidator />
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Şirket Adı</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-building text-muted"></i>
+                                            </span>
+                                            <InputText @bind-Value="profileModel.CompanyName" class="form-control border-start-0" placeholder="Şirket adınız" />
+                                        </div>
+                                        <ValidationMessage For="@(() => profileModel.CompanyName)" class="text-danger small mt-1" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Şirket Adresi</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-geo-alt text-muted"></i>
+                                            </span>
+                                            <InputTextArea @bind-Value="profileModel.CompanyAddress" class="form-control border-start-0" placeholder="Şirket adresiniz" rows="3" />
+                                        </div>
+                                        <ValidationMessage For="@(() => profileModel.CompanyAddress)" class="text-danger small mt-1" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">E-posta</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-envelope text-muted"></i>
+                                            </span>
+                                            <InputText type="email" @bind-Value="profileModel.CompanyEmail" class="form-control border-start-0" placeholder="sirket@email.com" />
+                                        </div>
+                                        <ValidationMessage For="@(() => profileModel.CompanyEmail)" class="text-danger small mt-1" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Telefon</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-telephone text-muted"></i>
+                                            </span>
+                                            <span class="input-group-text bg-light border-end-0 border-start-0">+90</span>
+                                            <InputText @bind-Value="profileModel.CompanyPhoneNumber" class="form-control border-start-0" placeholder="5XX XXX XX XX" maxlength="10" />
+                                        </div>
+                                        <ValidationMessage For="@(() => profileModel.CompanyPhoneNumber)" class="text-danger small mt-1" />
+                                        <small class="text-muted mt-1 d-block">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Telefon numaranızı başında 0 olmadan giriniz (Örnek: 5XX XXX XX XX)
+                                        </small>
+                                    </div>
+                                    <div class="col-12 mt-4 d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelEditing" disabled="@(isLoading)">
+                                            <i class="bi bi-x-circle me-2"></i>
+                                            <span>İptal</span>
+                                        </button>
+                                        <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
+                                            @if (isLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                <span>Güncelleniyor...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-check-circle me-2"></i>
+                                                <span>Kaydet</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 profile-card">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-lock text-houlight-accent fs-4 me-2"></i>
+                            <h5 class="card-title mb-0">Şifre Değiştir</h5>
+                        </div>
+                        @if (!isChangingPassword)
+                        {
+                            <button class="btn btn-houlight-accent btn-sm" @onclick="StartPasswordChange">
+                                <i class="bi bi-pencil me-1"></i>
+                                Değiştir
+                            </button>
+                        }
+                    </div>
+                    <div class="card-body p-4">
+                        @if (!isChangingPassword)
+                        {
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-shield-lock fs-1 mb-3"></i>
+                                <p class="mb-0">Şifrenizi güvenli tutmak için düzenli olarak değiştirmenizi öneririz.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <EditForm Model="@passwordModel" OnValidSubmit="HandlePasswordChange">
+                                <DataAnnotationsValidator />
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Mevcut Şifre</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-key text-muted"></i>
+                                            </span>
+                                            <InputText type="password" @bind-Value="passwordModel.CurrentPassword" class="form-control border-start-0" placeholder="Mevcut şifrenizi giriniz" />
+                                        </div>
+                                        <ValidationMessage For="@(() => passwordModel.CurrentPassword)" class="text-danger small mt-1" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Yeni Şifre</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-lock text-muted"></i>
+                                            </span>
+                                            <InputText type="password" @bind-Value="passwordModel.NewPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi giriniz" />
+                                        </div>
+                                        <ValidationMessage For="@(() => passwordModel.NewPassword)" class="text-danger small mt-1" />
+                                        <div class="password-requirements mt-2 p-3 bg-light rounded">
+                                            <small class="text-muted d-block mb-1 fw-medium">Şifre Gereksinimleri:</small>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li class="mb-1">
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                    En az 6 karakter uzunluğunda
+                                                </li>
+                                                <li class="mb-1">
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                    En az bir büyük harf
+                                                </li>
+                                                <li class="mb-1">
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                    En az bir küçük harf
+                                                </li>
+                                                <li class="mb-1">
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                    En az bir rakam
+                                                </li>
+                                                <li>
+                                                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                    En az bir özel karakter
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-medium">Yeni Şifre Tekrar</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-lock-fill text-muted"></i>
+                                            </span>
+                                            <InputText type="password" @bind-Value="passwordModel.ConfirmPassword" class="form-control border-start-0" placeholder="Yeni şifrenizi tekrar giriniz" />
+                                        </div>
+                                        <ValidationMessage For="@(() => passwordModel.ConfirmPassword)" class="text-danger small mt-1" />
+                                    </div>
+                                    <div class="col-12 mt-4 d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" @onclick="CancelPasswordChange" disabled="@(isLoading)">
+                                            <i class="bi bi-x-circle me-2"></i>
+                                            <span>İptal</span>
+                                        </button>
+                                        <button type="submit" class="btn btn-houlight-accent flex-grow-1 py-2" disabled="@(isLoading)">
+                                            @if (isLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                <span>Güncelleniyor...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-shield-check me-2"></i>
+                                                <span>Şifreyi Değiştir</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

@@ -5,6 +5,65 @@
     background: transparent;
 }
 
+/* Tüm sayfalardaki container'lar için padding */
+.container {
+    padding-top: 72px; /* Header yüksekliği + ekstra boşluk */
+}
+
+/* Müşteri sayfaları için özel düzenlemeler */
+.customer-dashboard,
+.customer-dashboard .container {
+    padding-top: 72px !important;
+}
+
+.customer-profile,
+.customer-profile .container,
+.customer-loads,
+.customer-loads .container,
+.customer-offers,
+.customer-offers .container {
+    padding-top: 90px !important; /* Header için daha fazla boşluk */
+}
+
+/* Şirket sayfaları için özel düzenlemeler */
+.company-dashboard,
+.company-dashboard .container,
+.company-profile,
+.company-profile .container,
+.company-loads,
+.company-loads .container,
+.company-offers,
+.company-offers .container {
+    padding-top: 90px !important;
+}
+
+.company-my-offers,
+.company-my-offers .container,
+.company-my-accepted-loads,
+.company-my-accepted-loads .container,
+.company-vehicles,
+.company-vehicles .container,
+.company-drivers,
+.company-drivers .container {
+    padding-top: 90px !important;
+    padding-bottom: 70px !important;
+}
+
+/* Özel sayfa bölümleri için padding düzenlemeleri */
+.about-section,
+.about-container,
+.contact-section,
+.contact-container {
+    padding-top: 90px !important;
+}
+
+/* Dashboard ve diğer panel sayfaları için özel düzenleme */
+.dashboard-container,
+.company-dashboard-container,
+.customer-dashboard-container {
+    padding-top: 72px; /* Header yüksekliği + ekstra boşluk */
+}
+
 /* Hero Section */
 .hero-section {
     position: relative;
@@ -188,4 +247,29 @@
     50% {
         transform: translateY(-20px);
     }
+}
+
+.company-my-offers,
+.company-my-accepted-loads,
+.company-vehicles,
+.company-vehicles .container,
+.company-drivers,
+.company-drivers .container,
+.company-dashboard,
+.company-dashboard .container,
+.company-profile,
+.company-profile .container,
+.company-loads,
+.company-loads .container,
+.company-offers,
+.company-offers .container,
+.customer-dashboard,
+.customer-dashboard .container,
+.customer-profile,
+.customer-profile .container,
+.customer-loads,
+.customer-loads .container,
+.customer-offers,
+.customer-offers .container {
+    padding-bottom: 70px !important;
 } 

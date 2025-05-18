@@ -12,115 +12,117 @@
 
 <PageTitle>Yüklerim - Houlight</PageTitle>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Yüklerim</h4>
-        <div>
-            <a href="/customer/dashboard" class="dashboard-back-btn me-2">
-                <i class="bi bi-arrow-left"></i>
-                Dashboard'a Dön
-            </a>
-            <button class="btn btn-houlight-accent" @onclick="() => ShowNewLoadModal = true">
-                <i class="bi bi-plus-circle me-1"></i>
-                Yeni Yük Ekle
-            </button>
-        </div>
-    </div>
-    <!-- Filtreleme Alanları -->
-    <div class="row g-2 mb-3">
-        <div class="col-12 col-md-3">
-            <select class="form-select" @bind="selectedLoadType">
-                <option value="">Tüm Yük Tipleri</option>
-                @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
-                {
-                    <option value="@type">@GetLoadTypeName(type)</option>
-                }
-            </select>
-        </div>
-        <div class="col-12 col-md-3">
-            <select class="form-select" @bind="selectedStatus">
-                <option value="">Tüm Durumlar</option>
-                <option value="Pending">Beklemede</option>
-                <option value="InTransit">Yolda</option>
-                <option value="Delivered">Teslim Edildi</option>
-                <option value="Assigned">Atandı</option>
-                <option value="Accepted">Kabul Edildi</option>
-            </select>
-        </div>
-        <div class="col-12 col-md-4">
-            <input class="form-control" placeholder="Arama..." @bind="searchText" />
-        </div>
-        <div class="col-12 col-md-2 d-grid">
-            <button class="btn btn-outline-secondary" type="button" @onclick="ClearFilters">
-                <i class="bi bi-x-circle"></i> Temizle
-            </button>
-        </div>
-    </div>
-    
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger">@errorMessage</div>
-    }
-    
-    @if (isLoading)
-    {
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+<div class="customer-loads">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Yüklerim</h4>
+            <div>
+                <a href="/customer/dashboard" class="dashboard-back-btn me-2">
+                    <i class="bi bi-arrow-left"></i>
+                    Dashboard'a Dön
+                </a>
+                <button class="btn btn-houlight-accent" @onclick="() => ShowNewLoadModal = true">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Yeni Yük Ekle
+                </button>
             </div>
         </div>
-    }
-    else if (loads == null || loads.Count == 0)
-    {
-        <div class="alert alert-info">Henüz yükünüz bulunmamaktadır.</div>
-    }
-    else
-    {
-        <div class="row g-3">
-            @foreach (var load in filteredLoads)
-            {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold">@load.FromLocation → @load.ToLocation</span>
-                                <span class="badge bg-@GetStatusColor(load.Status)">@GetStatusName(load.Status)</span>
+        <!-- Filtreleme Alanları -->
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-md-3">
+                <select class="form-select" @bind="selectedLoadType">
+                    <option value="">Tüm Yük Tipleri</option>
+                    @foreach (LoadType type in Enum.GetValues(typeof(LoadType)))
+                    {
+                        <option value="@type">@GetLoadTypeName(type)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select" @bind="selectedStatus">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="Pending">Beklemede</option>
+                    <option value="InTransit">Yolda</option>
+                    <option value="Delivered">Teslim Edildi</option>
+                    <option value="Assigned">Atandı</option>
+                    <option value="Accepted">Kabul Edildi</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4">
+                <input class="form-control" placeholder="Arama..." @bind="searchText" />
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+                <button class="btn btn-outline-secondary" type="button" @onclick="ClearFilters">
+                    <i class="bi bi-x-circle"></i> Temizle
+                </button>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        
+        @if (isLoading)
+        {
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        }
+        else if (loads == null || loads.Count == 0)
+        {
+            <div class="alert alert-info">Henüz yükünüz bulunmamaktadır.</div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var load in filteredLoads)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">@load.FromLocation → @load.ToLocation</span>
+                                    <span class="badge bg-@GetStatusColor(load.Status)">@GetStatusName(load.Status)</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Yük Tipi:</strong> @GetLoadTypeName(load.LoadType)
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Ağırlık:</strong> @load.Weight kg
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Hacim:</strong> @load.Volume m³
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Beklenen Fiyat:</strong> @load.CustomerExpectedPrice?.ToString("C")
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Teslimat Tarihi:</strong> @load.DeliveryDate?.ToShortDateString()
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Açıklama:</strong> @load.Description
+                                </div>
                             </div>
-                            <div class="mb-2">
-                                <strong>Yük Tipi:</strong> @GetLoadTypeName(load.LoadType)
-                            </div>
-                            <div class="mb-2">
-                                <strong>Ağırlık:</strong> @load.Weight kg
-                            </div>
-                            <div class="mb-2">
-                                <strong>Hacim:</strong> @load.Volume m³
-                            </div>
-                            <div class="mb-2">
-                                <strong>Beklenen Fiyat:</strong> @load.CustomerExpectedPrice?.ToString("C")
-                            </div>
-                            <div class="mb-2">
-                                <strong>Teslimat Tarihi:</strong> @load.DeliveryDate?.ToShortDateString()
-                            </div>
-                            <div class="mb-2">
-                                <strong>Açıklama:</strong> @load.Description
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
-                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowLoadDetails(load)">
-                                <i class="bi bi-eye"></i> Detay
-                            </button>
-                            @if (load.Status == LoadStatus.Pending)
-                            {
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelLoad(load)">
-                                    <i class="bi bi-x-lg"></i> İptal
+                            <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowLoadDetails(load)">
+                                    <i class="bi bi-eye"></i> Detay
                                 </button>
-                            }
+                                @if (load.Status == LoadStatus.Pending)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelLoad(load)">
+                                        <i class="bi bi-x-lg"></i> İptal
+                                    </button>
+                                }
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @if (ShowNewLoadModal)
@@ -161,7 +163,7 @@
                         </div>
                                     <div class="mb-3">
                                 <label class="form-label required">Ağırlık (kg)</label>
-                                        <InputNumber @bind-Value="newLoad.Weight" class="form-control houlight-input" min="1" max="100000" />
+                                        <input type="number" class="form-control houlight-input" min="1" max="100000" value="@newLoad.Weight" @oninput="OnWeightInput" />
                                 <ValidationMessage For="@(() => newLoad.Weight)" class="text-danger" />
                                     </div>
                                 </div>
@@ -170,7 +172,7 @@
                                 <div class="form-column">
                                     <div class="mb-3">
                                 <label class="form-label required">Hacim (m³)</label>
-                                        <InputNumber @bind-Value="newLoad.Volume" class="form-control houlight-input" min="1" max="1000" />
+                                        <input type="number" class="form-control houlight-input" min="1" max="1000" value="@newLoad.Volume" @oninput="OnVolumeInput" />
                                 <ValidationMessage For="@(() => newLoad.Volume)" class="text-danger" />
                         </div>
                         <div class="mb-3">
@@ -604,6 +606,26 @@
         selectedStatus = "";
         searchText = "";
         ApplyFilters();
+    }
+
+    private void OnWeightInput(ChangeEventArgs e)
+    {
+        if (e.Value is string value)
+        {
+            var cleaned = value.TrimStart('0');
+            if (string.IsNullOrEmpty(cleaned)) cleaned = "0";
+            newLoad.Weight = int.TryParse(cleaned, out var w) ? w : 0;
+        }
+    }
+
+    private void OnVolumeInput(ChangeEventArgs e)
+    {
+        if (e.Value is string value)
+        {
+            var cleaned = value.TrimStart('0');
+            if (string.IsNullOrEmpty(cleaned)) cleaned = "0";
+            newLoad.Volume = int.TryParse(cleaned, out var v) ? v : 0;
+        }
     }
 
     private class ErrorResponse

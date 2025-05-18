@@ -16,119 +16,121 @@
 
 <PageTitle>Araçlar - Houlight</PageTitle>
 
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            @successMessage
-            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
-        </div>
-    }
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Araçlar</h4>
-        <div>
-            <button class="btn btn-houlight-accent" @onclick="() => ShowCreateModal()">
-                <i class="bi bi-plus-circle me-1"></i>
-                Yeni Araç Ekle
-            </button>
-            <a href="/company/dashboard" class="dashboard-back-btn ms-2">
-                <i class="bi bi-arrow-left"></i>
-                Dashboard'a Dön
-            </a>
-        </div>
-    </div>
-
-    @if (isLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-houlight-accent" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+<div class="company-vehicles">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @errorMessage
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
             </div>
-            <p class="text-muted mt-2">Araçlar yükleniyor...</p>
+        }
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @successMessage
+                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Araçlar</h4>
+            <div>
+                <button class="btn btn-houlight-accent" @onclick="() => ShowCreateModal()">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Yeni Araç Ekle
+                </button>
+                <a href="/company/dashboard" class="dashboard-back-btn ms-2">
+                    <i class="bi bi-arrow-left"></i>
+                    Dashboard'a Dön
+                </a>
+            </div>
         </div>
-    }
-    else if (vehicles == null || !vehicles.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-truck fs-1 text-muted mb-3"></i>
-            <p class="text-muted mb-0">Henüz araç bulunmuyor.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var vehicle in vehicles)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h5 class="card-title mb-1">@vehicle.PlateNumber</h5>
-                                    <p class="text-muted small mb-0">
-                                        <i class="bi bi-truck me-1"></i>@vehicle.VehicleTypeType
-                                    </p>
-                                </div>
-                                <span class="badge @(vehicle.IsAvailable ? "bg-success" : "bg-danger")">
-                                    @(vehicle.IsAvailable ? "Müsait" : "Müsait Değil")
-                                </span>
-                            </div>
-                            <div class="mb-3">
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <div class="p-2 bg-light rounded">
-                                            <small class="text-muted d-block">Kapasite</small>
-                                            <span>@(vehicle.Capacity.ToString("N0")) kg</span>
-                                        </div>
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-houlight-accent" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted mt-2">Araçlar yükleniyor...</p>
+            </div>
+        }
+        else if (vehicles == null || !vehicles.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-truck fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">Henüz araç bulunmuyor.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var vehicle in vehicles)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-1">@vehicle.PlateNumber</h5>
+                                        <p class="text-muted small mb-0">
+                                            <i class="bi bi-truck me-1"></i>@vehicle.VehicleTypeType
+                                        </p>
                                     </div>
-                                    <div class="col-6">
-                                        <div class="p-2 bg-light rounded">
-                                            <small class="text-muted d-block">Mevcut Yük</small>
-                                            <span>@(vehicle.CurrentWeight.ToString("N0")) kg</span>
-                                        </div>
-                                    </div>
+                                    <span class="badge @(vehicle.IsAvailable ? "bg-success" : "bg-danger")">
+                                        @(vehicle.IsAvailable ? "Müsait" : "Müsait Değil")
+                                    </span>
                                 </div>
-                            </div>
-                            @if (vehicle.AssignedDriverName != null)
-                            {
                                 <div class="mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-person-badge text-houlight-accent me-2"></i>
-                                        <span>@vehicle.AssignedDriverName</span>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="p-2 bg-light rounded">
+                                                <small class="text-muted d-block">Kapasite</small>
+                                                <span>@(vehicle.Capacity.ToString("N0")) kg</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 bg-light rounded">
+                                                <small class="text-muted d-block">Mevcut Yük</small>
+                                                <span>@(vehicle.CurrentWeight.ToString("N0")) kg</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            }
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar me-1"></i>
-                                    @vehicle.CreateDate.ToLocalTime().ToString("dd.MM.yyyy")
-                                </small>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(vehicle)">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(vehicle)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                @if (vehicle.AssignedDriverName != null)
+                                {
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-badge text-houlight-accent me-2"></i>
+                                            <span>@vehicle.AssignedDriverName</span>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        @vehicle.CreateDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                    </small>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => ShowEditModal(vehicle)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(vehicle)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @if (showModal)
@@ -154,17 +156,28 @@
                             <ValidationMessage For="@(() => vehicleModel.PlateNumber)" class="text-danger small mt-1" />
                         </div>
 
-                        <div class="form-floating mb-3">
-                            <InputSelect @bind-Value="vehicleModel.VehicleTypeId" class="form-select">
+                        <div class="form-floating mb-3 position-relative">
+                            <InputSelect id="vehicleTypeSelect" @bind-Value="vehicleModel.VehicleTypeId" class="form-select" placeholder="Araç Tipi">
                                 <option value="">Seçiniz...</option>
                                 @foreach (var type in vehicleTypes)
                                 {
                                     <option value="@type.Id">@type.Type</option>
                                 }
                             </InputSelect>
-                            <label>Araç Tipi</label>
+                            <label for="vehicleTypeSelect">Araç Tipi</label>
                             <ValidationMessage For="@(() => vehicleModel.VehicleTypeId)" class="text-danger small mt-1" />
                         </div>
+                        @if (vehicleModel.VehicleTypeId != Guid.Empty)
+                        {
+                            var selectedType = vehicleTypes.FirstOrDefault(x => x.Id == vehicleModel.VehicleTypeId);
+                            if (selectedType != null && !string.IsNullOrWhiteSpace(selectedType.Description))
+                            {
+                                <div class="alert alert-info mt-2 py-2 px-3" style="font-size: 0.98em;">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @selectedType.Description
+                                </div>
+                            }
+                        }
 
                         <div class="form-floating mb-3">
                             <InputNumber @bind-Value="vehicleModel.Capacity" class="form-control" placeholder="Kapasite" />

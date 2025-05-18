@@ -12,266 +12,268 @@
 
 <PageTitle>Yükler - Houlight</PageTitle>
 
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+<div class="company-loads">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @errorMessage
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @successMessage
+                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Yükler</h4>
+            <a href="/company/dashboard" class="dashboard-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
         </div>
-    }
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            @successMessage
-            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
-        </div>
-    }
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Yükler</h4>
-        <a href="/company/dashboard" class="dashboard-back-btn">
-            <i class="bi bi-arrow-left"></i>
-            Dashboard'a Dön
-        </a>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" placeholder="Yük ara..." @bind="searchTerm" @bind:event="oninput" @onkeyup="HandleSearch" />
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" placeholder="Yük ara..." @bind="searchTerm" @bind:event="oninput" @onkeyup="HandleSearch" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" @bind="selectedStatus">
+                            <option value="">Tüm Durumlar</option>
+                            <option value="@LoadStatus.Pending">Beklemede</option>
+                            <option value="@LoadStatus.Assigned">Atandı</option>
+                            <option value="@LoadStatus.InTransit">Yolda</option>
+                            <option value="@LoadStatus.Delivered">Teslim Edildi</option>
+                            <option value="@LoadStatus.Accepted">Kabul Edildi</option>
+                            <option value="@LoadStatus.Rejected">Reddedildi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-houlight-accent w-100" @onclick="ApplyFilters">
+                            <i class="bi bi-funnel me-1"></i>
+                            Filtrele
+                        </button>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select" @bind="selectedStatus">
-                        <option value="">Tüm Durumlar</option>
-                        <option value="@LoadStatus.Pending">Beklemede</option>
-                        <option value="@LoadStatus.Assigned">Atandı</option>
-                        <option value="@LoadStatus.InTransit">Yolda</option>
-                        <option value="@LoadStatus.Delivered">Teslim Edildi</option>
-                        <option value="@LoadStatus.Accepted">Kabul Edildi</option>
-                        <option value="@LoadStatus.Rejected">Reddedildi</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-houlight-accent w-100" @onclick="ApplyFilters">
-                        <i class="bi bi-funnel me-1"></i>
-                        Filtrele
-                    </button>
-                </div>
             </div>
         </div>
-    </div>
 
-    @if (isLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-houlight-accent" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-houlight-accent" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted mt-2">Yükler yükleniyor...</p>
             </div>
-            <p class="text-muted mt-2">Yükler yükleniyor...</p>
-        </div>
-    }
-    else if (filteredLoads == null || !filteredLoads.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-truck fs-1 text-muted mb-3"></i>
-            <p class="text-muted mb-0">Gösterilecek yük bulunamadı.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var load in filteredLoads)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title mb-0">@load.Title</h5>
-                                <span class="badge @GetLoadStatusBadgeClass(load.Status)">@GetLoadStatusText(load.Status)</span>
-                            </div>
-                            <div class="mb-3">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-geo-alt text-houlight-accent me-2"></i>
+        }
+        else if (filteredLoads == null || !filteredLoads.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-truck fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">Gösterilecek yük bulunamadı.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var load in filteredLoads)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title mb-0">@load.Title</h5>
+                                    <span class="badge @GetLoadStatusBadgeClass(load.Status)">@GetLoadStatusText(load.Status)</span>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-geo-alt text-houlight-accent me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Alış</small>
+                                            <span>@load.FromLocation</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-geo-alt-fill text-houlight-accent me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Teslimat</small>
+                                            <span>@load.ToLocation</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Teslimat Tarihi</small>
+                                            <span>@(load.DeliveryDate.HasValue ? load.DeliveryDate.Value.ToString("dd.MM.yyyy") : "-")</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted d-block">Ağırlık</small>
+                                            <span>@load.Weight kg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <small class="text-muted d-block">Alış</small>
-                                        <span>@load.FromLocation</span>
+                                        <small class="text-muted d-block">Teklif</small>
+                                        <span class="fw-bold">@(load.CustomerExpectedPrice?.ToString("N2") ?? "0.00") TL</span>
                                     </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-geo-alt-fill text-houlight-accent me-2"></i>
-                                    <div>
-                                        <small class="text-muted d-block">Teslimat</small>
-                                        <span>@load.ToLocation</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded">
-                                        <small class="text-muted d-block">Teslimat Tarihi</small>
-                                        <span>@(load.DeliveryDate.HasValue ? load.DeliveryDate.Value.ToString("dd.MM.yyyy") : "-")</span>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded">
-                                        <small class="text-muted d-block">Ağırlık</small>
-                                        <span>@load.Weight kg</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="text-muted d-block">Teklif</small>
-                                    <span class="fw-bold">@(load.CustomerExpectedPrice?.ToString("N2") ?? "0.00") TL</span>
-                                </div>
-                                @if (load.Status == LoadStatus.Pending)
-                                {
-                                    var alreadyOffered = myOffers.Any(x => x.LoadId == load.Id);
-                                    if (alreadyOffered)
+                                    @if (load.Status == LoadStatus.Pending)
                                     {
-                                        <a class="btn btn-outline-houlight-accent" href="/company/my-offers">
-                                            <i class="bi bi-list-check me-1"></i>
-                                            Tekliflerim
-                                        </a>
+                                        var alreadyOffered = myOffers.Any(x => x.LoadId == load.Id);
+                                        if (alreadyOffered)
+                                        {
+                                            <a class="btn btn-outline-houlight-accent" href="/company/my-offers">
+                                                <i class="bi bi-list-check me-1"></i>
+                                                Tekliflerim
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-houlight-accent" @onclick="@(() => ShowOfferModal(load))">
+                                                <i class="bi bi-cash-coin me-1"></i>
+                                                Teklif Ver
+                                            </button>
+                                        }
                                     }
                                     else
                                     {
-                                        <button class="btn btn-houlight-accent" @onclick="@(() => ShowOfferModal(load))">
-                                            <i class="bi bi-cash-coin me-1"></i>
-                                            Teklif Ver
+                                        <button class="btn btn-outline-secondary" disabled>
+                                            <i class="bi bi-lock me-1"></i>
+                                            Teklif Verilemez
                                         </button>
                                     }
-                                }
-                                else
-                                {
-                                    <button class="btn btn-outline-secondary" disabled>
-                                        <i class="bi bi-lock me-1"></i>
-                                        Teklif Verilemez
-                                    </button>
-                                }
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
 
-    @if (showOfferModal)
-    {
-        <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1051;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Teklif Ver</h5>
-                        <button type="button" class="btn-close" @onclick="CloseOfferModal"></button>
-                    </div>
-                    <EditForm Model="@offerModel" OnValidSubmit="SubmitOffer">
-                        <DataAnnotationsValidator />
-                        <div class="modal-body">
-                            @if (selectedLoad != null)
-                            {
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="p-3 bg-light rounded">
-                                            <h6 class="mb-3">Yük Bilgileri</h6>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Başlık</small>
-                                                <span>@selectedLoad.Title</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Güzergah</small>
-                                                <span>@selectedLoad.FromLocation - @selectedLoad.ToLocation</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Yük Tipi</small>
-                                                <span>@GetLoadTypeText(selectedLoad.LoadType)</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Ağırlık</small>
-                                                <span>@(selectedLoad.Weight.ToString("N0")) kg</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Hacim</small>
-                                                <span>@(selectedLoad.Volume.ToString("N0")) m³</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">Müşteri Beklentisi</small>
-                                                <span class="fw-bold">@(selectedLoad.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
-                                            </div>
-                                            @if (!string.IsNullOrEmpty(selectedLoad.Description))
-                                            {
-                                                <div>
-                                                    <small class="text-muted d-block">Açıklama</small>
-                                                    <span>@selectedLoad.Description</span>
+        @if (showOfferModal)
+        {
+            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1051;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Teklif Ver</h5>
+                            <button type="button" class="btn-close" @onclick="CloseOfferModal"></button>
+                        </div>
+                        <EditForm Model="@offerModel" OnValidSubmit="SubmitOffer">
+                            <DataAnnotationsValidator />
+                            <div class="modal-body">
+                                @if (selectedLoad != null)
+                                {
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <h6 class="mb-3">Yük Bilgileri</h6>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Başlık</small>
+                                                    <span>@selectedLoad.Title</span>
                                                 </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="p-3 bg-light rounded">
-                                            <h6 class="mb-3">Teklif Bilgileri</h6>
-                                            <div class="mb-3">
-                                                <label class="form-label">Teklif Fiyatı (TL)</label>
-                                                <InputNumber @bind-Value="offerModel.CompanyOfferedPrice" class="form-control" />
-                                                <ValidationMessage For="@(() => offerModel.CompanyOfferedPrice)" />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Araç Seçin</label>
-                                                <select @bind="offerModel.AssignedVehicleId" class="form-select">
-                                                    <option value="">Araç Seçin</option>
-                                                    @foreach (var vehicle in availableVehicles)
-                                                    {
-                                                        <option value="@vehicle.Id">@vehicle.PlateNumber - @vehicle.VehicleTypeType (@vehicle.Capacity.ToString("N0") kg)</option>
-                                                    }
-                                                </select>
-                                                <ValidationMessage For="@(() => offerModel.AssignedVehicleId)" />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Sürücü Seçin</label>
-                                                <select @bind="offerModel.AssignedDriverId" class="form-select">
-                                                    <option value="">Sürücü Seçin</option>
-                                                    @foreach (var driver in availableDrivers.Where(d => d.DriverStatus == DriverStatus.Available))
-                                                    {
-                                                        <option value="@driver.Id">@driver.Name @driver.Surname - @driver.LicenseNumber</option>
-                                                    }
-                                                </select>
-                                                <ValidationMessage For="@(() => offerModel.AssignedDriverId)" />
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Güzergah</small>
+                                                    <span>@selectedLoad.FromLocation - @selectedLoad.ToLocation</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Yük Tipi</small>
+                                                    <span>@GetLoadTypeText(selectedLoad.LoadType)</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Ağırlık</small>
+                                                    <span>@(selectedLoad.Weight.ToString("N0")) kg</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Hacim</small>
+                                                    <span>@(selectedLoad.Volume.ToString("N0")) m³</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Müşteri Beklentisi</small>
+                                                    <span class="fw-bold">@(selectedLoad.CustomerExpectedPrice?.ToString("N2") ?? "-") TL</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(selectedLoad.Description))
+                                                {
+                                                    <div>
+                                                        <small class="text-muted d-block">Açıklama</small>
+                                                        <span>@selectedLoad.Description</span>
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <h6 class="mb-3">Teklif Bilgileri</h6>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Teklif Fiyatı (TL)</label>
+                                                    <input type="number" class="form-control" value="@offerModel.CompanyOfferedPrice" @oninput="OnOfferPriceInput" />
+                                                    <ValidationMessage For="@(() => offerModel.CompanyOfferedPrice)" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Araç Seçin</label>
+                                                    <select @bind="offerModel.AssignedVehicleId" class="form-select">
+                                                        <option value="">Araç Seçin</option>
+                                                        @foreach (var vehicle in availableVehicles)
+                                                        {
+                                                            <option value="@vehicle.Id">@vehicle.PlateNumber - @vehicle.VehicleTypeType (@vehicle.Capacity.ToString("N0") kg)</option>
+                                                        }
+                                                    </select>
+                                                    <ValidationMessage For="@(() => offerModel.AssignedVehicleId)" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Sürücü Seçin</label>
+                                                    <select @bind="offerModel.AssignedDriverId" class="form-select">
+                                                        <option value="">Sürücü Seçin</option>
+                                                        @foreach (var driver in availableDrivers.Where(d => d.DriverStatus == DriverStatus.Available))
+                                                        {
+                                                            <option value="@driver.Id">@driver.Name @driver.Surname - @driver.LicenseNumber</option>
+                                                        }
+                                                    </select>
+                                                    <ValidationMessage For="@(() => offerModel.AssignedDriverId)" />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            }
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" @onclick="CloseOfferModal">İptal</button>
-                            <button type="submit" class="btn btn-houlight-accent" disabled="@isSubmitting">
-                                @if (isSubmitting)
-                                {
-                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                    <span>Teklif Veriliyor...</span>
                                 }
-                                else
-                                {
-                                    <span>Teklif Ver</span>
-                                }
-                            </button>
-                        </div>
-                    </EditForm>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @onclick="CloseOfferModal">İptal</button>
+                                <button type="submit" class="btn btn-houlight-accent" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        <span>Teklif Veriliyor...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Teklif Ver</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 @code {
@@ -513,7 +515,18 @@
             if (response != null && response.Id != Guid.Empty)
             {
                 successMessage = "Teklifiniz başarıyla gönderildi.";
-                await LoadData();
+                // Tekliflerim listesini güncelle
+                await LoadMyOffers();
+                // Yük listesini güncelle
+                var updatedLoad = loads.FirstOrDefault(l => l.Id == offerModel.LoadId);
+                if (updatedLoad != null)
+                {
+                    var index = filteredLoads.FindIndex(l => l.Id == offerModel.LoadId);
+                    if (index != -1)
+                    {
+                        filteredLoads[index] = updatedLoad;
+                    }
+                }
                 CloseOfferModal();
             }
             else
@@ -595,6 +608,16 @@
             Console.WriteLine($"[Loads] Hata: {ex}");
             NavigationManager.NavigateTo("/login");
             return Guid.Empty;
+        }
+    }
+
+    private void OnOfferPriceInput(ChangeEventArgs e)
+    {
+        if (e.Value is string value)
+        {
+            var cleaned = value.TrimStart('0');
+            if (string.IsNullOrEmpty(cleaned)) cleaned = "0";
+            offerModel.CompanyOfferedPrice = decimal.TryParse(cleaned, out var p) ? p : 0m;
         }
     }
 } 

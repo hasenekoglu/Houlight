@@ -11,157 +11,159 @@
 
 <PageTitle>Yüklerim - Houlight</PageTitle>
 
-<div class="container py-4">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
-                <div>
-                    <strong>Hata!</strong>
-                    <p class="mb-0">@errorMessage</p>
+<div class="company-my-accepted-loads">
+    <div class="container py-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                    <div>
+                        <strong>Hata!</strong>
+                        <p class="mb-0">@errorMessage</p>
+                    </div>
                 </div>
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
             </div>
-            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Kabul Edilen Yüklerim</h4>
+            <a href="/company/dashboard" class="dashboard-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Dashboard'a Dön
+            </a>
         </div>
-    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Kabul Edilen Yüklerim</h4>
-        <a href="/company/dashboard" class="dashboard-back-btn">
-            <i class="bi bi-arrow-left"></i>
-            Dashboard'a Dön
-        </a>
-    </div>
-
-    @if (isLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-houlight-accent" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-houlight-accent" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted mt-2">Yükler yükleniyor...</p>
             </div>
-            <p class="text-muted mt-2">Yükler yükleniyor...</p>
-        </div>
-    }
-    else if (offers == null || !offers.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-truck fs-1 text-muted mb-3"></i>
-            <p class="text-muted mb-0">Henüz kabul edilmiş yükünüz bulunmuyor.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var offer in offers)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="route-info">
-                                    <h5 class="card-title mb-1 d-flex align-items-center">
-                                        <span class="location-badge">@offer.FromLocation</span>
-                                        <i class="bi bi-arrow-right mx-2 text-houlight-accent"></i>
-                                        <span class="location-badge">@offer.ToLocation</span>
-                                    </h5>
+        }
+        else if (offers == null || !offers.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-truck fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">Henüz kabul edilmiş yükünüz bulunmuyor.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var offer in offers)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 h-100 hover-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="route-info">
+                                        <h5 class="card-title mb-1 d-flex align-items-center">
+                                            <span class="location-badge">@offer.FromLocation</span>
+                                            <i class="bi bi-arrow-right mx-2 text-houlight-accent"></i>
+                                            <span class="location-badge">@offer.ToLocation</span>
+                                        </h5>
+                                    </div>
+                                    <span class="status-badge @GetStatusBadgeClass(offer.Status)">
+                                        <i class="bi @GetStatusIcon(offer.Status) me-1"></i>
+                                        @GetStatusText(offer.Status)
+                                    </span>
                                 </div>
-                                <span class="status-badge @GetStatusBadgeClass(offer.Status)">
-                                    <i class="bi @GetStatusIcon(offer.Status) me-1"></i>
-                                    @GetStatusText(offer.Status)
-                                </span>
-                            </div>
 
-                            @if (!string.IsNullOrWhiteSpace(offer.Description))
-                            {
-                                <div class="description-box mb-3">
-                                    <i class="bi bi-info-circle me-1 text-houlight-accent"></i>
-                                    <span class="description-text">@offer.Description</span>
-                                </div>
-                            }
+                                @if (!string.IsNullOrWhiteSpace(offer.Description))
+                                {
+                                    <div class="description-box mb-3">
+                                        <i class="bi bi-info-circle me-1 text-houlight-accent"></i>
+                                        <span class="description-text">@offer.Description</span>
+                                    </div>
+                                }
 
-                            <div class="info-grid mb-3">
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="bi bi-box-seam"></i>
+                                <div class="info-grid mb-3">
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-box-seam"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Ağırlık</small>
+                                            <span class="info-value">@offer.Weight kg</span>
+                                        </div>
                                     </div>
-                                    <div class="info-content">
-                                        <small class="text-muted d-block">Ağırlık</small>
-                                        <span class="info-value">@offer.Weight kg</span>
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-box"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Hacim</small>
+                                            <span class="info-value">@offer.Volume m³</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Müşteri Beklentisi</small>
+                                            <span class="info-value">@FormatPrice(offer.CustomerExpectedPrice) TL</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-tag"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Teklif Edilen</small>
+                                            <span class="info-value">@FormatPrice(offer.CompanyOfferedPrice) TL</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="bi bi-box"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <small class="text-muted d-block">Hacim</small>
-                                        <span class="info-value">@offer.Volume m³</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <small class="text-muted d-block">Müşteri Beklentisi</small>
-                                        <span class="info-value">@FormatPrice(offer.CustomerExpectedPrice) TL</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="bi bi-tag"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <small class="text-muted d-block">Teklif Edilen</small>
-                                        <span class="info-value">@FormatPrice(offer.CompanyOfferedPrice) TL</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="vehicle-info mb-3">
-                                <div class="info-item">
+                                <div class="vehicle-info mb-3">
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Araç</small>
+                                            <span class="info-value">@(offer.AssignedVehiclePlate ?? "-")</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Sürücü</small>
+                                            <span class="info-value">@(offer.AssignedDriverName ?? "-")</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="delivery-info mb-3">
                                     <div class="info-icon">
-                                        <i class="bi bi-truck"></i>
+                                        <i class="bi bi-calendar-event"></i>
                                     </div>
                                     <div class="info-content">
-                                        <small class="text-muted d-block">Araç</small>
-                                        <span class="info-value">@(offer.AssignedVehiclePlate ?? "-")</span>
+                                        <small class="text-muted d-block">Teslimat Tarihi</small>
+                                        <span class="info-value">@(offer.DeliveryDate?.ToLocalTime().ToString("dd.MM.yyyy") ?? "-")</span>
                                     </div>
                                 </div>
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <small class="text-muted d-block">Sürücü</small>
-                                        <span class="info-value">@(offer.AssignedDriverName ?? "-")</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="delivery-info mb-3">
-                                <div class="info-icon">
-                                    <i class="bi bi-calendar-event"></i>
+                                <div class="d-flex justify-content-end align-items-center mt-3">
+                                    <button class="btn btn-outline-houlight-accent btn-sm px-3 py-1" @onclick="() => OpenStatusModal(offer)">
+                                        <i class="bi bi-pencil-square me-1"></i>
+                                        <span>Durumu Güncelle</span>
+                                    </button>
                                 </div>
-                                <div class="info-content">
-                                    <small class="text-muted d-block">Teslimat Tarihi</small>
-                                    <span class="info-value">@(offer.DeliveryDate?.ToLocalTime().ToString("dd.MM.yyyy") ?? "-")</span>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-end align-items-center mt-3">
-                                <button class="btn btn-outline-houlight-accent btn-sm px-3 py-1" @onclick="() => OpenStatusModal(offer)">
-                                    <i class="bi bi-pencil-square me-1"></i>
-                                    <span>Durumu Güncelle</span>
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @if (showDetailsModal)
